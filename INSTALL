@@ -1,0 +1,9 @@
+Building Guncoin
+
+See doc/readme-qt.rst for instructions on building Guncoin-Qt,
+the intended-for-end-users, nice-graphical-interface, reference
+implementation of Guncoin.
+
+See doc/build-*.txt for instructions on building guncoind,
+the intended-for-services, no-graphical-interface, reference
+implementation of Guncoin.
