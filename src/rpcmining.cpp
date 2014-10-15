@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "main.h"
+#include "util.h"
 #include "db.h"
 #include "init.h"
 #include "bitcoinrpc.h"
@@ -85,44 +86,42 @@ void ShutdownRPCMining()
     delete pMiningKey; pMiningKey = NULL;
 }
 
-Value getgenerate(const Array& params, bool fHelp)
-{
-    if (fHelp || params.size() != 0)
-        throw runtime_error(
-            "getgenerate\n"
-            "Returns true or false.");
+Value getgenerate(const Array& params, bool fHelp) {
 
-    if (!pMiningKey)
-        return false;
+    if(fHelp || (params.size() != 0))
+      throw(runtime_error(
+        "getgenerate\n"
+        "Returns true or false."));
 
-    return GetBoolArg("-gen");
+    return(fGenerateCoins);
 }
 
 
-Value setgenerate(const Array& params, bool fHelp)
-{
-    if (fHelp || params.size() < 1 || params.size() > 2)
-        throw runtime_error(
-            "setgenerate <generate> [genproclimit]\n"
-            "<generate> is true or false to turn generation on or off.\n"
-            "Generation is limited to [genproclimit] processors, -1 is unlimited.");
+Value setgenerate(const Array& params, bool fHelp) {
+
+    if(fHelp || (params.size() < 1) || (params.size() > 2))
+      throw(runtime_error(
+        "setgenerate <generate> [genproclimit]\n"
+        "<generate> is true or false to turn generation on or off.\n"
+        "Generation is limited to [genproclimit] processors, -1 is hardware default."));
 
     bool fGenerate = true;
-    if (params.size() > 0)
-        fGenerate = params[0].get_bool();
 
-    if (params.size() > 1)
-    {
-        int nGenProcLimit = params[1].get_int();
-        mapArgs["-genproclimit"] = itostr(nGenProcLimit);
-        if (nGenProcLimit == 0)
-            fGenerate = false;
+    if(params.size() > 0)
+      fGenerate = params[0].get_bool();
+
+    if(params.size() > 1) {
+        int nThreads = params[1].get_int();
+        if(nThreads < 0)
+          nMiningThreads = boost::thread::hardware_concurrency();
+        else
+          nMiningThreads = nThreads;
     }
-    mapArgs["-gen"] = (fGenerate ? "1" : "0");
 
-    assert(pwalletMain != NULL);
-    GenerateBitcoins(fGenerate, pwalletMain);
-    return Value::null;
+    if(pwalletMain)
+      GenerateCoins(fGenerate, pwalletMain);
+
+    return(Value::null);
 }
 
 
@@ -133,9 +132,7 @@ Value gethashespersec(const Array& params, bool fHelp)
             "gethashespersec\n"
             "Returns a recent hashes per second performance measurement while generating.");
 
-    if (GetTimeMillis() - nHPSTimerStart > 8000)
-        return (boost::int64_t)0;
-    return (boost::int64_t)dHashesPerSec;
+    return((uint64_t)nMiningSpeed);
 }
 
 
@@ -152,9 +149,9 @@ Value getmininginfo(const Array& params, bool fHelp)
     obj.push_back(Pair("currentblocktx",(uint64_t)nLastBlockTx));
     obj.push_back(Pair("difficulty",    (double)GetDifficulty()));
     obj.push_back(Pair("errors",        GetWarnings("statusbar")));
-    obj.push_back(Pair("generate",      GetBoolArg("-gen")));
-    obj.push_back(Pair("genproclimit",  (int)GetArg("-genproclimit", -1)));
-    obj.push_back(Pair("hashespersec",  gethashespersec(params, false)));
+    obj.push_back(Pair("generate",      fGenerateCoins));
+    obj.push_back(Pair("genproclimit",  (uint64_t)nMiningThreads));
+    obj.push_back(Pair("hashespersec",  (uint64_t)nMiningSpeed));
     obj.push_back(Pair("networkhashps", getnetworkhashps(params, false)));
     obj.push_back(Pair("pooledtx",      (uint64_t)mempool.size()));
     obj.push_back(Pair("testnet",       fTestNet));
@@ -230,11 +227,8 @@ Value getworkex(const Array& params, bool fHelp)
         // Save
         mapNewBlock[pblock->hashMerkleRoot] = make_pair(pblock, pblock->vtx[0].vin[0].scriptSig);
 
-        // Pre-build hash buffers
-        char pmidstate[32];
-        char pdata[128];
-        char phash1[64];
-        FormatHashBuffers(pblock, pmidstate, pdata, phash1);
+        uint pdata[32];
+        FormatDataBuffer(pblock, pdata);
 
         uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
 
@@ -242,7 +236,7 @@ Value getworkex(const Array& params, bool fHelp)
         std::vector<uint256> merkle = pblock->GetMerkleBranch(0);
 
         Object result;
-        result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
+        result.push_back(Pair("data",     HexStr(BEGIN(pdata), fNeoScrypt ? (char *) &pdata[20] : END(pdata))));
         result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
 
         CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
@@ -259,41 +253,40 @@ Value getworkex(const Array& params, bool fHelp)
         result.push_back(Pair("merkle", merkle_arr));
 
         return result;
-    }
-    else
-    {
-        // Parse parameters
+
+    } else {
+
         vector<unsigned char> vchData = ParseHex(params[0].get_str());
         vector<unsigned char> coinbase;
 
         if(params.size() == 2)
-            coinbase = ParseHex(params[1].get_str());
+          coinbase = ParseHex(params[1].get_str());
 
-        if (vchData.size() != 128)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
-            
+        if(vchData.size() < 80)
+          throw(JSONRPCError(-8, "Invalid parameter"));
         CBlock* pdata = (CBlock*)&vchData[0];
 
-        // Byte reverse
-        for (int i = 0; i < 128/4; i++)
-            ((unsigned int*)pdata)[i] = ByteReverse(((unsigned int*)pdata)[i]);
+        if(!fNeoScrypt) {
+            uint i;
+            for(i = 9; i < 20; i++)
+              ((uint *) pdata)[i] = ByteReverse(((uint *) pdata)[i]);
+        }
 
-        // Get saved block
-        if (!mapNewBlock.count(pdata->hashMerkleRoot))
-            return false;
+        if(!mapNewBlock.count(pdata->hashMerkleRoot))
+          return(false);
         CBlock* pblock = mapNewBlock[pdata->hashMerkleRoot].first;
 
         pblock->nTime = pdata->nTime;
         pblock->nNonce = pdata->nNonce;
 
         if(coinbase.size() == 0)
-            pblock->vtx[0].vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second;
+          pblock->vtx[0].vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second;
         else
-            CDataStream(coinbase, SER_NETWORK, PROTOCOL_VERSION) >> pblock->vtx[0];
+          CDataStream(coinbase, SER_NETWORK, PROTOCOL_VERSION) >> pblock->vtx[0];
 
         pblock->hashMerkleRoot = pblock->BuildMerkleTree();
 
-        return CheckWork(pblock, *pwalletMain, reservekey);
+        return(CheckWork(pblock, *pwalletMain, reservekey));
     }
 }
 
@@ -303,12 +296,11 @@ Value getwork(const Array& params, bool fHelp)
     if (fHelp || params.size() > 1)
         throw runtime_error(
             "getwork [data]\n"
-            "If [data] is not specified, returns formatted hash data to work on:\n"
-            "  \"midstate\" : precomputed hash state after hashing the first half of the data (DEPRECATED)\n" // deprecated
-            "  \"data\" : block data\n"
-            "  \"hash1\" : formatted hash buffer for second hash (DEPRECATED)\n" // deprecated
-            "  \"target\" : little endian hash target\n"
-            "If [data] is specified, tries to solve the block and returns true if it was successful.");
+            "If [data] is not specified, returns formatted data to work on:\n"
+            "  \"data\" : block header\n"
+            "  \"target\" : hash target\n"
+            "  \"algorithm\" : hashing algorithm expected (optional)\n"
+            "If [data] is specified, verifies the PoW hash against target and returns true if successful.");
 
     if (vNodes.empty())
         throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Guncoin is not connected!");
@@ -366,48 +358,59 @@ Value getwork(const Array& params, bool fHelp)
         static unsigned int nExtraNonce = 0;
         IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-        // Save
+        /* Save this block for the future use */
         mapNewBlock[pblock->hashMerkleRoot] = make_pair(pblock, pblock->vtx[0].vin[0].scriptSig);
 
-        // Pre-build hash buffers
-        char pmidstate[32];
-        char pdata[128];
-        char phash1[64];
-        FormatHashBuffers(pblock, pmidstate, pdata, phash1);
+        /* Prepare the block header for transmission */
+        uint pdata[32];
+        FormatDataBuffer(pblock, pdata);
 
+        /* Get the current decompressed block target */
         uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
 
         Object result;
-        result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate)))); // deprecated
-        result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
-        result.push_back(Pair("hash1",    HexStr(BEGIN(phash1), END(phash1)))); // deprecated
+        result.push_back(Pair("data",     HexStr(BEGIN(pdata), fNeoScrypt ? (char *) &pdata[20] : END(pdata))));
         result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
-        return result;
-    }
-    else
-    {
-        // Parse parameters
+        /* Optional */
+        if(fNeoScrypt)
+          result.push_back(Pair("algorithm", "neoscrypt"));
+        else
+          result.push_back(Pair("algorithm", "scrypt:1024,1,1"));
+        return(result);
+
+    } else {
+
+        /* Data received */
         vector<unsigned char> vchData = ParseHex(params[0].get_str());
-        if (vchData.size() != 128)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
+
+        /* Must be no less actual data than sent previously */
+        if(vchData.size() < 80)
+          throw(JSONRPCError(-8, "Invalid parameter"));
         CBlock* pdata = (CBlock*)&vchData[0];
 
-        // Byte reverse
-        for (int i = 0; i < 128/4; i++)
-            ((unsigned int*)pdata)[i] = ByteReverse(((unsigned int*)pdata)[i]);
+        if(!fNeoScrypt) {
+            uint i;
+            /* nVersion and hashPrevBlock aren't needed */
+            for(i = 9; i < 20; i++)
+              /* Convert BE to LE */
+              ((uint *) pdata)[i] = ByteReverse(((uint *) pdata)[i]);
+        }
 
-        // Get saved block
-        if (!mapNewBlock.count(pdata->hashMerkleRoot))
-            return false;
+        /* Pick up the block contents saved previously */
+        if(!mapNewBlock.count(pdata->hashMerkleRoot))
+          return(false);
         CBlock* pblock = mapNewBlock[pdata->hashMerkleRoot].first;
 
+        /* Replace with the data received */
         pblock->nTime = pdata->nTime;
         pblock->nNonce = pdata->nNonce;
         pblock->vtx[0].vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second;
+
+        /* Re-build the merkle root */
         pblock->hashMerkleRoot = pblock->BuildMerkleTree();
 
-        assert(pwalletMain != NULL);
-        return CheckWork(pblock, *pwalletMain, *pMiningKey);
+        /* Verify the resulting hash against target */
+        return(CheckWork(pblock, *pwalletMain, *pMiningKey));
     }
 }
 

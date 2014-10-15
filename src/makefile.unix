@@ -65,41 +65,10 @@ LIBS+= \
    -l pthread
 
 
-# Hardening
-# Make some classes of vulnerabilities unexploitable in case one is discovered.
-#
-    # This is a workaround for Ubuntu bug #691722, the default -fstack-protector causes
-    # -fstack-protector-all to be ignored unless -fno-stack-protector is used first.
-    # see: https://bugs.launchpad.net/ubuntu/+source/gcc-4.5/+bug/691722
-    HARDENING=-fno-stack-protector
+# Strip symbols from the daemon; disable if debugging
+LDHARDENING+=-Wl,-s
 
-    # Stack Canaries
-    # Put numbers at the beginning of each stack frame and check that they are the same.
-    # If a stack buffer if overflowed, it writes over the canary number and then on return
-    # when that number is checked, it won't be the same and the program will exit with
-    # a "Stack smashing detected" error instead of being exploited.
-    HARDENING+=-fstack-protector-all -Wstack-protector
-
-    # Make some important things such as the global offset table read only as soon as
-    # the dynamic linker is finished building it. This will prevent overwriting of addresses
-    # which would later be jumped to.
-    LDHARDENING+=-Wl,-z,relro -Wl,-z,now
-
-    # Build position independent code to take advantage of Address Space Layout Randomization
-    # offered by some kernels.
-    # see doc/build-unix.txt for more information.
-    ifdef PIE
-        HARDENING+=-fPIE
-        LDHARDENING+=-pie
-    endif
-
-    # -D_FORTIFY_SOURCE=2 does some checking for potentially exploitable code patterns in
-    # the source such overflowing a statically defined buffer.
-    HARDENING+=-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2
-#
-
-
-DEBUGFLAGS=-g
+#DEBUGFLAGS=-g
 
 # CXXFLAGS can be specified on the make command line, so we use xCXXFLAGS that only
 # adds some defaults in front. Unfortunately, CXXFLAGS=... $(CXXFLAGS) does not work.
@@ -123,6 +92,8 @@ OBJS= \
     obj/init.o \
     obj/keystore.o \
     obj/main.o \
+    obj/neoscrypt.o \
+    obj/neoscrypt_asm.o \
     obj/net.o \
     obj/protocol.o \
     obj/bitcoinrpc.o \
@@ -133,7 +104,6 @@ OBJS= \
     obj/rpcblockchain.o \
     obj/rpcrawtransaction.o \
     obj/script.o \
-    obj/scrypt.o \
     obj/sync.o \
     obj/util.o \
     obj/wallet.o \
@@ -144,12 +114,6 @@ OBJS= \
     obj/leveldb.o \
     obj/txdb.o
 
-
-ifdef USE_SSE2
-DEFS += -DUSE_SSE2
-OBJS_SSE2= obj/scrypt-sse2.o
-OBJS += $(OBJS_SSE2)
-endif
 
 all: guncoind
 
@@ -169,6 +133,12 @@ leveldb/libleveldb.a:
 # auto-generated dependencies:
 -include obj/*.P
 -include obj-test/*.P
+
+obj/neoscrypt.o: neoscrypt.c
+	gcc -O2 -DSHA256 -c -o $@ $^
+
+obj/neoscrypt_asm.o: neoscrypt_asm.S
+	gcc -c -o $@ $^
 
 obj/build.h: FORCE
 	/bin/sh ../share/genbuild.sh obj/build.h

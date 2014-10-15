@@ -14,6 +14,7 @@ class TransactionView;
 class OverviewPage;
 class AddressBookPage;
 class SendCoinsDialog;
+class MiningPage;
 class SignVerifyMessageDialog;
 class RPCConsole;
 
@@ -61,6 +62,7 @@ private:
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
+    MiningPage *miningPage;
     SignVerifyMessageDialog *signVerifyMessageDialog;
 
     TransactionView *transactionView;
@@ -76,6 +78,8 @@ public slots:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
+    /* Switch to mining page */
+    void gotoMiningPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

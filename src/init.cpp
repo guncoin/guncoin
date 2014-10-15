@@ -100,7 +100,7 @@ void Shutdown()
     ShutdownRPCMining();
     if (pwalletMain)
         bitdb.Flush(false);
-    GenerateBitcoins(false, NULL);
+    GenerateCoins(false, NULL);
     StopNode();
     {
         LOCK(cs_main);
@@ -1127,9 +1127,16 @@ bool AppInit2(boost::thread_group& threadGroup)
     if (fServer)
         StartRPCThreads();
 
-    // Generate coins in the background
-    if (pwalletMain)
-        GenerateBitcoins(GetBoolArg("-gen", false), pwalletMain);
+    /* Set the number of mining threads */
+    int nThreads = GetArg("-genproclimit", -1);
+    if(nThreads < 0)
+      nMiningThreads = boost::thread::hardware_concurrency();
+    else
+      nMiningThreads = nThreads;
+
+    /* Start the miner in the background */
+    if(pwalletMain)
+      GenerateCoins(GetBoolArg("-gen", false), pwalletMain);
 
     // ********************************************************* Step 12: finished
 
