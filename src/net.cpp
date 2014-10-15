@@ -1883,7 +1883,7 @@ void StartNode(boost::thread_group& threadGroup)
 bool StopNode()
 {
     printf("StopNode()\n");
-    GenerateBitcoins(false, NULL);
+    GenerateCoins(false, NULL);
     MapPort(false);
     nTransactionsUpdated++;
     if (semOutbound)

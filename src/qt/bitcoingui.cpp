@@ -14,11 +14,13 @@
 #include "walletframe.h"
 #include "optionsmodel.h"
 #include "transactiondescdialog.h"
+#include "miningpage.h"
 #include "bitcoinunits.h"
 #include "guiconstants.h"
 #include "notificator.h"
 #include "guiutil.h"
 #include "rpcconsole.h"
+#include "miningpage.h"
 #include "ui_interface.h"
 #include "wallet.h"
 #include "init.h"
@@ -106,10 +108,13 @@ BitcoinGUI::BitcoinGUI(QWidget *parent) :
     frameBlocksLayout->setContentsMargins(3,0,3,0);
     frameBlocksLayout->setSpacing(3);
     labelEncryptionIcon = new QLabel();
+    labelMiningIcon = new QLabel();
     labelConnectionsIcon = new QLabel();
     labelBlocksIcon = new QLabel();
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelEncryptionIcon);
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelMiningIcon);
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelConnectionsIcon);
     frameBlocksLayout->addStretch();
@@ -200,6 +205,11 @@ void BitcoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
+    miningAction = new QAction(QIcon(":/icons/mining"), tr("&Mining"), this);
+    miningAction->setToolTip(tr("Configure mining"));
+    miningAction->setCheckable(true);
+    tabGroup->addAction(miningAction);
+
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -210,6 +220,7 @@ void BitcoinGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
+    connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setStatusTip(tr("Quit application"));
@@ -281,6 +292,8 @@ void BitcoinGUI::createMenuBar()
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
     help->addSeparator();
+    help->addAction(miningAction);
+    help->addSeparator();
     help->addAction(aboutAction);
     help->addAction(aboutQtAction);
 }
@@ -294,6 +307,7 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
+    toolbar->addAction(miningAction);
 }
 
 void BitcoinGUI::setClientModel(ClientModel *clientModel)
@@ -332,6 +346,9 @@ void BitcoinGUI::setClientModel(ClientModel *clientModel)
 
         setNumBlocks(clientModel->getNumBlocks(), clientModel->getNumBlocksOfPeers());
         connect(clientModel, SIGNAL(numBlocksChanged(int,int)), this, SLOT(setNumBlocks(int,int)));
+
+        setMiningIcon(ClientModel::SoloMining, 0, 0, 0);
+        connect(clientModel, SIGNAL(miningChanged(int, bool, uint, uint)), this, SLOT(setMiningIcon(int, bool, uint, uint)));
 
         // Receive and report messages from network/worker thread
         connect(clientModel, SIGNAL(message(QString,QString,unsigned int)), this, SLOT(message(QString,QString,unsigned int)));
@@ -416,6 +433,7 @@ void BitcoinGUI::createTrayIconMenu()
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
+    trayIconMenu->addAction(miningAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
@@ -506,6 +524,11 @@ void BitcoinGUI::gotoVerifyMessageTab(QString addr)
     if (walletFrame) walletFrame->gotoVerifyMessageTab(addr);
 }
 
+void BitcoinGUI::gotoMiningPage() {
+    if(walletFrame)
+      walletFrame->gotoMiningPage();
+}
+
 void BitcoinGUI::setNumConnections(int count)
 {
     QString icon;
@@ -594,10 +617,13 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
         progressBar->setVisible(true);
 
         tooltip = tr("Catching up...") + QString("<br>") + tooltip;
-        labelBlocksIcon->setMovie(syncIconMovie);
-        if(count != prevBlocks)
-            syncIconMovie->jumpToNextFrame();
-        prevBlocks = count;
+
+        /* Keep it simple */
+        labelBlocksIcon->setPixmap(QIcon(":/icons/notsynced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+//        labelBlocksIcon->setMovie(syncIconMovie);
+//        if(count != prevBlocks)
+//            syncIconMovie->jumpToNextFrame();
+//        prevBlocks = count;
 
         walletFrame->showOutOfSyncWarning(true);
 
@@ -613,6 +639,37 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
     labelBlocksIcon->setToolTip(tooltip);
     progressBarLabel->setToolTip(tooltip);
     progressBar->setToolTip(tooltip);
+}
+
+/* Solo mining: read the mining statistics directly;
+   Pool mining: display pushed data */
+void BitcoinGUI::setMiningIcon(int type, bool started, uint threads, uint speed) {
+
+    /* FIXME: miningChanged() doesn't work properly */
+    return;
+
+    /* Solo mining active */
+    if(fGenerateCoins) {
+        labelMiningIcon->setPixmap(QIcon(":/icons/mining_active")
+          .pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelMiningIcon->setToolTip(tr("Solo mining: %1 threads, %2 hashes per second")
+          .arg(nMiningThreads).arg(nMiningSpeed));
+        return;
+    }
+
+    /* Pool mining active */
+    if((type == ClientModel::PoolMining) && started) {
+        labelMiningIcon->setPixmap(QIcon(":/icons/mining_active")
+          .pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelMiningIcon->setToolTip(tr("Pool mining: %1 threads, %2 hashes per second")
+          .arg(threads).arg(speed));
+        return;
+    }
+
+    /* Mining disabled */
+    labelMiningIcon->setPixmap(QIcon(":/icons/mining_inactive")
+      .pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    labelMiningIcon->setToolTip(tr("Mining disabled"));
 }
 
 void BitcoinGUI::message(const QString &title, const QString &message, unsigned int style, bool *ret)

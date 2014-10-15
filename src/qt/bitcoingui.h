@@ -19,6 +19,7 @@ class TransactionView;
 class OverviewPage;
 class AddressBookPage;
 class SendCoinsDialog;
+class MiningPage;
 class SignVerifyMessageDialog;
 class Notificator;
 class RPCConsole;
@@ -71,6 +72,7 @@ public:
     QAction * getAddressBookAction() { return addressBookAction; }
     QAction * getReceiveCoinsAction() { return receiveCoinsAction; }
     QAction * getSendCoinsAction() { return sendCoinsAction; }
+    QAction * getMiningAction() { return miningAction; }
 
 protected:
     void changeEvent(QEvent *e);
@@ -84,6 +86,7 @@ private:
     WalletFrame *walletFrame;
 
     QLabel *labelEncryptionIcon;
+    QLabel *labelMiningIcon;
     QLabel *labelConnectionsIcon;
     QLabel *labelBlocksIcon;
     QLabel *progressBarLabel;
@@ -95,6 +98,7 @@ private:
     QAction *quitAction;
     QAction *sendCoinsAction;
     QAction *addressBookAction;
+    QAction *miningAction;
     QAction *signMessageAction;
     QAction *verifyMessageAction;
     QAction *aboutAction;
@@ -138,6 +142,8 @@ public slots:
     void setNumConnections(int count);
     /** Set number of blocks shown in the UI */
     void setNumBlocks(int count, int nTotalBlocks);
+    /* Set the mining icon and the tool tip statistics */
+    void setMiningIcon(int type, bool started, uint threads, uint speed);
     /** Set the encryption status as shown in the UI.
        @param[in] status            current encryption status
        @see WalletModel::EncryptionStatus
@@ -177,6 +183,8 @@ private slots:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
+    /* Switch to mining page */
+    void gotoMiningPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

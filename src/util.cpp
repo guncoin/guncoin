@@ -85,6 +85,10 @@ bool fLogTimestamps = false;
 CMedianFilter<int64> vTimeOffsets(200,0);
 volatile bool fReopenDebugLog = false;
 bool fCachedPath[2] = {false, false};
+bool fGenerateCoins = false;
+uint nMiningThreads = 0;
+uint64 nMiningSpeed = 0;
+bool fNeoScrypt = false;
 
 // Init OpenSSL library multithreading support
 static CCriticalSection** ppmutexOpenSSL;

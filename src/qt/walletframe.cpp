@@ -93,6 +93,10 @@ void WalletFrame::gotoAddressBookPage()
         walletStack->gotoAddressBookPage();
 }
 
+void WalletFrame::gotoMiningPage() {
+    walletStack->gotoMiningPage();
+}
+
 void WalletFrame::gotoReceiveCoinsPage()
 {
     walletStack->gotoReceiveCoinsPage();

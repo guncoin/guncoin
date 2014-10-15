@@ -9,6 +9,7 @@
 #include "txdb.h"
 #include "net.h"
 #include "init.h"
+#include "util.h"
 #include "ui_interface.h"
 #include "checkqueue.h"
 #include <boost/algorithm/string/replace.hpp>
@@ -40,6 +41,8 @@ unsigned int nTransactionsUpdated = 0;
 map<uint256, CBlockIndex*> mapBlockIndex;
 uint256 hashGenesisBlock("0x55a9b3b171a6dfc95d59e07fa23736f44cd745f896e86491982ad6d043c58ba6"); // guncoin primary genesis
 static CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // Guncoin: starting difficulty is 1 / 2^12
+/* The initial difficulty after switching to NeoScrypt (0.0625) */
+static CBigNum bnNeoScryptSwitch(~uint256(0) >> 28);
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
 uint256 nBestChainWork = 0;
@@ -1123,37 +1126,18 @@ static const int64 nTargetSpacing = 2 * 60; // Guncoin: 2 minutes
 static const int64 nInterval = nTargetTimespan / nTargetSpacing;
 static const int64 nTargetTimespanNEW = 2*60 ; // digishield
 
-
-//
-// minimum amount of work that could possibly be required nTime after
-// minimum work required was nBase
-//
-unsigned int ComputeMinWork(unsigned int nBase, int64 nTime)
-{
-    // Testnet has min-difficulty blocks
-    // after nTargetSpacing*2 time between blocks:
-    if (fTestNet && nTime > nTargetSpacing*2)
-        return bnProofOfWorkLimit.GetCompact();
-
-    CBigNum bnResult;
-    bnResult.SetCompact(nBase);
-    while (nTime > 0 && bnResult < bnProofOfWorkLimit)
-    {
-        // Maximum 400% adjustment...
-        bnResult *= 4;
-        // ... in best-case exactly 4-times-normal target time
-        nTime -= nTargetTimespan*4;
-    }
-    if (bnResult > bnProofOfWorkLimit)
-        bnResult = bnProofOfWorkLimit;
-    return bnResult.GetCompact();
-}
-
 unsigned int static GetNextWorkRequired_V2(const CBlockIndex* pindexLast, const CBlockHeader *pblock){
 
     unsigned int nProofOfWorkLimit = bnProofOfWorkLimit.GetCompact();
     int nHeight = pindexLast->nHeight + 1;
 
+    /* Switch to NeoScrypt */
+    if(nHeight >= nForkNeoScrypt) {
+        if(!fNeoScrypt) fNeoScrypt = true;
+        /* Difficulty reset after the switch */
+        if(nHeight < (nForkNeoScrypt + 10))
+          return(bnNeoScryptSwitch.GetCompact());
+    }
 
     int64 retargetTimespan = nTargetTimespan;
     int64 retargetSpacing = nTargetSpacing;
@@ -1211,11 +1195,10 @@ unsigned int static GetNextWorkRequired_V2(const CBlockIndex* pindexLast, const 
     //DigiShield implementation - thanks to RealSolid & WDC for this code
     // amplitude filter - thanks to daft27 for this code
     nActualTimespan = retargetTimespan + (nActualTimespan - retargetTimespan)/8;
-    printf("DIGISHIELD RETARGET\n");
     if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
     if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
-    // Retarget
 
+    // Retarget
     bnNew *= nActualTimespan;
     bnNew /= retargetTimespan;
 
@@ -1223,14 +1206,12 @@ unsigned int static GetNextWorkRequired_V2(const CBlockIndex* pindexLast, const 
         bnNew = bnProofOfWorkLimit;
 
     /// debug print
-    printf("GetNextWorkRequired RETARGET\n");
+    printf("DIGISHIELD RETARGET\n");
     printf("nTargetTimespan = %"PRI64d"    nActualTimespan = %"PRI64d"\n", retargetTimespan, nActualTimespan);
     printf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString().c_str());
     printf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
 
     return bnNew.GetCompact();
-
-
 }
 
 
@@ -2245,9 +2226,9 @@ bool CBlock::CheckBlock(CValidationState &state, bool fCheckPOW, bool fCheckMerk
             return error("CheckBlock() : 15 August maxlocks violation");
     }
 
-    // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(GetPoWHash(), nBits))
-        return state.DoS(50, error("CheckBlock() : proof of work failed"));
+    /* Verify proof-of-work */
+    if(fCheckPOW && !CheckProofOfWork(GetPoWHash(), nBits))
+      return(state.DoS(50, error("CheckBlock() : proof-of-work verification failed")));
 
     // Check timestamp
     if (GetBlockTime() > GetAdjustedTime() + 2 * 60 * 60)
@@ -2311,6 +2292,17 @@ bool CBlock::AcceptBlock(CValidationState &state, CDiskBlockPos *dbp)
         pindexPrev = (*mi).second;
         nHeight = pindexPrev->nHeight+1;
 
+        /* Don't accept v1 blocks */
+        CScript expect = CScript() << nHeight;
+        if(!std::equal(expect.begin(), expect.end(), vtx[0].vin[0].scriptSig.begin()))
+          return(state.DoS(100, error("AcceptBlock() : incorrect block height in coin base")));
+
+        /* Don't accept blocks with bogus nVersion numbers after this point */
+        if(nHeight >= nForkNeoScrypt) {
+            if(nVersion != 2)
+              return(state.DoS(100, error("AcceptBlock() : incorrect block version")));
+        }
+
         // Check proof of work
         if (nBits != GetNextWorkRequired(pindexPrev, this))
             return state.DoS(100, error("AcceptBlock() : incorrect proof of work"));
@@ -2333,28 +2325,6 @@ bool CBlock::AcceptBlock(CValidationState &state, CDiskBlockPos *dbp)
         if (pcheckpoint && nHeight < pcheckpoint->nHeight)
             return state.DoS(100, error("AcceptBlock() : forked chain older than last checkpoint (height %d)", nHeight));
 
-        // Reject block.nVersion=1 blocks when 95% (75% on testnet) of the network has upgraded:
-        if (nVersion < 2)
-        {
-            if ((!fTestNet && CBlockIndex::IsSuperMajority(2, pindexPrev, 950, 1000)) ||
-                (fTestNet && CBlockIndex::IsSuperMajority(2, pindexPrev, 75, 100)))
-            {
-                return state.Invalid(error("AcceptBlock() : rejected nVersion=1 block"));
-            }
-        }
-        // Enforce block.nVersion=2 rule that the coinbase starts with serialized block height
-        if (nVersion >= 2)
-        {
-            // if 750 of the last 1,000 blocks are version 2 or greater (51/100 if testnet):
-            if ((!fTestNet && CBlockIndex::IsSuperMajority(2, pindexPrev, 750, 1000)) ||
-                (fTestNet && CBlockIndex::IsSuperMajority(2, pindexPrev, 51, 100)))
-            {
-                CScript expect = CScript() << nHeight;
-                if (vtx[0].vin[0].scriptSig.size() < expect.size() ||
-                    !std::equal(expect.begin(), expect.end(), vtx[0].vin[0].scriptSig.begin()))
-                    return state.DoS(100, error("AcceptBlock() : block height mismatch in coinbase"));
-            }
-        }
     }
 
     // Write block to history file
@@ -2422,14 +2392,6 @@ bool ProcessBlock(CValidationState &state, CNode* pfrom, CBlock* pblock, CDiskBl
         if (deltaTime < 0)
         {
             return state.DoS(100, error("ProcessBlock() : block with timestamp before last checkpoint"));
-        }
-        CBigNum bnNewBlock;
-        bnNewBlock.SetCompact(pblock->nBits);
-        CBigNum bnRequired;
-        bnRequired.SetCompact(ComputeMinWork(pcheckpoint->nBits, deltaTime));
-        if (bnNewBlock > bnRequired)
-        {
-            return state.DoS(100, error("ProcessBlock() : block with too little proof-of-work"));
         }
     }
 
@@ -4252,41 +4214,8 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 // GuncoinMiner
 //
 
-int static FormatHashBlocks(void* pbuffer, unsigned int len)
-{
-    unsigned char* pdata = (unsigned char*)pbuffer;
-    unsigned int blocks = 1 + ((len + 8) / 64);
-    unsigned char* pend = pdata + 64 * blocks;
-    memset(pdata + len, 0, 64 * blocks - len);
-    pdata[len] = 0x80;
-    unsigned int bits = len * 8;
-    pend[-1] = (bits >> 0) & 0xff;
-    pend[-2] = (bits >> 8) & 0xff;
-    pend[-3] = (bits >> 16) & 0xff;
-    pend[-4] = (bits >> 24) & 0xff;
-    return blocks;
-}
-
 static const unsigned int pSHA256InitState[8] =
 {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
-
-void SHA256Transform(void* pstate, void* pinput, const void* pinit)
-{
-    SHA256_CTX ctx;
-    unsigned char data[64];
-
-    SHA256_Init(&ctx);
-
-    for (int i = 0; i < 16; i++)
-        ((uint32_t*)data)[i] = ByteReverse(((uint32_t*)pinput)[i]);
-
-    for (int i = 0; i < 8; i++)
-        ctx.h[i] = ((uint32_t*)pinit)[i];
-
-    SHA256_Update(&ctx, data, sizeof(data));
-    for (int i = 0; i < 8; i++)
-        ((uint32_t*)pstate)[i] = ctx.h[i];
-}
 
 // Some explaining would be appreciated
 class COrphan
@@ -4606,50 +4535,40 @@ void IncrementExtraNonce(CBlock* pblock, CBlockIndex* pindexPrev, unsigned int& 
     pblock->hashMerkleRoot = pblock->BuildMerkleTree();
 }
 
+/* Prepares a block header for transmission using RPC getwork */
+void FormatDataBuffer(CBlock *pblock, uint *pdata) {
+    uint i;
 
-void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash1)
-{
-    //
-    // Pre-build hash buffers
-    //
-    struct
-    {
-        struct unnamed2
-        {
-            int nVersion;
-            uint256 hashPrevBlock;
-            uint256 hashMerkleRoot;
-            unsigned int nTime;
-            unsigned int nBits;
-            unsigned int nNonce;
-        }
-        block;
-        unsigned char pchPadding0[64];
-        uint256 hash1;
-        unsigned char pchPadding1[64];
+    struct {
+        int nVersion;
+        uint256 hashPrevBlock;
+        uint256 hashMerkleRoot;
+        uint nTime;
+        uint nBits;
+        uint nNonce;
+    } data;
+
+    data.nVersion       = pblock->nVersion;
+    data.hashPrevBlock  = pblock->hashPrevBlock;
+    data.hashMerkleRoot = pblock->hashMerkleRoot;
+    data.nTime          = pblock->nTime;
+    data.nBits          = pblock->nBits;
+    data.nNonce         = pblock->nNonce;
+
+    if(fNeoScrypt) {
+        /* Copy the LE data */
+        for(i = 0; i < 20; i++)
+          pdata[i] = ((uint *) &data)[i];
+    } else {
+        /* Block header size in bits */
+        pdata[31] = 640;
+        /* Convert LE to BE and copy */
+        for(i = 0; i < 20; i++)
+          pdata[i] = ByteReverse(((uint *) &data)[i]);
+        /* Erase the remaining part */
+        for(i = 20; i < 31; i++)
+          pdata[i] = 0;
     }
-    tmp;
-    memset(&tmp, 0, sizeof(tmp));
-
-    tmp.block.nVersion       = pblock->nVersion;
-    tmp.block.hashPrevBlock  = pblock->hashPrevBlock;
-    tmp.block.hashMerkleRoot = pblock->hashMerkleRoot;
-    tmp.block.nTime          = pblock->nTime;
-    tmp.block.nBits          = pblock->nBits;
-    tmp.block.nNonce         = pblock->nNonce;
-
-    FormatHashBlocks(&tmp.block, sizeof(tmp.block));
-    FormatHashBlocks(&tmp.hash1, sizeof(tmp.hash1));
-
-    // Byte swap all the input buffer
-    for (unsigned int i = 0; i < sizeof(tmp)/4; i++)
-        ((unsigned int*)&tmp)[i] = ByteReverse(((unsigned int*)&tmp)[i]);
-
-    // Precalc the first half of the first hash, which stays constant
-    SHA256Transform(pmidstate, &tmp.block, pSHA256InitState);
-
-    memcpy(pdata, &tmp.block, 128);
-    memcpy(phash1, &tmp.hash1, 64);
 }
 
 
@@ -4701,147 +4620,125 @@ void static GuncoinMiner(CWallet *pwallet)
     CReserveKey reservekey(pwallet);
     unsigned int nExtraNonce = 0;
 
-    try { loop {
-        while (vNodes.empty())
-            MilliSleep(1000);
+    try {
 
-        //
-        // Create new block
-        //
-        unsigned int nTransactionsUpdatedLast = nTransactionsUpdated;
-        CBlockIndex* pindexPrev = pindexBest;
+        while(fGenerateCoins) {
 
-        auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlockWithKey(reservekey));
-        if (!pblocktemplate.get())
-            return;
-        CBlock *pblock = &pblocktemplate->block;
-        IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
+            while(vNodes.empty() || IsInitialBlockDownload()) {
+                MilliSleep(1000);
 
-        printf("Running GuncoinMiner with %"PRIszu" transactions in block (%u bytes)\n", pblock->vtx.size(),
-               ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
+                if(!fGenerateCoins)
+                  return;
+            }
 
-        //
-        // Pre-build hash buffers
-        //
-        char pmidstatebuf[32+16]; char* pmidstate = alignup<16>(pmidstatebuf);
-        char pdatabuf[128+16];    char* pdata     = alignup<16>(pdatabuf);
-        char phash1buf[64+16];    char* phash1    = alignup<16>(phash1buf);
+            unsigned int nTransactionsUpdatedLast = nTransactionsUpdated;
+            CBlockIndex* pindexPrev = pindexBest;
 
-        FormatHashBuffers(pblock, pmidstate, pdata, phash1);
+            auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlockWithKey(reservekey));
+            if(!pblocktemplate.get())
+              return;
+            CBlock *pblock = &pblocktemplate->block;
+            IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-        unsigned int& nBlockTime = *(unsigned int*)(pdata + 64 + 4);
-        unsigned int& nBlockBits = *(unsigned int*)(pdata + 64 + 8);
-        //unsigned int& nBlockNonce = *(unsigned int*)(pdata + 64 + 12);
+            printf("Running GuncoinMiner with %"PRIszu" transactions in block (%u bytes)\n", pblock->vtx.size(),
+              ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
+            int64 nStart = GetTime();
+            uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
 
-        //
-        // Search
-        //
-        int64 nStart = GetTime();
-        uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
-        loop
-        {
-            unsigned int nHashesDone = 0;
+            while(true) {
+                unsigned int nHashesDone = 0;
+                uint profile = fNeoScrypt ? 0x0 : 0x3;
+                uint256 hash;
 
-            uint256 thash;
-            char scratchpad[SCRYPT_SCRATCHPAD_SIZE];
-            loop
-            {
-                scrypt_1024_1_1_256_sp(BEGIN(pblock->nVersion), BEGIN(thash), scratchpad);
-
-                if (thash <= hashTarget)
-                {
-                    // Found a solution
-                    SetThreadPriority(THREAD_PRIORITY_NORMAL);
-                    CheckWork(pblock, *pwallet, reservekey);
-                    SetThreadPriority(THREAD_PRIORITY_LOWEST);
-                    break;
+                while(true) {
+                    neoscrypt((uchar *) &pblock->nVersion, (uchar *) &hash, profile);
+                    if(hash <= hashTarget) {
+                        /* Found a solution */
+                        SetThreadPriority(THREAD_PRIORITY_NORMAL);
+                        CheckWork(pblock, *pwallet, reservekey);
+                        SetThreadPriority(THREAD_PRIORITY_LOWEST);
+                        break;
+                    }
+                    pblock->nNonce += 1;
+                    nHashesDone += 1;
+                    if((pblock->nNonce & 0xFF) == 0)
+                      break;
                 }
-                pblock->nNonce += 1;
-                nHashesDone += 1;
-                if ((pblock->nNonce & 0xFF) == 0)
-                    break;
-            }
 
-            // Meter hashes/sec
-            static int64 nHashCounter;
-            if (nHPSTimerStart == 0)
-            {
-                nHPSTimerStart = GetTimeMillis();
-                nHashCounter = 0;
-            }
-            else
-                nHashCounter += nHashesDone;
-            if (GetTimeMillis() - nHPSTimerStart > 4000)
-            {
-                static CCriticalSection cs;
-                {
-                    LOCK(cs);
-                    if (GetTimeMillis() - nHPSTimerStart > 4000)
+                static int64 nHashCounter;
+                if(nHPSTimerStart == 0) {
+                    nHPSTimerStart = GetTimeMillis();
+                    nHashCounter = 0;
+                } else {
+                    nHashCounter += nHashesDone;
+                }
+
+                if(GetTimeMillis() - nHPSTimerStart > 4000) {
+                    static CCriticalSection cs;
                     {
-                        dHashesPerSec = 1000.0 * nHashCounter / (GetTimeMillis() - nHPSTimerStart);
-                        nHPSTimerStart = GetTimeMillis();
-                        nHashCounter = 0;
-                        static int64 nLogTime;
-                        if (GetTime() - nLogTime > 30 * 60)
-                        {
-                            nLogTime = GetTime();
-                            printf("hashmeter %6.0f khash/s\n", dHashesPerSec/1000.0);
+                        LOCK(cs);
+                        if(GetTimeMillis() - nHPSTimerStart > 4000) {
+                            nMiningSpeed = (nHashCounter * 1000) / (GetTimeMillis() - nHPSTimerStart);
+                            nHPSTimerStart = GetTimeMillis();
+                            nHashCounter = 0;
+                            static int64 nLogTime;
+                            if(GetTime() - nLogTime > 30 * 60) {
+                                nLogTime = GetTime();
+                                printf("%s ", DateTimeStrFormat("%x %H:%M", GetTime()).c_str());
+                                printf("hashmeter %.2f KH/s\n", (double)(nMiningSpeed / 1000));
+                            }
                         }
                     }
                 }
-            }
 
-            // Check for stop or if block needs to be rebuilt
-            boost::this_thread::interruption_point();
-            if (vNodes.empty())
-                break;
-            if (pblock->nNonce >= 0xffff0000)
-                break;
-            if (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60)
-                break;
-            if (pindexPrev != pindexBest)
-                break;
+                boost::this_thread::interruption_point();
+                if(!fGenerateCoins)
+                  return;
+                if(vNodes.empty())
+                  break;
+                if(pblock->nNonce >= 0xffff0000)
+                  break;
+                if((nTransactionsUpdated != nTransactionsUpdatedLast) && (GetTime() - nStart > 60))
+                  break;
+                if(pindexPrev != pindexBest)
+                   break;
 
-            // Update nTime every few seconds
-            pblock->UpdateTime(pindexPrev);
-            nBlockTime = ByteReverse(pblock->nTime);
-            if (fTestNet)
-            {
-                // Changing pblock->nTime can change work required on testnet:
-                nBlockBits = ByteReverse(pblock->nBits);
-                hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
+                pblock->UpdateTime(pindexPrev);
+
+                if(fTestNet) {
+                    /* UpdateTime() can change work required on testnet */
+                    hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
+                }
             }
         }
-    } }
-    catch (boost::thread_interrupted)
-    {
+    } catch(boost::thread_interrupted) {
+        nMiningSpeed = 0;
         printf("GuncoinMiner terminated\n");
         throw;
     }
 }
 
-void GenerateBitcoins(bool fGenerate, CWallet* pwallet)
-{
+void GenerateCoins(bool fGenerate, CWallet* pwallet) {
     static boost::thread_group* minerThreads = NULL;
 
-    int nThreads = GetArg("-genproclimit", -1);
-    if (nThreads < 0)
-        nThreads = boost::thread::hardware_concurrency();
+    fGenerateCoins = fGenerate;
 
-    if (minerThreads != NULL)
-    {
+    if(minerThreads != NULL) {
         minerThreads->interrupt_all();
-        delete minerThreads;
+        delete(minerThreads);
         minerThreads = NULL;
     }
 
-    if (nThreads == 0 || !fGenerate)
+    if(!nMiningThreads || !fGenerate) {
+        fGenerateCoins = false;
         return;
+    }
 
+    uint i;
     minerThreads = new boost::thread_group();
-    for (int i = 0; i < nThreads; i++)
-        minerThreads->create_thread(boost::bind(&GuncoinMiner, pwallet));
+    for(i = 0; i < nMiningThreads; i++)
+      minerThreads->create_thread(boost::bind(&GuncoinMiner, pwallet));
 }
 
 // Amount compression:

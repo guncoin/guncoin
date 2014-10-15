@@ -81,6 +81,8 @@ OBJS= \
     obj/init.o \
     obj/keystore.o \
     obj/main.o \
+    obj/neoscrypt.o \
+    obj/neoscrypt_asm.o \
     obj/net.o \
     obj/protocol.o \
     obj/bitcoinrpc.o \
@@ -91,7 +93,6 @@ OBJS= \
     obj/rpcblockchain.o \
     obj/rpcrawtransaction.o \
     obj/script.o \
-    obj/scrypt.o \
     obj/sync.o \
     obj/util.o \
     obj/wallet.o \
@@ -102,11 +103,6 @@ OBJS= \
     obj/leveldb.o \
     obj/txdb.o
 
-ifdef USE_SSE2
-DEFS += -DUSE_SSE2
-OBJS_SSE2= obj/scrypt-sse2.o
-OBJS += $(OBJS_SSE2)
-endif
 
 all: guncoind.exe
 
@@ -121,6 +117,12 @@ DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
 
 leveldb/libleveldb.a:
 	cd leveldb && $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(CFLAGS)" TARGET_OS=NATIVE_WINDOWS libleveldb.a libmemenv.a && cd ..
+
+obj/neoscrypt.o: neoscrypt.c
+	gcc -O2 -DSHA256 -c -o $@ $^
+
+obj/neoscrypt_asm.o: neoscrypt_asm.S
+	gcc -c -o $@ $^
 
 obj/%-sse2.o: %-sse2.cpp
 	$(CXX) -c $(CFLAGS) -msse2 -mstackrealign -o $@ $<

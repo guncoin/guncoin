@@ -11,6 +11,8 @@
 
 #include "alert.h"
 #include "main.h"
+#include "util.h"
+#include "init.h" /* for pwalletMain */
 #include "checkpoints.h"
 #include "ui_interface.h"
 
@@ -25,6 +27,14 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     cachedReindexing(0), cachedImporting(0),
     numBlocksAtStartup(-1), pollTimer(0)
 {
+    /* Disable mining even if user enabled */
+    miningType = SoloMining;
+    miningStarted = false;
+    GenerateCoins(false, pwalletMain);
+
+    /* Get the number of mining threads */
+    miningThreads = nMiningThreads;
+
     pollTimer = new QTimer(this);
     pollTimer->setInterval(MODEL_UPDATE_DELAY);
     pollTimer->start();
@@ -52,6 +62,90 @@ int ClientModel::getNumBlocksAtStartup()
 {
     if (numBlocksAtStartup == -1) numBlocksAtStartup = getNumBlocks();
     return numBlocksAtStartup;
+}
+
+ClientModel::MiningType ClientModel::getMiningType() const {
+    return(miningType);
+}
+
+int ClientModel::getMiningThreads() const {
+    return(miningThreads);
+}
+
+bool ClientModel::getMiningStarted() const {
+    return(miningStarted);
+}
+
+bool ClientModel::getMiningDebug() const {
+    return(miningDebug);
+}
+
+void ClientModel::setMiningDebug(bool debug) {
+    miningDebug = debug;
+}
+
+int ClientModel::getMiningScanTime() const {
+    return(miningScanTime);
+}
+
+void ClientModel::setMiningScanTime(int scantime) {
+    miningScanTime = scantime;
+}
+
+QString ClientModel::getMiningServer() const {
+    return(miningServer);
+}
+
+void ClientModel::setMiningServer(QString server) {
+    miningServer = server;
+}
+
+QString ClientModel::getMiningPort() const {
+    return(miningPort);
+}
+
+void ClientModel::setMiningPort(QString port) {
+    miningPort = port;
+}
+
+QString ClientModel::getMiningUsername() const {
+    return(miningUsername);
+}
+
+void ClientModel::setMiningUsername(QString username) {
+    miningUsername = username;
+}
+
+QString ClientModel::getMiningPassword() const {
+    return(miningPassword);
+}
+
+void ClientModel::setMiningPassword(QString password) {
+    miningPassword = password;
+}
+
+double ClientModel::GetDifficulty() const {
+
+    /* Floating point number that is a multiple of the minimum difficulty (1.0) */
+
+    if(pindexBest == NULL)
+      return(1.0);
+
+    int nShift = (pindexBest->nBits >> 24) & 0xFF;
+
+    double dDiff = (double)0x0000FFFF / (double)(pindexBest->nBits & 0x00FFFFFF);
+
+    while(nShift < 29) {
+        dDiff *= 256.0;
+        nShift++;
+    }
+
+    while(nShift > 29) {
+        dDiff /= 256.0;
+        nShift--;
+    }
+
+    return(dDiff);
 }
 
 QDateTime ClientModel::getLastBlockDate() const
@@ -87,6 +181,12 @@ void ClientModel::updateTimer()
 
         // ensure we return the maximum of newNumBlocksOfPeers and newNumBlocks to not create weird displays in the GUI
         emit numBlocksChanged(newNumBlocks, std::max(newNumBlocksOfPeers, newNumBlocks));
+
+        /* Need to refresh if solo mining */
+        if(miningType == SoloMining) {
+            /* No need to push any data while solo mining */
+            emit miningChanged(miningType, 0, 0, 0);
+        }
     }
 }
 
@@ -120,6 +220,16 @@ bool ClientModel::isTestNet() const
 bool ClientModel::inInitialBlockDownload() const
 {
     return IsInitialBlockDownload();
+}
+
+void ClientModel::setMining(MiningType type, bool started, uint threads, uint speed) {
+    if((type == SoloMining) && (started != miningStarted)) {
+        nMiningThreads = threads;
+        GenerateCoins(started, pwalletMain);
+    }
+    miningType = type;
+    miningStarted = started;
+    emit miningChanged(type, started, threads, speed);
 }
 
 enum BlockSource ClientModel::getBlockSource() const

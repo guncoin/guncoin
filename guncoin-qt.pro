@@ -1,13 +1,14 @@
 TEMPLATE = app
 TARGET = guncoin-qt
 macx:TARGET = "Guncoin-Qt"
-VERSION = 0.8.7.1
+VERSION = 1.1.0.0
 INCLUDEPATH += src src/json src/qt
 QT += core gui network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
 CONFIG += no_include_pwd
 CONFIG += thread
+QMAKE_CFLAGS += -DSHA256
 
 #BOOST_LIB_SUFFIX=
 BOOST_INCLUDE_PATH=C:/deps/boost
@@ -46,21 +47,12 @@ contains(RELEASE, 1) {
     }
 }
 
-!win32 {
-    # for extra security against potential buffer overflows: enable GCCs Stack Smashing Protection
-    QMAKE_CXXFLAGS *= -fstack-protector-all
-    QMAKE_LFLAGS *= -fstack-protector-all
-    # Exclude on Windows cross compile with MinGW 4.2.x, as it will result in a non-working executable!
-    # This can be enabled for Windows, when we switch to MinGW >= 4.4.x.
-}
-# for extra security (see: https://wiki.debian.org/Hardening): this flag is GCC compiler-specific
-QMAKE_CXXFLAGS += -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2
 # for extra security on Windows: enable ASLR and DEP via GCC linker flags
 win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
 # on Windows: enable GCC large address aware linker flag
 win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 # i686-w64-mingw32
-#win32:QMAKE_LFLAGS *= -static-libgcc -static-libstdc++
+#win32:QMAKE_LFLAGS *= -static -static-libgcc -static-libstdc++
 
 # use: qmake "USE_QRCODE=1"
 # libqrencode (http://fukuchi.org/works/qrencode/index.en.html) must be installed for support
@@ -141,7 +133,7 @@ QMAKE_CLEAN += $$PWD/src/leveldb/libleveldb.a; cd $$PWD/src/leveldb ; $(MAKE) cl
     DEFINES += HAVE_BUILD_INFO
 }
 
-QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
+QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter
 
 # Input
 DEPENDPATH += src src/json src/qt
@@ -220,7 +212,8 @@ HEADERS += src/qt/bitcoingui.h \
     src/allocators.h \
     src/ui_interface.h \
     src/qt/rpcconsole.h \
-    src/scrypt.h \
+    src/qt/miningpage.h \
+    src/neoscrypt.h \
     src/version.h \
     src/netbase.h \
     src/clientversion.h \
@@ -296,7 +289,9 @@ SOURCES += src/qt/bitcoin.cpp \
     src/qt/notificator.cpp \
     src/qt/paymentserver.cpp \
     src/qt/rpcconsole.cpp \
-    src/scrypt.cpp \
+    src/qt/miningpage.cpp \
+    src/neoscrypt.c \
+    src/neoscrypt_asm.S \
     src/noui.cpp \
     src/leveldb.cpp \
     src/txdb.cpp \
@@ -315,6 +310,7 @@ FORMS += src/qt/forms/sendcoinsdialog.ui \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/rpcconsole.ui \
+    src/qt/forms/miningpage.ui \
     src/qt/forms/optionsdialog.ui
 
 contains(USE_QRCODE, 1) {

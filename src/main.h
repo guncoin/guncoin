@@ -9,7 +9,7 @@
 #include "sync.h"
 #include "net.h"
 #include "script.h"
-#include "scrypt.h"
+#include "neoscrypt.h"
 
 #include <list>
 
@@ -68,6 +68,7 @@ static const int fHaveUPnP = true;
 static const int fHaveUPnP = false;
 #endif
 
+static const int nForkNeoScrypt   = 120000;  /* Switch to NeoScrypt */
 
 extern CScript COINBASE_FLAGS;
 
@@ -159,20 +160,18 @@ bool SendMessages(CNode* pto, bool fSendTrickle);
 /** Run an instance of the script checking thread */
 void ThreadScriptCheck();
 /** Run the miner threads */
-void GenerateBitcoins(bool fGenerate, CWallet* pwallet);
+void GenerateCoins(bool fGenerate, CWallet* pwallet);
 /** Generate a new block, without valid proof-of-work */
 CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn);
 CBlockTemplate* CreateNewBlockWithKey(CReserveKey& reservekey);
 /** Modify the extranonce in a block */
 void IncrementExtraNonce(CBlock* pblock, CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
-/** Do mining precalculation */
-void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash1);
+/* Prepare a block header for transmission */
+void FormatDataBuffer(CBlock *pblock, uint *pdata);
 /** Check mined block */
 bool CheckWork(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey);
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
 bool CheckProofOfWork(uint256 hash, unsigned int nBits);
-/** Calculate the minimum amount of work a received block needs, without knowing its direct parent */
-unsigned int ComputeMinWork(unsigned int nBase, int64 nTime);
 /** Get the number of active peers */
 int GetNumBlocksOfPeers();
 /** Check whether we are doing an initial block download (synchronizing from disk or network) */
@@ -1373,11 +1372,43 @@ public:
         vMerkleTree.clear();
     }
 
-    uint256 GetPoWHash() const
-    {
-        uint256 thash;
-        scrypt_1024_1_1_256(BEGIN(nVersion), BEGIN(thash));
-        return thash;
+    /* Calculates block proof-of-work hash using either NeoScrypt or Scrypt */
+    uint256 GetPoWHash() const {
+        uint profile = 0x0;
+        uint256 hash;
+
+        /* All these blocks must be v2+ with valid nHeight */
+        int nHeight = GetBlockHeight();
+        if(nHeight < nForkNeoScrypt)
+          profile = 0x3;
+
+        neoscrypt((uchar *) &nVersion, (uchar *) &hash, profile);
+
+        return(hash);
+    }
+
+    /* Extracts block height from v2+ coin base;
+     * ignores nVersion because it's unrealiable */
+    int GetBlockHeight() const {
+        /* Prevents a crash if called on a block header alone */
+        if(vtx.size()) {
+            /* Serialised CScript */
+            std::vector<uchar>::const_iterator scriptsig = vtx[0].vin[0].scriptSig.begin();
+            uchar i, scount = scriptsig[0];
+            /* Optimise: nTime is 4 bytes always,
+             * nHeight must be less for a long time;
+             * check against a threshold when the time comes */
+            if(scount < 4) {
+                int height = 0;
+                uchar *pheight = (uchar *) &height;
+                for(i = 0; i < scount; i++)
+                  pheight[i] = scriptsig[i + 1];
+                /* v2+ block with nHeight in coin base */
+                return(height);
+            }
+        }
+        /* Not found */
+        return(-1);
     }
 
     CBlockHeader GetBlockHeader() const
@@ -1490,10 +1521,6 @@ public:
         catch (std::exception &e) {
             return error("%s() : deserialize or I/O error", __PRETTY_FUNCTION__);
         }
-
-        // Check the header
-        if (!CheckProofOfWork(GetPoWHash(), nBits))
-            return error("CBlock::ReadFromDisk() : errors in block header");
 
         return true;
     }
