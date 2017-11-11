@@ -949,7 +949,7 @@ boost::filesystem::path GetDefaultDataDir()
     // Unix: ~/.bitcoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "Bitcoin";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "Guncoin";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -961,10 +961,10 @@ boost::filesystem::path GetDefaultDataDir()
     // Mac
     pathRet /= "Library/Application Support";
     TryCreateDirectory(pathRet);
-    return pathRet / "Bitcoin";
+    return pathRet / "Guncoin";
 #else
     // Unix
-    return pathRet / ".bitcoin";
+    return pathRet / ".guncoin";
 #endif
 #endif
 }
@@ -1013,7 +1013,7 @@ void ClearDatadirCache()
 
 boost::filesystem::path GetConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-conf", "bitcoin.conf"));
+    boost::filesystem::path pathConfigFile(GetArg("-conf", "guncoin.conf"));
     if (!pathConfigFile.is_complete()) pathConfigFile = GetDataDir(false) / pathConfigFile;
     return pathConfigFile;
 }
@@ -1046,7 +1046,7 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
 
 boost::filesystem::path GetPidFile()
 {
-    boost::filesystem::path pathPidFile(GetArg("-pid", "bitcoind.pid"));
+    boost::filesystem::path pathPidFile(GetArg("-pid", "guncoind.pid"));
     if (!pathPidFile.is_complete()) pathPidFile = GetDataDir() / pathPidFile;
     return pathPidFile;
 }
