@@ -97,7 +97,7 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 
     widget->setFont(bitcoinAddressFont());
 #if QT_VERSION >= 0x040700
-    widget->setPlaceholderText(QObject::tr("Enter a Bitcoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)"));
+    widget->setPlaceholderText(QObject::tr("Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)"));
 #endif
     widget->setValidator(new BitcoinAddressEntryValidator(parent));
     widget->setCheckValidator(new BitcoinAddressCheckValidator(parent));
@@ -537,7 +537,7 @@ TableViewLastColumnResizingFixer::TableViewLastColumnResizingFixer(QTableView* t
 #ifdef WIN32
 boost::filesystem::path static StartupShortcutPath()
 {
-    return GetSpecialFolderPath(CSIDL_STARTUP) / "Bitcoin.lnk";
+    return GetSpecialFolderPath(CSIDL_STARTUP) / "Guncoin.lnk";
 }
 
 bool GetStartOnSystemStartup()
@@ -619,7 +619,7 @@ boost::filesystem::path static GetAutostartDir()
 
 boost::filesystem::path static GetAutostartFilePath()
 {
-    return GetAutostartDir() / "bitcoin.desktop";
+    return GetAutostartDir() / "guncoin.desktop";
 }
 
 bool GetStartOnSystemStartup()
@@ -660,7 +660,7 @@ bool SetStartOnSystemStartup(bool fAutoStart)
         // Write a bitcoin.desktop file to the autostart directory:
         optionFile << "[Desktop Entry]\n";
         optionFile << "Type=Application\n";
-        optionFile << "Name=Bitcoin\n";
+        optionFile << "Name=Guncoin\n";
         optionFile << "Exec=" << pszExePath << " -min\n";
         optionFile << "Terminal=false\n";
         optionFile << "Hidden=false\n";

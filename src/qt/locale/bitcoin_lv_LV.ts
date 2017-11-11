@@ -2,12 +2,12 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <source>About Bitcoin Core</source>
-        <translation>Par Bitcoin Core</translation>
+        <source>About Guncoin Core</source>
+        <translation>Par Guncoin Core</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Bitcoin Core&lt;/b&gt; version</source>
-        <translation>&lt;b&gt;Bitcoin Core&lt;/b&gt; versija</translation>
+        <source>&lt;b&gt;Guncoin Core&lt;/b&gt; version</source>
+        <translation>&lt;b&gt;Guncoin Core&lt;/b&gt; versija</translation>
     </message>
     <message>
         <source>
@@ -28,8 +28,8 @@ Izplatīta saskaņā ar MIT/X11 programmatūras licenci, skatīt pievienoto datn
         <translation>Autortiesības</translation>
     </message>
     <message>
-        <source>The Bitcoin Core developers</source>
-        <translation>Bitcoin Core izstrādātāji</translation>
+        <source>The Guncoin Core developers</source>
+        <translation>Guncoin Core izstrādātāji</translation>
     </message>
     <message>
         <source>(%1-bit)</source>
@@ -84,11 +84,11 @@ Izplatīta saskaņā ar MIT/X11 programmatūras licenci, skatīt pievienoto datn
     </message>
     <message>
         <source>Choose the address to send coins to</source>
-        <translation>Izvēlies adresi uz kuru sūtīt bitcoins</translation>
+        <translation>Izvēlies adresi uz kuru sūtīt Guncoins</translation>
     </message>
     <message>
         <source>Choose the address to receive coins with</source>
-        <translation>Izvēlies adresi ar kuru saņemt bitcoins</translation>
+        <translation>Izvēlies adresi ar kuru saņemt Guncoins</translation>
     </message>
     <message>
         <source>C&amp;hoose</source>
@@ -193,8 +193,8 @@ Izplatīta saskaņā ar MIT/X11 programmatūras licenci, skatīt pievienoto datn
         <translation>Apstiprināt maciņa šifrēšanu</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR BITCOINS&lt;/b&gt;!</source>
-        <translation>Brīdinājums: Ja tu nošifrē savu maciņu un pazaudē paroli, tu &lt;b&gt;PAZAUDĒSI VISAS SAVAS BITCOINS&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR GUN&lt;/b&gt;!</source>
+        <translation>Brīdinājums: Ja tu nošifrē savu maciņu un pazaudē paroli, tu &lt;b&gt;PAZAUDĒSI VISAS SAVAS GUN&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -209,8 +209,8 @@ Izplatīta saskaņā ar MIT/X11 programmatūras licenci, skatīt pievienoto datn
         <translation>Maciņš nošifrēts</translation>
     </message>
     <message>
-        <source>Bitcoin will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
-        <translation>Bitcoin aizvērsies, lai pabeigtu šifrēšanu. Atcerieties, ka maciņa šifrēšana nevar pilnībā novērst bitkoinu zādzību, ko veic datorā ieviesušās kaitīgas programmas.</translation>
+        <source>Guncoin will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your Guncoins from being stolen by malware infecting your computer.</source>
+        <translation>Guncoin aizvērsies, lai pabeigtu šifrēšanu. Atcerieties, ka maciņa šifrēšana nevar pilnībā novērst Guncoin zādzību, ko veic datorā ieviesušās kaitīgas programmas.</translation>
     </message>
     <message>
         <source>Wallet encryption failed</source>
@@ -280,8 +280,8 @@ Izplatīta saskaņā ar MIT/X11 programmatūras licenci, skatīt pievienoto datn
         <translation>Aizvērt programmu</translation>
     </message>
     <message>
-        <source>Show information about Bitcoin</source>
-        <translation>Parādīt informāciju par Bitcoin</translation>
+        <source>Show information about Guncoin</source>
+        <translation>Parādīt informāciju par Guncoin</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -328,12 +328,12 @@ Izplatīta saskaņā ar MIT/X11 programmatūras licenci, skatīt pievienoto datn
         <translation>Bloku reindeksēšana no diska...</translation>
     </message>
     <message>
-        <source>Send coins to a Bitcoin address</source>
-        <translation>Nosūtīt bitkoinus uz Bitcoin adresi</translation>
+        <source>Send coins to a Guncoin address</source>
+        <translation>Nosūtīt Guncoins uz Guncoin adresi</translation>
     </message>
     <message>
-        <source>Modify configuration options for Bitcoin</source>
-        <translation>Mainīt Bitcoin konfigurācijas uzstādījumus</translation>
+        <source>Modify configuration options for Guncoin</source>
+        <translation>Mainīt Guncoin konfigurācijas uzstādījumus</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -356,8 +356,8 @@ Izplatīta saskaņā ar MIT/X11 programmatūras licenci, skatīt pievienoto datn
         <translation>&amp;Pārbaudīt ziņojumu...</translation>
     </message>
     <message>
-        <source>Bitcoin</source>
-        <translation>Bitcoin</translation>
+        <source>Guncoin</source>
+        <translation>Guncoin</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -384,12 +384,12 @@ Izplatīta saskaņā ar MIT/X11 programmatūras licenci, skatīt pievienoto datn
         <translation>Šifrēt privātās atslēgas kuras pieder tavam maciņam</translation>
     </message>
     <message>
-        <source>Sign messages with your Bitcoin addresses to prove you own them</source>
-        <translation>Parakstīt ziņojumus ar savām Bitcoin adresēm lai pierādītu ka tās pieder tev</translation>
+        <source>Sign messages with your Guncoin addresses to prove you own them</source>
+        <translation>Parakstīt ziņojumus ar savām Guncoin adresēm lai pierādītu ka tās pieder tev</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Bitcoin addresses</source>
-        <translation>Pārbaudīt ziņojumus lai pārliecinātos, ka tie tika parakstīti ar norādītajām Bitcoin adresēm</translation>
+        <source>Verify messages to ensure they were signed with specified Guncoin addresses</source>
+        <translation>Pārbaudīt ziņojumus lai pārliecinātos, ka tie tika parakstīti ar norādītajām Guncoin adresēm</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -412,32 +412,32 @@ Izplatīta saskaņā ar MIT/X11 programmatūras licenci, skatīt pievienoto datn
         <translation>[testnet]</translation>
     </message>
     <message>
-        <source>Bitcoin Core</source>
-        <translation>Bitcoin Core</translation>
+        <source>Guncoin Core</source>
+        <translation>Guncoin Core</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and bitcoin: URIs)</source>
-        <translation>Pieprasīt maksājumus (izveido QR kodu un bitcoin: URIs)</translation>
+        <source>Request payments (generates QR codes and guncoin: URIs)</source>
+        <translation>Pieprasīt maksājumus (izveido QR kodu un guncoin: URIs)</translation>
     </message>
     <message>
-        <source>&amp;About Bitcoin Core</source>
-        <translation>Par &amp;Bitcoin Core</translation>
+        <source>&amp;About Guncoin Core</source>
+        <translation>Par &amp;Guncoin Core</translation>
     </message>
     <message>
-        <source>Open a bitcoin: URI or payment request</source>
-        <translation>Atvērt bitcoin URI vai maksājuma pieprasījumu</translation>
+        <source>Open a guncoin: URI or payment request</source>
+        <translation>Atvērt Guncoin URI vai maksājuma pieprasījumu</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
         <translation>&amp;Komandrindas iespējas</translation>
     </message>
     <message>
-        <source>Bitcoin client</source>
-        <translation>Bitcoin klients</translation>
+        <source>Guncoin client</source>
+        <translation>Guncoin klients</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Bitcoin network</source>
-        <translation><numerusform>%n aktīvu savienojumu ar Bitcoin tīklu</numerusform><numerusform>%n aktīvs savienojums ar Bitcoin tīklu</numerusform><numerusform>%n aktīvu savienojumu as Bitcoin tīklu</numerusform></translation>
+        <source>%n active connection(s) to Guncoin network</source>
+        <translation><numerusform>%n aktīvu savienojumu ar Guncoin tīklu</numerusform><numerusform>%n aktīvs savienojums ar Guncoin tīklu</numerusform><numerusform>%n aktīvu savienojumu as Guncoin tīklu</numerusform></translation>
     </message>
     <message>
         <source>No block source available...</source>
@@ -524,8 +524,8 @@ Adrese: %4
         <translation>Maciņš ir &lt;b&gt;šifrēts&lt;/b&gt; un pašlaik &lt;b&gt;slēgts&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Bitcoin can no longer continue safely and will quit.</source>
-        <translation>Radās fatāla kļūda. Bitcoin Core nevar vairs droši turpināt un tiks izslēgta.</translation>
+        <source>A fatal error occurred. Guncoin can no longer continue safely and will quit.</source>
+        <translation>Radās fatāla kļūda. Guncoin Core nevar vairs droši turpināt un tiks izslēgta.</translation>
     </message>
 </context>
 <context>
@@ -539,7 +539,7 @@ Adrese: %4
     <name>CoinControlDialog</name>
     <message>
         <source>Coin Control Address Selection</source>
-        <translation>Bitcoin Kontroles Adrešu Atlase</translation>
+        <translation>Guncoin Kontroles Adrešu Atlase</translation>
     </message>
     <message>
         <source>Quantity:</source>
@@ -765,8 +765,8 @@ Adrese: %4
         <translation>Nupat ierakstītā adrese "%1" jau atrodas adrešu grāmatā.</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Bitcoin address.</source>
-        <translation>Ierakstītā adrese "%1" nav derīga Bitcoin adrese.</translation>
+        <source>The entered address "%1" is not a valid Guncoin address.</source>
+        <translation>Ierakstītā adrese "%1" nav derīga Guncoin adrese.</translation>
     </message>
     <message>
         <source>Could not unlock wallet.</source>
@@ -799,12 +799,12 @@ Adrese: %4
 <context>
     <name>HelpMessageDialog</name>
     <message>
-        <source>Bitcoin Core - Command-line options</source>
-        <translation>Bitcoin Core - Komandrindas iespējas</translation>
+        <source>Guncoin Core - Command-line options</source>
+        <translation>Guncoin Core - Komandrindas iespējas</translation>
     </message>
     <message>
-        <source>Bitcoin Core</source>
-        <translation>Bitcoin Core</translation>
+        <source>Guncoin Core</source>
+        <translation>Guncoin Core</translation>
     </message>
     <message>
         <source>version</source>
@@ -842,8 +842,8 @@ Adrese: %4
         <translation>Sveiciens</translation>
     </message>
     <message>
-        <source>Welcome to Bitcoin Core.</source>
-        <translation>Sveicināts Bitcoin Core</translation>
+        <source>Welcome to Guncoin Core.</source>
+        <translation>Sveicināts Guncoin Core</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -854,8 +854,8 @@ Adrese: %4
         <translation>Izmantot pielāgotu datu mapi:</translation>
     </message>
     <message>
-        <source>Bitcoin</source>
-        <translation>Bitcoin</translation>
+        <source>Guncoin</source>
+        <translation>Guncoin</translation>
     </message>
     <message>
         <source>Error</source>
@@ -908,12 +908,12 @@ Adrese: %4
         <translation>&amp;Maksāt par transakciju</translation>
     </message>
     <message>
-        <source>Automatically start Bitcoin after logging in to the system.</source>
-        <translation>Automātiski sākt Bitcoin pēc pieteikšanās sistēmā.</translation>
+        <source>Automatically start Guncoin after logging in to the system.</source>
+        <translation>Automātiski sākt Guncoin pēc pieteikšanās sistēmā.</translation>
     </message>
     <message>
-        <source>&amp;Start Bitcoin on system login</source>
-        <translation>&amp;Sākt Bitcoin reizē ar sistēmu</translation>
+        <source>&amp;Start Guncoin on system login</source>
+        <translation>&amp;Sākt Guncoin reizē ar sistēmu</translation>
     </message>
     <message>
         <source>Size of &amp;database cache</source>
@@ -928,8 +928,8 @@ Adrese: %4
         <translation>Skriptu &amp;pārbaudes pavedienu skaits</translation>
     </message>
     <message>
-        <source>Connect to the Bitcoin network through a SOCKS proxy.</source>
-        <translation>Savienoties ar Bitcoin tīklu caur SOCKS starpniekserveri.</translation>
+        <source>Connect to the Guncoin network through a SOCKS proxy.</source>
+        <translation>Savienoties ar Guncoin tīklu caur SOCKS starpniekserveri.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS proxy (default proxy):</source>
@@ -969,15 +969,15 @@ Adrese: %4
     </message>
     <message>
         <source>Enable coin &amp;control features</source>
-        <translation>Ieslēgt bitcoin &amp;kontroles funkcijas</translation>
+        <translation>Ieslēgt Guncoin &amp;kontroles funkcijas</translation>
     </message>
     <message>
         <source>&amp;Spend unconfirmed change</source>
         <translation>&amp;Tērēt neapstiprinātu atlikumu</translation>
     </message>
     <message>
-        <source>Automatically open the Bitcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Uz rūtera automātiski atvērt Bitcoin klienta portu. Tas strādā tikai tad, ja rūteris atbalsta UPnP un tas ir ieslēgts.</translation>
+        <source>Automatically open the Guncoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Uz rūtera automātiski atvērt Guncoin klienta portu. Tas strādā tikai tad, ja rūteris atbalsta UPnP un tas ir ieslēgts.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -1032,8 +1032,8 @@ Adrese: %4
         <translation>Lietotāja interfeiss un &amp;valoda:</translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Bitcoin.</source>
-        <translation>Šeit var iestatīt lietotāja valodu. Iestatījums aktivizēsies pēc Bitcoin pārstartēšanas.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting Guncoin.</source>
+        <translation>Šeit var iestatīt lietotāja valodu. Iestatījums aktivizēsies pēc Guncoin pārstartēšanas.</translation>
     </message>
     <message>
         <source>&amp;Unit to show amounts in:</source>
@@ -1041,11 +1041,11 @@ Adrese: %4
     </message>
     <message>
         <source>Choose the default subdivision unit to show in the interface and when sending coins.</source>
-        <translation>Izvēlēties dalījuma vienību pēc noklusēšanas, ko izmantot interfeisā un nosūtot bitkoinus.</translation>
+        <translation>Izvēlēties dalījuma vienību pēc noklusēšanas, ko izmantot interfeisā un nosūtot Guncoins.</translation>
     </message>
     <message>
-        <source>Whether to show Bitcoin addresses in the transaction list or not.</source>
-        <translation>Rādīt vai nē Bitcoin adreses transakciju sarakstā.</translation>
+        <source>Whether to show Guncoin addresses in the transaction list or not.</source>
+        <translation>Rādīt vai nē Guncoin adreses transakciju sarakstā.</translation>
     </message>
     <message>
         <source>&amp;Display addresses in transaction list</source>
@@ -1053,7 +1053,7 @@ Adrese: %4
     </message>
     <message>
         <source>Whether to show coin control features or not.</source>
-        <translation>Vai rādīt Bitcoin kontroles funkcijas vai nē.</translation>
+        <translation>Vai rādīt Guncoin kontroles funkcijas vai nē.</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -1091,8 +1091,8 @@ Adrese: %4
         <translation>Forma</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Bitcoin network after a connection is established, but this process has not completed yet.</source>
-        <translation>Attēlotā informācija var būt novecojusi. Jūsu maciņš pēc savienojuma izveides automātiski sinhronizējas ar Bitcoin tīklu, taču šis process vēl nav beidzies.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Guncoin network after a connection is established, but this process has not completed yet.</source>
+        <translation>Attēlotā informācija var būt novecojusi. Jūsu maciņš pēc savienojuma izveides automātiski sinhronizējas ar Guncoin tīklu, taču šis process vēl nav beidzies.</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -1146,8 +1146,8 @@ Adrese: %4
         <translation>Maksājumu pieprasījuma kļūda</translation>
     </message>
     <message>
-        <source>Cannot start bitcoin: click-to-pay handler</source>
-        <translation>Nevar palaist Bitcoin: nospied-lai-maksātu apstrādātāju</translation>
+        <source>Cannot start guncoin: click-to-pay handler</source>
+        <translation>Nevar palaist guncoin: nospied-lai-maksātu apstrādātāju</translation>
     </message>
     <message>
         <source>Refund from %1</source>
@@ -1165,16 +1165,16 @@ Adrese: %4
 <context>
     <name>QObject</name>
     <message>
-        <source>Bitcoin</source>
-        <translation>Bitcoin</translation>
+        <source>Guncoin</source>
+        <translation>Guncoin</translation>
     </message>
     <message>
-        <source>Bitcoin Core didn't yet exit safely...</source>
-        <translation>Bitcoin Core vel neizgāja droši...</translation>
+        <source>Guncoin Core didn't yet exit safely...</source>
+        <translation>Guncoin Core vel neizgāja droši...</translation>
     </message>
     <message>
-        <source>Enter a Bitcoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Ierakstiet Bitcoin adresi (piem. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
+        <translation>Ierakstiet Guncoin adresi (piem. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
     </message>
 </context>
 <context>
@@ -1299,8 +1299,8 @@ Adrese: %4
         <translation>Notīrīt konsoli</translation>
     </message>
     <message>
-        <source>Welcome to the Bitcoin RPC console.</source>
-        <translation>Laipni lūgti Bitcoin RPC konsolē.</translation>
+        <source>Welcome to the Guncoin RPC console.</source>
+        <translation>Laipni lūgti Guncoin RPC konsolē.</translation>
     </message>
     <message>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
@@ -1492,11 +1492,11 @@ Adrese: %4
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
-        <translation>Sūtīt bitkoinus</translation>
+        <translation>Sūtīt Guncoins</translation>
     </message>
     <message>
         <source>Coin Control Features</source>
-        <translation>Bitcoin Kontroles Funkcijas</translation>
+        <translation>Guncoin Kontroles Funkcijas</translation>
     </message>
     <message>
         <source>Inputs...</source>
@@ -1576,7 +1576,7 @@ Adrese: %4
     </message>
     <message>
         <source>Confirm send coins</source>
-        <translation>Apstiprināt bitkoinu sūtīšanu</translation>
+        <translation>Apstiprināt Guncoin sūtīšanu</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -1647,8 +1647,8 @@ Adrese: %4
         <translation>Transakcijas izveidošana neizdevās!</translation>
     </message>
     <message>
-        <source>Warning: Invalid Bitcoin address</source>
-        <translation>Brīdinājums: Nederīga Bitcoin adrese</translation>
+        <source>Warning: Invalid Guncoin address</source>
+        <translation>Brīdinājums: Nederīga Guncoin adrese</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -1741,8 +1741,8 @@ Adrese: %4
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>Bitcoin Core is shutting down...</source>
-        <translation>Bitcoin Core tiek izslēgta...</translation>
+        <source>Guncoin Core is shutting down...</source>
+        <translation>Guncoin Core tiek izslēgta...</translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
@@ -1792,8 +1792,8 @@ Adrese: %4
         <translation>Kopēt parakstu uz sistēmas starpliktuvi</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Bitcoin address</source>
-        <translation>Parakstīt ziņojumu lai pierādītu, ka esi šīs Bitcoin adreses īpašnieks.</translation>
+        <source>Sign the message to prove you own this Guncoin address</source>
+        <translation>Parakstīt ziņojumu lai pierādītu, ka esi šīs Guncoin adreses īpašnieks.</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -1824,8 +1824,8 @@ Adrese: %4
         <translation>Atiestatīt visus laukus</translation>
     </message>
     <message>
-        <source>Enter a Bitcoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Ierakstiet Bitcoin adresi (piem. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
+        <translation>Ierakstiet Guncoin adresi (piem. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
     </message>
     <message>
         <source>Click "Sign Message" to generate signature</source>
@@ -1883,12 +1883,12 @@ Adrese: %4
 <context>
     <name>SplashScreen</name>
     <message>
-        <source>Bitcoin Core</source>
-        <translation>Bitcoin Core</translation>
+        <source>Guncoin Core</source>
+        <translation>Guncoin Core</translation>
     </message>
     <message>
-        <source>The Bitcoin Core developers</source>
-        <translation>Bitcoin Core izstrādātāji</translation>
+        <source>The Guncoin Core developers</source>
+        <translation>Guncoin Core izstrādātāji</translation>
     </message>
     <message>
         <source>[testnet]</source>
@@ -2342,12 +2342,12 @@ Adrese: %4
         <translation>Iespējas:</translation>
     </message>
     <message>
-        <source>Specify configuration file (default: bitcoin.conf)</source>
-        <translation>Norādiet konfigurācijas failu (pēc noklusēšanas: bitcoin.conf)</translation>
+        <source>Specify configuration file (default: guncoin.conf)</source>
+        <translation>Norādiet konfigurācijas failu (pēc noklusēšanas: guncoin.conf)</translation>
     </message>
     <message>
-        <source>Specify pid file (default: bitcoind.pid)</source>
-        <translation>Norādiet pid failu (pēc noklusēšanas: bitcoind.pid)</translation>
+        <source>Specify pid file (default: guncoind.pid)</source>
+        <translation>Norādiet pid failu (pēc noklusēšanas: guncoind.pid)</translation>
     </message>
     <message>
         <source>Specify data directory</source>
@@ -2382,8 +2382,8 @@ Adrese: %4
         <translation>Pieņemt komandrindas un JSON-RPC komandas</translation>
     </message>
     <message>
-        <source>Bitcoin Core RPC client version</source>
-        <translation>Bitcoin Core RPC klienta versija</translation>
+        <source>Guncoin Core RPC client version</source>
+        <translation>Guncoin Core RPC klienta versija</translation>
     </message>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
@@ -2394,8 +2394,8 @@ Adrese: %4
         <translation>Izmantot testa tīklu</translation>
     </message>
     <message>
-        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Bitcoin will not work properly.</source>
-        <translation>Brīdinājums: Lūdzu pārbaudi vai tava datora datums un laiks ir pareizs! Ja pulkstenis ir nepareizs, Bitcoin Core nestrādās pareizi.</translation>
+        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Guncoin will not work properly.</source>
+        <translation>Brīdinājums: Lūdzu pārbaudi vai tava datora datums un laiks ir pareizs! Ja pulkstenis ir nepareizs, Guncoin Core nestrādās pareizi.</translation>
     </message>
     <message>
         <source>(default: 1)</source>
@@ -2414,8 +2414,8 @@ Adrese: %4
         <translation>Mēģināt atgūt privātās atslēgas no bojāta wallet.dat</translation>
     </message>
     <message>
-        <source>Bitcoin Core Daemon</source>
-        <translation>Bitcoin Core Process</translation>
+        <source>Guncoin Core Daemon</source>
+        <translation>Guncoin Core Process</translation>
     </message>
     <message>
         <source>Block creation options:</source>
@@ -2510,8 +2510,8 @@ Adrese: %4
         <translation>RPC servera iestatījumi:</translation>
     </message>
     <message>
-        <source>Send command to Bitcoin Core</source>
-        <translation>Sūtīt komandu uz Bitcoin Core</translation>
+        <source>Send command to Guncoin Core</source>
+        <translation>Sūtīt komandu uz Guncoin Core</translation>
     </message>
     <message>
         <source>Send trace/debug info to console instead of debug.log file</source>
@@ -2526,8 +2526,8 @@ Adrese: %4
         <translation>Transakcijas parakstīšana neizdevās</translation>
     </message>
     <message>
-        <source>Start Bitcoin Core Daemon</source>
-        <translation>Sākt Bitcoin Core Procesu</translation>
+        <source>Start Guncoin Core Daemon</source>
+        <translation>Sākt Guncoin Core Procesu</translation>
     </message>
     <message>
         <source>System error: </source>
@@ -2630,12 +2630,12 @@ Adrese: %4
         <translation>Nevar ielādēt wallet.dat: maciņš bojāts</translation>
     </message>
     <message>
-        <source>Error loading wallet.dat: Wallet requires newer version of Bitcoin</source>
-        <translation>Nevar ielādēt wallet.dat: maciņa atvēršanai nepieciešama jaunāka Bitcoin versija</translation>
+        <source>Error loading wallet.dat: Wallet requires newer version of Guncoin</source>
+        <translation>Nevar ielādēt wallet.dat: maciņa atvēršanai nepieciešama jaunāka Guncoin versija</translation>
     </message>
     <message>
-        <source>Wallet needed to be rewritten: restart Bitcoin to complete</source>
-        <translation>Bija nepieciešams pārstartēt maciņu: pabeigšanai pārstartējiet Bitcoin</translation>
+        <source>Wallet needed to be rewritten: restart Guncoin to complete</source>
+        <translation>Bija nepieciešams pārstartēt maciņu: pabeigšanai pārstartējiet Guncoin</translation>
     </message>
     <message>
         <source>Error loading wallet.dat</source>
@@ -2671,7 +2671,7 @@ Adrese: %4
     </message>
     <message>
         <source>Insufficient funds</source>
-        <translation>Nepietiek bitkoinu</translation>
+        <translation>Nepietiek Guncoin</translation>
     </message>
     <message>
         <source>Loading block index...</source>

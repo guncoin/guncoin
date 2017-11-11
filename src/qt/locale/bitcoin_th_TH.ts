@@ -146,8 +146,8 @@
         <translation>ออกจากโปรแกรม</translation>
     </message>
     <message>
-        <source>Show information about Bitcoin</source>
-        <translation>แสดงข้อมูลเกี่ยวกับ Bitcoin</translation>
+        <source>Show information about Guncoin</source>
+        <translation>แสดงข้อมูลเกี่ยวกับ Guncoin</translation>
     </message>
     <message>
         <source>&amp;Options...</source>
@@ -178,8 +178,8 @@
         <translation>[testnet]</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Bitcoin network</source>
-        <translation><numerusform>%n ที่ใช้งานการเชื่อมต่อกับเครือข่าย Bitcoin</numerusform></translation>
+        <source>%n active connection(s) to Guncoin network</source>
+        <translation><numerusform>%n ที่ใช้งานการเชื่อมต่อกับเครือข่าย Guncoin</numerusform></translation>
     </message>
     <message>
         <source>Up to date</source>

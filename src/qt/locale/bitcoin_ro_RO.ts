@@ -2,12 +2,12 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <source>About Bitcoin Core</source>
-        <translation>Despre Nucleul Bitcoin</translation>
+        <source>About Guncoin Core</source>
+        <translation>Despre Nucleul Guncoin</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Bitcoin Core&lt;/b&gt; version</source>
-        <translation>&lt;b&gt;Nucleul Bitcoin &lt;/b&gt; versiunea</translation>
+        <source>&lt;b&gt;Guncoin Core&lt;/b&gt; version</source>
+        <translation>&lt;b&gt;Nucleul Guncoin &lt;/b&gt; versiunea</translation>
     </message>
     <message>
         <source>
@@ -28,8 +28,8 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>Drepturi de autor</translation>
     </message>
     <message>
-        <source>The Bitcoin Core developers</source>
-        <translation>Dezvoltatorii Nucleului Bitcoin</translation>
+        <source>The Guncoin Core developers</source>
+        <translation>Dezvoltatorii Nucleului Guncoin</translation>
     </message>
     <message>
         <source>(%1-bit)</source>
@@ -103,12 +103,12 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>Adresa de primire</translation>
     </message>
     <message>
-        <source>These are your Bitcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Acestea sînt adresele dumneavoastră Bitcoin pentru efectuarea plăţilor. Verificaţi întotdeauna cantitatea şi adresa de primire înainte de a trimite monezi.</translation>
+        <source>These are your Guncoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Acestea sînt adresele dumneavoastră Guncoin pentru efectuarea plăţilor. Verificaţi întotdeauna cantitatea şi adresa de primire înainte de a trimite monezi.</translation>
     </message>
     <message>
-        <source>These are your Bitcoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Acestea sînt adresele dumneavoastră Bitcoin folosite pentru a primi plati. Este recomandat să folosiţi o adresă nouă de primire pentru fiecare tranzacţie în parte.</translation>
+        <source>These are your Guncoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Acestea sînt adresele dumneavoastră Guncoin folosite pentru a primi plati. Este recomandat să folosiţi o adresă nouă de primire pentru fiecare tranzacţie în parte.</translation>
     </message>
     <message>
         <source>Copy &amp;Label</source>
@@ -205,8 +205,8 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>Confirmaţi criptarea portofelului</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR BITCOINS&lt;/b&gt;!</source>
-        <translation>Atenţie: Dacă pierdeţi parola portofelului electronic după criptare, &lt;b&gt;VEŢI PIERDE ÎNTREAGA SUMĂ DE BITCOIN ACUMULATĂ&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR GUN&lt;/b&gt;!</source>
+        <translation>Atenţie: Dacă pierdeţi parola portofelului electronic după criptare, &lt;b&gt;VEŢI PIERDE ÎNTREAGA SUMĂ DE Guncoin ACUMULATĂ&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -225,8 +225,8 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>Portofel criptat</translation>
     </message>
     <message>
-        <source>Bitcoin will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
-        <translation>Bitcoin se va închide acum pentru a termina procesul de criptare. Ţineţi minte că criptarea portofelului nu vă poate proteja în totalitate de furtul monedelor de către programe dăunătoare care vă infectează calculatorul.</translation>
+        <source>Guncoin will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your Guncoins from being stolen by malware infecting your computer.</source>
+        <translation>Guncoin se va închide acum pentru a termina procesul de criptare. Ţineţi minte că criptarea portofelului nu vă poate proteja în totalitate de furtul monedelor de către programe dăunătoare care vă infectează calculatorul.</translation>
     </message>
     <message>
         <source>Wallet encryption failed</source>
@@ -296,8 +296,8 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>Închide aplicaţia</translation>
     </message>
     <message>
-        <source>Show information about Bitcoin</source>
-        <translation>Arată informaţii despre Bitcoin</translation>
+        <source>Show information about Guncoin</source>
+        <translation>Arată informaţii despre Guncoin</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -344,12 +344,12 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>Se reindexează blocurile pe disc...</translation>
     </message>
     <message>
-        <source>Send coins to a Bitcoin address</source>
-        <translation>Trimite monede către o adresă Bitcoin</translation>
+        <source>Send coins to a Guncoin address</source>
+        <translation>Trimite monede către o adresă Guncoin</translation>
     </message>
     <message>
-        <source>Modify configuration options for Bitcoin</source>
-        <translation>Modifică opţiunile de configurare pentru Bitcoin</translation>
+        <source>Modify configuration options for Guncoin</source>
+        <translation>Modifică opţiunile de configurare pentru Guncoin</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -372,8 +372,8 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>&amp;Verifică mesaj...</translation>
     </message>
     <message>
-        <source>Bitcoin</source>
-        <translation>Bitcoin</translation>
+        <source>Guncoin</source>
+        <translation>Guncoin</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -400,12 +400,12 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>Criptează cheile private ale portofelului dvs.</translation>
     </message>
     <message>
-        <source>Sign messages with your Bitcoin addresses to prove you own them</source>
-        <translation>Semnaţi mesaje cu adresa dvs. Bitcoin pentru a dovedi că vă aparţin</translation>
+        <source>Sign messages with your Guncoin addresses to prove you own them</source>
+        <translation>Semnaţi mesaje cu adresa dvs. Guncoin pentru a dovedi că vă aparţin</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Bitcoin addresses</source>
-        <translation>Verificaţi mesaje pentru a vă asigura că au fost semnate cu adresa Bitcoin specificată</translation>
+        <source>Verify messages to ensure they were signed with specified Guncoin addresses</source>
+        <translation>Verificaţi mesaje pentru a vă asigura că au fost semnate cu adresa Guncoin specificată</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -428,16 +428,16 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>[testnet]</translation>
     </message>
     <message>
-        <source>Bitcoin Core</source>
-        <translation>Nucleul Bitcoin</translation>
+        <source>Guncoin Core</source>
+        <translation>Nucleul Guncoin</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and bitcoin: URIs)</source>
-        <translation>Cereţi plăţi (generează coduri QR şi bitcoin-uri: URls)</translation>
+        <source>Request payments (generates QR codes and guncoin: URIs)</source>
+        <translation>Cereţi plăţi (generează coduri QR şi Guncoin-uri: URls)</translation>
     </message>
     <message>
-        <source>&amp;About Bitcoin Core</source>
-        <translation>&amp;Despre Nucleul Bitcoin</translation>
+        <source>&amp;About Guncoin Core</source>
+        <translation>&amp;Despre Nucleul Guncoin</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -448,24 +448,24 @@ Acest produs include programe dezvoltate de către Proiectul OpenSSL pentru a fi
         <translation>Arată lista de adrese pentru primire şi etichetele</translation>
     </message>
     <message>
-        <source>Open a bitcoin: URI or payment request</source>
-        <translation>Deschidere bitcoin: o adresa URI sau o cerere de plată</translation>
+        <source>Open a guncoin: URI or payment request</source>
+        <translation>Deschidere guncoin: o adresa URI sau o cerere de plată</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
         <translation>Opţiuni linie de &amp;comandă</translation>
     </message>
     <message>
-        <source>Show the Bitcoin Core help message to get a list with possible Bitcoin command-line options</source>
-        <translation>Arată mesajul de ajutor Bitcoin Core pentru a obţine o listă cu opţiunile posibile de linii de comandă Bitcoin</translation>
+        <source>Show the Guncoin Core help message to get a list with possible Guncoin command-line options</source>
+        <translation>Arată mesajul de ajutor Guncoin Core pentru a obţine o listă cu opţiunile posibile de linii de comandă Guncoin</translation>
     </message>
     <message>
-        <source>Bitcoin client</source>
-        <translation>Client Bitcoin</translation>
+        <source>Guncoin client</source>
+        <translation>Client Guncoin</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Bitcoin network</source>
-        <translation><numerusform>%n conexiune activă către reţeaua Bitcoin</numerusform><numerusform>%n conexiuni active către reţeaua Bitcoin</numerusform><numerusform>%n de conexiuni active către reţeaua Bitcoin</numerusform></translation>
+        <source>%n active connection(s) to Guncoin network</source>
+        <translation><numerusform>%n conexiune activă către reţeaua Guncoin</numerusform><numerusform>%n conexiuni active către reţeaua Guncoin</numerusform><numerusform>%n de conexiuni active către reţeaua Guncoin</numerusform></translation>
     </message>
     <message>
         <source>No block source available...</source>
@@ -560,8 +560,8 @@ Adresa: %4
         <translation>Portofelul este &lt;b&gt;criptat&lt;/b&gt; iar în momentul de faţă este &lt;b&gt;blocat&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Bitcoin can no longer continue safely and will quit.</source>
-        <translation>A survenit o eroare fatală. Bitcoin nu mai poate continua în siguranţă şi se va opri.</translation>
+        <source>A fatal error occurred. Guncoin can no longer continue safely and will quit.</source>
+        <translation>A survenit o eroare fatală. Guncoin nu mai poate continua în siguranţă şi se va opri.</translation>
     </message>
 </context>
 <context>
@@ -825,8 +825,8 @@ Adresa: %4
         <translation>Adresa introdusă "%1" se află deja în lista de adrese.</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Bitcoin address.</source>
-        <translation>Adresa introdusă "%1" nu este o adresă bitcoin validă.</translation>
+        <source>The entered address "%1" is not a valid Guncoin address.</source>
+        <translation>Adresa introdusă "%1" nu este o adresă Guncoin validă.</translation>
     </message>
     <message>
         <source>Could not unlock wallet.</source>
@@ -863,12 +863,12 @@ Adresa: %4
 <context>
     <name>HelpMessageDialog</name>
     <message>
-        <source>Bitcoin Core - Command-line options</source>
-        <translation>Nucleu Bitcoin - Opţiuni linie de comandă</translation>
+        <source>Guncoin Core - Command-line options</source>
+        <translation>Nucleu Guncoin - Opţiuni linie de comandă</translation>
     </message>
     <message>
-        <source>Bitcoin Core</source>
-        <translation>Nucleul Bitcoin</translation>
+        <source>Guncoin Core</source>
+        <translation>Nucleul Guncoin</translation>
     </message>
     <message>
         <source>version</source>
@@ -914,12 +914,12 @@ Adresa: %4
         <translation>Bun venit</translation>
     </message>
     <message>
-        <source>Welcome to Bitcoin Core.</source>
-        <translation>Bine aţi venit la Nucleul Bitcoin.</translation>
+        <source>Welcome to Guncoin Core.</source>
+        <translation>Bine aţi venit la Nucleul Guncoin.</translation>
     </message>
     <message>
-        <source>As this is the first time the program is launched, you can choose where Bitcoin Core will store its data.</source>
-        <translation>Dacă aceasta este prima dată cînd programul este lansat, puteţi alege unde Nucleul Bitcoin va stoca datele.</translation>
+        <source>As this is the first time the program is launched, you can choose where Guncoin Core will store its data.</source>
+        <translation>Dacă aceasta este prima dată cînd programul este lansat, puteţi alege unde Nucleul Guncoin va stoca datele.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -930,8 +930,8 @@ Adresa: %4
         <translation>Foloseşte un dosar de date personalizat:</translation>
     </message>
     <message>
-        <source>Bitcoin</source>
-        <translation>Bitcoin</translation>
+        <source>Guncoin</source>
+        <translation>Guncoin</translation>
     </message>
     <message>
         <source>Error: Specified data directory "%1" can not be created.</source>
@@ -992,12 +992,12 @@ Adresa: %4
         <translation>Plăteşte comision pentru tranzacţie</translation>
     </message>
     <message>
-        <source>Automatically start Bitcoin after logging in to the system.</source>
-        <translation>Porneşte automat Bitcoin după pornirea calculatorului.</translation>
+        <source>Automatically start Guncoin after logging in to the system.</source>
+        <translation>Porneşte automat Guncoin după pornirea calculatorului.</translation>
     </message>
     <message>
-        <source>&amp;Start Bitcoin on system login</source>
-        <translation>Porneşte Bitcoin la pornirea sistemului</translation>
+        <source>&amp;Start Guncoin on system login</source>
+        <translation>Porneşte Guncoin la pornirea sistemului</translation>
     </message>
     <message>
         <source>Size of &amp;database cache</source>
@@ -1012,8 +1012,8 @@ Adresa: %4
         <translation>Numărul de thread-uri de &amp;verificare</translation>
     </message>
     <message>
-        <source>Connect to the Bitcoin network through a SOCKS proxy.</source>
-        <translation>Conectare la reţeaua Bitcoin printr-un proxy SOCKS</translation>
+        <source>Connect to the Guncoin network through a SOCKS proxy.</source>
+        <translation>Conectare la reţeaua Guncoin printr-un proxy SOCKS</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS proxy (default proxy):</source>
@@ -1072,8 +1072,8 @@ Adresa: %4
         <translation>Cheltuire rest neconfirmat</translation>
     </message>
     <message>
-        <source>Automatically open the Bitcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Deschide automat în router portul aferent clientului Bitcoin. Funcţionează doar dacă routerul duportă UPnP şi e activat.</translation>
+        <source>Automatically open the Guncoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Deschide automat în router portul aferent clientului Guncoin. Funcţionează doar dacă routerul duportă UPnP şi e activat.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -1128,8 +1128,8 @@ Adresa: %4
         <translation>&amp;Limbă interfaţă utilizator</translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Bitcoin.</source>
-        <translation>Limba interfeţei utilizatorului poate fi setată aici. Această setare va avea efect după repornirea Bitcoin.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting Guncoin.</source>
+        <translation>Limba interfeţei utilizatorului poate fi setată aici. Această setare va avea efect după repornirea Guncoin.</translation>
     </message>
     <message>
         <source>&amp;Unit to show amounts in:</source>
@@ -1137,11 +1137,11 @@ Adresa: %4
     </message>
     <message>
         <source>Choose the default subdivision unit to show in the interface and when sending coins.</source>
-        <translation>Alegeţi subdiviziunea folosită la afişarea interfeţei şi la trimiterea de bitcoin.</translation>
+        <translation>Alegeţi subdiviziunea folosită la afişarea interfeţei şi la trimiterea de Guncoin.</translation>
     </message>
     <message>
-        <source>Whether to show Bitcoin addresses in the transaction list or not.</source>
-        <translation>Arată adresele Bitcoin sînt în lista de tranzacţii sau nu</translation>
+        <source>Whether to show Guncoin addresses in the transaction list or not.</source>
+        <translation>Arată adresele Guncoin sînt în lista de tranzacţii sau nu</translation>
     </message>
     <message>
         <source>&amp;Display addresses in transaction list</source>
@@ -1185,7 +1185,7 @@ Adresa: %4
     </message>
     <message>
         <source>The supplied proxy address is invalid.</source>
-        <translation>Adresa bitcoin pe care aţi specificat-o nu este validă.</translation>
+        <translation>Adresa Guncoin pe care aţi specificat-o nu este validă.</translation>
     </message>
 </context>
 <context>
@@ -1195,8 +1195,8 @@ Adresa: %4
         <translation>Form</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Bitcoin network after a connection is established, but this process has not completed yet.</source>
-        <translation>Informaţiile afişate pot fi neactualizate. Portofelul dvs. se sincronizează automat cu reţeaua Bitcoin după ce o conexiune este stabilită, dar acest proces nu a fost finalizat încă.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Guncoin network after a connection is established, but this process has not completed yet.</source>
+        <translation>Informaţiile afişate pot fi neactualizate. Portofelul dvs. se sincronizează automat cu reţeaua Guncoin după ce o conexiune este stabilită, dar acest proces nu a fost finalizat încă.</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -1250,8 +1250,8 @@ Adresa: %4
         <translation>Gestionare URI</translation>
     </message>
     <message>
-        <source>URI can not be parsed! This can be caused by an invalid Bitcoin address or malformed URI parameters.</source>
-        <translation>URI nu poate fi analizat! Acest lucru poate fi cauzat de o adresă Bitcoin nevalidă sau parametri URI deformaţi.</translation>
+        <source>URI can not be parsed! This can be caused by an invalid Guncoin address or malformed URI parameters.</source>
+        <translation>URI nu poate fi analizat! Acest lucru poate fi cauzat de o adresă Guncoin nevalidă sau parametri URI deformaţi.</translation>
     </message>
     <message>
         <source>Requested payment amount of %1 is too small (considered dust).</source>
@@ -1262,8 +1262,8 @@ Adresa: %4
         <translation>Eroare la cererea de plată</translation>
     </message>
     <message>
-        <source>Cannot start bitcoin: click-to-pay handler</source>
-        <translation>Nu poate porni bitcoin: manipulator clic-pentru-plată</translation>
+        <source>Cannot start guncoin: click-to-pay handler</source>
+        <translation>Nu poate porni guncoin: manipulator clic-pentru-plată</translation>
     </message>
     <message>
         <source>Net manager warning</source>
@@ -1317,8 +1317,8 @@ Adresa: %4
 <context>
     <name>QObject</name>
     <message>
-        <source>Bitcoin</source>
-        <translation>Bitcoin</translation>
+        <source>Guncoin</source>
+        <translation>Guncoin</translation>
     </message>
     <message>
         <source>Error: Specified data directory "%1" does not exist.</source>
@@ -1333,12 +1333,12 @@ Adresa: %4
         <translation>Eroare: combinaţie nevalidă de -regtest şi -testnet.</translation>
     </message>
     <message>
-        <source>Bitcoin Core didn't yet exit safely...</source>
-        <translation>Nucelul Bitcoin nu s-a închis în siguranţă...</translation>
+        <source>Guncoin Core didn't yet exit safely...</source>
+        <translation>Nucelul Guncoin nu s-a închis în siguranţă...</translation>
     </message>
     <message>
-        <source>Enter a Bitcoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Introduceţi o adresă Bitcoin (de exemplu: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
+        <translation>Introduceţi o adresă Guncoin (de exemplu: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
     </message>
 </context>
 <context>
@@ -1459,7 +1459,7 @@ Adresa: %4
         <translation>Fişier jurnal depanare</translation>
     </message>
     <message>
-        <source>Open the Bitcoin debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <source>Open the Guncoin debug log file from the current data directory. This can take a few seconds for large log files.</source>
         <translation>Deschide fişierul jurnal depanare din directorul curent. Aceasta poate dura cîteva secunde pentru fişierele mai mari.</translation>
     </message>
     <message>
@@ -1467,8 +1467,8 @@ Adresa: %4
         <translation>Curăţă consola</translation>
     </message>
     <message>
-        <source>Welcome to the Bitcoin RPC console.</source>
-        <translation>Bun venit la consola bitcoin RPC.</translation>
+        <source>Welcome to the Guncoin RPC console.</source>
+        <translation>Bun venit la consola Guncoin RPC.</translation>
     </message>
     <message>
         <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
@@ -1530,8 +1530,8 @@ Adresa: %4
         <translation>R&amp;efoloseşte o adresă de primire (nu este recomandat)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Bitcoin network.</source>
-        <translation>Un mesaj opţional de ataşat la cererea de plată, care va fi afişat cînd cererea este deschisă. Notă: Mesajul nu va fi trimis cu plata către reţeaua Bitcoin.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Guncoin network.</source>
+        <translation>Un mesaj opţional de ataşat la cererea de plată, care va fi afişat cînd cererea este deschisă. Notă: Mesajul nu va fi trimis cu plata către reţeaua Guncoin.</translation>
     </message>
     <message>
         <source>An optional label to associate with the new receiving address.</source>
@@ -1843,8 +1843,8 @@ Adresa: %4
         <translation>Tranzacţia a fost respinsă! Acest lucru se poate întîmpla dacă o parte din monedele tale din portofel au fost deja cheltuite, la fel ca şi cum aţi fi folosit o copie a wallet.dat şi monedele au fost cheltuite în copie, dar nu au fost marcate ca şi cheltuite şi aici.</translation>
     </message>
     <message>
-        <source>Warning: Invalid Bitcoin address</source>
-        <translation>Atenţie: Adresa bitcoin nevalidă!</translation>
+        <source>Warning: Invalid Guncoin address</source>
+        <translation>Atenţie: Adresa Guncoin nevalidă!</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -1930,8 +1930,8 @@ Adresa: %4
         <translation>Introduceţi eticheta pentru ca această adresa să fie introdusă în lista de adrese folosite</translation>
     </message>
     <message>
-        <source>A message that was attached to the bitcoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Bitcoin network.</source>
-        <translation>Un mesaj a fost ataşat la bitcoin: URI care va fi stocat cu tranzacţia pentru referinţa dvs. Notă: Acest mesaj nu va fi trimis către reţeaua bitcoin.</translation>
+        <source>A message that was attached to the guncoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Guncoin network.</source>
+        <translation>Un mesaj a fost ataşat la guncoin: URI care va fi stocat cu tranzacţia pentru referinţa dvs. Notă: Acest mesaj nu va fi trimis către reţeaua Guncoin.</translation>
     </message>
     <message>
         <source>This is an unverified payment request.</source>
@@ -1949,8 +1949,8 @@ Adresa: %4
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>Bitcoin Core is shutting down...</source>
-        <translation>Nucleul Bitcoin se închide...</translation>
+        <source>Guncoin Core is shutting down...</source>
+        <translation>Nucleul Guncoin se închide...</translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
@@ -2004,8 +2004,8 @@ Adresa: %4
         <translation>Copiază semnatura curentă în clipboard-ul sistemului</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Bitcoin address</source>
-        <translation>Semnează mesajul pentru a dovedi ca deţineţi acestă adresă Bitcoin</translation>
+        <source>Sign the message to prove you own this Guncoin address</source>
+        <translation>Semnează mesajul pentru a dovedi ca deţineţi acestă adresă Guncoin</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2029,11 +2029,11 @@ Adresa: %4
     </message>
     <message>
         <source>The address the message was signed with (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Introduceţi o adresă Bitcoin (de exemplu: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <translation>Introduceţi o adresă Guncoin (de exemplu: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Bitcoin address</source>
-        <translation>Verificaţi mesajul pentru a vă asigura că a fost semnat cu adresa Bitcoin specificată</translation>
+        <source>Verify the message to ensure it was signed with the specified Guncoin address</source>
+        <translation>Verificaţi mesajul pentru a vă asigura că a fost semnat cu adresa Guncoin specificată</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -2044,8 +2044,8 @@ Adresa: %4
         <translation>Resetează toate cîmpurile mesajelor semnate</translation>
     </message>
     <message>
-        <source>Enter a Bitcoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Introduceţi o adresă Bitcoin (de exemplu: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
+        <translation>Introduceţi o adresă Guncoin (de exemplu: 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
     </message>
     <message>
         <source>Click "Sign Message" to generate signature</source>
@@ -2103,12 +2103,12 @@ Adresa: %4
 <context>
     <name>SplashScreen</name>
     <message>
-        <source>Bitcoin Core</source>
-        <translation>Nucleul Bitcoin</translation>
+        <source>Guncoin Core</source>
+        <translation>Nucleul Guncoin</translation>
     </message>
     <message>
-        <source>The Bitcoin Core developers</source>
-        <translation>Dezvoltatorii Nucleului Bitcoin</translation>
+        <source>The Guncoin Core developers</source>
+        <translation>Dezvoltatorii Nucleului Guncoin</translation>
     </message>
     <message>
         <source>[testnet]</source>
@@ -2521,7 +2521,7 @@ Adresa: %4
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
-        <translation>Trimitere bitcoin</translation>
+        <translation>Trimitere Guncoin</translation>
     </message>
 </context>
 <context>
@@ -2578,12 +2578,12 @@ Adresa: %4
         <translation>Opţiuni:</translation>
     </message>
     <message>
-        <source>Specify configuration file (default: bitcoin.conf)</source>
-        <translation>Specificaţi fişierul de configurare (implicit: bitcoin.conf)</translation>
+        <source>Specify configuration file (default: guncoin.conf)</source>
+        <translation>Specificaţi fişierul de configurare (implicit: guncoin.conf)</translation>
     </message>
     <message>
-        <source>Specify pid file (default: bitcoind.pid)</source>
-        <translation>Specificaţi fişierul pid (implicit bitcoind.pid)</translation>
+        <source>Specify pid file (default: guncoind.pid)</source>
+        <translation>Specificaţi fişierul pid (implicit guncoind.pid)</translation>
     </message>
     <message>
         <source>Specify data directory</source>
@@ -2626,8 +2626,8 @@ Adresa: %4
         <translation>Acceptă comenzi din linia de comandă şi comenzi JSON-RPC</translation>
     </message>
     <message>
-        <source>Bitcoin Core RPC client version</source>
-        <translation>Versiunea nucleului clientului Bitcoin RPC</translation>
+        <source>Guncoin Core RPC client version</source>
+        <translation>Versiunea nucleului clientului Guncoin RPC</translation>
     </message>
     <message>
         <source>Run in the background as a daemon and accept commands</source>
@@ -2645,24 +2645,24 @@ Adresa: %4
         <source>%s, you must set a rpcpassword in the configuration file:
 %s
 It is recommended you use the following random password:
-rpcuser=bitcoinrpc
+rpcuser=guncoinrpc
 rpcpassword=%s
 (you do not need to remember this password)
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s "Bitcoin Alert" admin@foo.com
+for example: alertnotify=echo %%s | mail -s "Guncoin Alert" admin@foo.com
 </source>
         <translation>%s trebuie să setaţi o parolă rpc în fişierul de configurare
 %s
 Este recomandat să folosiţi această parolă aleatoare:
-rpcuser=bitcoinrpc
+rpcuser=guncoinrpc
 parola rpc=%s
 (nu este necesar ca să vă amintiţi această parolă)
 Numele de utilizator şi parola NU trebuie să fie la fel.
 Dacă fişierul nu există, crează-l cu ca fişier cu permisiune de citit doar proprietar.
 Este de asemenea recomandat să setaţi alerta de notificare ca să primiţi notificări ale problemelor;
-spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
+spre exemplu: alertnotify=echo %%s | mail -s "Alerta Guncoin" admin@foo.com
 
 </translation>
     </message>
@@ -2735,8 +2735,8 @@ spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
         <translation>Aceasta este o versiune de test preliminară - vă asumaţi riscul folosind-o - nu folosiţi pentru minerit sau aplicaţiile comercianţilor</translation>
     </message>
     <message>
-        <source>Unable to bind to %s on this computer. Bitcoin Core is probably already running.</source>
-        <translation>Nu se poate lega la %s pe acest calculator. Nucleul Bitcoin probabil deja rulează.</translation>
+        <source>Unable to bind to %s on this computer. Guncoin Core is probably already running.</source>
+        <translation>Nu se poate lega la %s pe acest calculator. Nucleul Guncoin probabil deja rulează.</translation>
     </message>
     <message>
         <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: -proxy)</source>
@@ -2747,8 +2747,8 @@ spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
         <translation>Atenţie: setarea -paytxfee este foarte mare! Aceasta este taxa tranzacţiei pe care o veţi plăti dacă trimiteţi o tranzacţie.</translation>
     </message>
     <message>
-        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Bitcoin will not work properly.</source>
-        <translation>Atenţie: Vă rugăm verificaţi dacă data/timpul calculatorului dvs. sînt corecte! Dacă ceasul calcultorului este decalat, Bitcoin nu va funcţiona corect.</translation>
+        <source>Warning: Please check that your computer's date and time are correct! If your clock is wrong Guncoin will not work properly.</source>
+        <translation>Atenţie: Vă rugăm verificaţi dacă data/timpul calculatorului dvs. sînt corecte! Dacă ceasul calcultorului este decalat, Guncoin nu va funcţiona corect.</translation>
     </message>
     <message>
         <source>Warning: The network does not appear to fully agree! Some miners appear to be experiencing issues.</source>
@@ -2783,8 +2783,8 @@ spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
         <translation>Încercare de recuperare a cheilor private dintr-un wallet.dat corupt</translation>
     </message>
     <message>
-        <source>Bitcoin Core Daemon</source>
-        <translation>Demonul Nucleu Bitcoin</translation>
+        <source>Guncoin Core Daemon</source>
+        <translation>Demonul Nucleu Guncoin</translation>
     </message>
     <message>
         <source>Block creation options:</source>
@@ -2991,8 +2991,8 @@ spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
         <translation>Este folosită pentru programe de testare a regresiei în algoritmi şi dezvoltare de alte aplicaţii.</translation>
     </message>
     <message>
-        <source>Usage (deprecated, use bitcoin-cli):</source>
-        <translation>Utilizare (învechită, folosiţi bitcoin-cli):</translation>
+        <source>Usage (deprecated, use Guncoin-cli):</source>
+        <translation>Utilizare (învechită, folosiţi Guncoin-cli):</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>
@@ -3027,8 +3027,8 @@ spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
         <translation>Importă blocuri dintr-un fişier extern blk000??.dat</translation>
     </message>
     <message>
-        <source>Cannot obtain a lock on data directory %s. Bitcoin Core is probably already running.</source>
-        <translation>Nu se poate obţine blocarea folderului cu date %s. Nucleul Bitcoin probabil deja rulează.</translation>
+        <source>Cannot obtain a lock on data directory %s. Guncoin Core is probably already running.</source>
+        <translation>Nu se poate obţine blocarea folderului cu date %s. Nucleul Guncoin probabil deja rulează.</translation>
     </message>
     <message>
         <source>Execute command when a relevant alert is received or we see a really long fork (%s in cmd is replaced by message)</source>
@@ -3091,8 +3091,8 @@ spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
         <translation>Publicare arbore blocuri la pornire (prestabilit: 0)</translation>
     </message>
     <message>
-        <source>RPC SSL options: (see the Bitcoin Wiki for SSL setup instructions)</source>
-        <translation>Opţiuni RPC SSL: (vedeţi Wiki Bitcoin pentru intrucţiunile de setare SSL)</translation>
+        <source>RPC SSL options: (see the Guncoin Wiki for SSL setup instructions)</source>
+        <translation>Opţiuni RPC SSL: (vedeţi Wiki Guncoin pentru intrucţiunile de setare SSL)</translation>
     </message>
     <message>
         <source>RPC server options:</source>
@@ -3111,12 +3111,12 @@ spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
         <translation>Rulează un thread pentru a goli portofelul periodic (implicit: 1)</translation>
     </message>
     <message>
-        <source>SSL options: (see the Bitcoin Wiki for SSL setup instructions)</source>
-        <translation>Opţiuni SSL (vedeţi Bitcoin wiki pentru intrucţiunile de instalare)</translation>
+        <source>SSL options: (see the Guncoin Wiki for SSL setup instructions)</source>
+        <translation>Opţiuni SSL (vedeţi Guncoin wiki pentru intrucţiunile de instalare)</translation>
     </message>
     <message>
-        <source>Send command to Bitcoin Core</source>
-        <translation>Trimitere comenzi către Bitcoin Core</translation>
+        <source>Send command to Guncoin Core</source>
+        <translation>Trimitere comenzi către Guncoin Core</translation>
     </message>
     <message>
         <source>Send trace/debug info to console instead of debug.log file</source>
@@ -3151,8 +3151,8 @@ spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
         <translation>Specifică intervalul maxim de conectare în milisecunde (implicit: 5000)</translation>
     </message>
     <message>
-        <source>Start Bitcoin Core Daemon</source>
-        <translation>Porneşte demonul nucleu Bitcoin</translation>
+        <source>Start Guncoin Core Daemon</source>
+        <translation>Porneşte demonul nucleu Guncoin</translation>
     </message>
     <message>
         <source>System error: </source>
@@ -3267,12 +3267,12 @@ spre exemplu: alertnotify=echo %%s | mail -s "Alerta Bitcoin" admin@foo.com
         <translation>Eroare la încărcarea wallet.dat: Portofel corupt</translation>
     </message>
     <message>
-        <source>Error loading wallet.dat: Wallet requires newer version of Bitcoin</source>
-        <translation>Eroare la încărcarea wallet.dat: Portofelul are nevoie de o versiune Bitcoin mai nouă</translation>
+        <source>Error loading wallet.dat: Wallet requires newer version of Guncoin</source>
+        <translation>Eroare la încărcarea wallet.dat: Portofelul are nevoie de o versiune Guncoin mai nouă</translation>
     </message>
     <message>
-        <source>Wallet needed to be rewritten: restart Bitcoin to complete</source>
-        <translation>Portofelul trebuie rescris: reporneşte Bitcoin pentru finalizare</translation>
+        <source>Wallet needed to be rewritten: restart Guncoin to complete</source>
+        <translation>Portofelul trebuie rescris: reporneşte Guncoin pentru finalizare</translation>
     </message>
     <message>
         <source>Error loading wallet.dat</source>

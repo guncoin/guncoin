@@ -138,8 +138,8 @@
         <translation>Gadael rhaglen</translation>
     </message>
     <message>
-        <source>Show information about Bitcoin</source>
-        <translation>Dangos gwybodaeth am Bitcoin</translation>
+        <source>Show information about Guncoin</source>
+        <translation>Dangos gwybodaeth am Guncoin</translation>
     </message>
     <message>
         <source>&amp;Options...</source>
