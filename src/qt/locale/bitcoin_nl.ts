@@ -2624,8 +2624,8 @@ Adres: %4
         <translation>Stel datamap in</translation>
     </message>
     <message>
-        <source>Listen for connections on &lt;port&gt; (default: 8333 or testnet: 18333)</source>
-        <translation>Luister voor verbindingen op &lt;poort&gt; (standaard: 8333 of testnet: 18333)</translation>
+        <source>Listen for connections on &lt;port&gt; (default: 42954 or testnet: 52954)</source>
+        <translation>Luister voor verbindingen op &lt;poort&gt; (standaard: 42954 of testnet: 52954)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
@@ -2652,8 +2652,8 @@ Adres: %4
         <translation>Er is een fout opgetreden tijdens het instellen van de inkomende RPC-poort %u op IPv4: %s</translation>
     </message>
     <message>
-        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 8332 or testnet: 18332)</source>
-        <translation>Wacht op JSON-RPC-connecties op poort &lt;port&gt; (standaard: 8332 of testnet: 18332)</translation>
+        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 42953 or testnet: 52953)</source>
+        <translation>Wacht op JSON-RPC-connecties op poort &lt;port&gt; (standaard: 42953 of testnet: 52953)</translation>
     </message>
     <message>
         <source>Accept command line and JSON-RPC commands</source>
@@ -2834,8 +2834,8 @@ bijvoorbeeld: alertnotify=echo %%s | mail -s "Bitcoin Alert" admin@foo.com</tran
         <translation>Verbind via een SOCKS-proxy</translation>
     </message>
     <message>
-        <source>Connect to JSON-RPC on &lt;port&gt; (default: 8332 or testnet: 18332)</source>
-        <translation>Verbinden met JSON-RPC op &lt;poort&gt; (standaard: 8332 of testnet: 18332)</translation>
+        <source>Connect to JSON-RPC on &lt;port&gt; (default: 42953 or testnet: 52953)</source>
+        <translation>Verbinden met JSON-RPC op &lt;poort&gt; (standaard: 42953 of testnet: 52953)</translation>
     </message>
     <message>
         <source>Connection options:</source>

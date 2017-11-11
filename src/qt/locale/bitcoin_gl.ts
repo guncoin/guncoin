@@ -2206,8 +2206,8 @@ Dirección: %4
         <translation>Especificar directorio de datos</translation>
     </message>
     <message>
-        <source>Listen for connections on &lt;port&gt; (default: 8333 or testnet: 18333)</source>
-        <translation>Escoitar conexións no &lt;porto&gt; (por defecto: 8333 ou testnet: 18333)</translation>
+        <source>Listen for connections on &lt;port&gt; (default: 42954 or testnet: 52954)</source>
+        <translation>Escoitar conexións no &lt;porto&gt; (por defecto: 42954 ou testnet: 52954)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
@@ -2234,8 +2234,8 @@ Dirección: %4
         <translation>Ocorreu un erro mentres se establecía o porto RPC %u para escoitar sobre IPv4: %s</translation>
     </message>
     <message>
-        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 8332 or testnet: 18332)</source>
-        <translation>Escoitar conexións JSON-RPC no &lt;porto&gt; (por defecto: 8332 ou testnet: 18332)</translation>
+        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 42953 or testnet: 52953)</source>
+        <translation>Escoitar conexións JSON-RPC no &lt;porto&gt; (por defecto: 42953 ou testnet: 52953)</translation>
     </message>
     <message>
         <source>Accept command line and JSON-RPC commands</source>
@@ -2350,8 +2350,8 @@ por exemplo: alertnotify=echo %%s | mail -s "Bitcoin Alert" admin@foo.com
         <translation>Conectar so ao(s) nodo(s) especificado(s)</translation>
     </message>
     <message>
-        <source>Connect to JSON-RPC on &lt;port&gt; (default: 8332 or testnet: 18332)</source>
-        <translation>Conectar a JSON-RPC no &lt;porto&gt; (por defecto: 8332 ou testnet: 18332)</translation>
+        <source>Connect to JSON-RPC on &lt;port&gt; (default: 42953 or testnet: 52953)</source>
+        <translation>Conectar a JSON-RPC no &lt;porto&gt; (por defecto: 42953 ou testnet: 52953)</translation>
     </message>
     <message>
         <source>Corrupted block database detected</source>

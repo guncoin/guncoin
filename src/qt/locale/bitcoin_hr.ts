@@ -1480,8 +1480,8 @@ Adresa:%4
         <translation>Odredi direktorij za datoteke</translation>
     </message>
     <message>
-        <source>Listen for connections on &lt;port&gt; (default: 8333 or testnet: 18333)</source>
-        <translation>Slušaj na &lt;port&gt;u (default: 8333 ili testnet: 18333)</translation>
+        <source>Listen for connections on &lt;port&gt; (default: 42954 or testnet: 52954)</source>
+        <translation>Slušaj na &lt;port&gt;u (default: 42954 ili testnet: 52954)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
@@ -1500,8 +1500,8 @@ Adresa:%4
         <translation>Broj sekundi koliko se članovima koji se čudno ponašaju neće dopustiti da se opet spoje (default: 86400)</translation>
     </message>
     <message>
-        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 8332 or testnet: 18332)</source>
-        <translation>Prihvaćaj JSON-RPC povezivanje na portu broj &lt;port&gt; (ugrađeni izbor: 8332 or testnet: 18332)</translation>
+        <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 42953 or testnet: 52953)</source>
+        <translation>Prihvaćaj JSON-RPC povezivanje na portu broj &lt;port&gt; (ugrađeni izbor: 42953 or testnet: 52953)</translation>
     </message>
     <message>
         <source>Accept command line and JSON-RPC commands</source>

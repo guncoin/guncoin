@@ -2306,8 +2306,8 @@ Address: %4
         <translation>Определете директория за данните</translation>
     </message>
     <message>
-        <source>Listen for connections on &lt;port&gt; (default: 8333 or testnet: 18333)</source>
-        <translation>Приемайте връзки на &lt;port&gt; ( по подразбиране: 8333 или testnet:18333)</translation>
+        <source>Listen for connections on &lt;port&gt; (default: 42954 or testnet: 52954)</source>
+        <translation>Приемайте връзки на &lt;port&gt; ( по подразбиране: 42954 или testnet:52954)</translation>
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
