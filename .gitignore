@@ -13,9 +13,10 @@ src/test_guncoin
 
 # Compilation and Qt preprocessor part
 *.qm
-Makefile
+Makefile*
 guncoin-qt
 Guncoin-Qt.app
+object_script*
 
 # Unit-tests
 Makefile.test
