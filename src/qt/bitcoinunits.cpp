@@ -71,9 +71,9 @@ qint64 BitcoinUnits::maxAmount(int unit)
 {
     switch(unit)
     {
-    case BTC:  return Q_INT64_C(21000000);
-    case mBTC: return Q_INT64_C(21000000000);
-    case uBTC: return Q_INT64_C(21000000000000);
+    case BTC:  return Q_INT64_C(500000000);
+    case mBTC: return Q_INT64_C(500000000000);
+    case uBTC: return Q_INT64_C(500000000000000);
     default:   return 0;
     }
 }
@@ -82,9 +82,9 @@ int BitcoinUnits::amountDigits(int unit)
 {
     switch(unit)
     {
-    case BTC: return 8; // 21,000,000 (# digits, without commas)
-    case mBTC: return 11; // 21,000,000,000
-    case uBTC: return 14; // 21,000,000,000,000
+    case BTC: return 9; // 500,000,000 (# digits, without commas)
+    case mBTC: return 12; // 500,000,000,000
+    case uBTC: return 15; // 500,000,000,000,000
     default: return 0;
     }
 }
