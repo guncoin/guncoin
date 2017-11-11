@@ -5,6 +5,8 @@
 
 #include "core.h"
 
+#include "chainparams.h"
+#include "neoscrypt.h"
 #include "util.h"
 
 std::string COutPoint::ToString() const
@@ -215,6 +217,19 @@ uint64_t CTxOutCompressor::DecompressAmount(uint64_t x)
 uint256 CBlockHeader::GetHash() const
 {
     return Hash(BEGIN(nVersion), END(nNonce));
+}
+
+/* Calculates block proof-of-work hash using either NeoScrypt 0x0 or Scrypt 0x3 */
+uint256 CBlockHeader::GetPoWHash() const {
+    unsigned int profile = 0x0;
+    uint256 hash;
+
+    if (this->nTime < Params().NeoScryptFork())
+        profile = 0x3;
+
+    neoscrypt((unsigned char *) &nVersion, (unsigned char *) &hash, profile);
+
+    return(hash);
 }
 
 uint256 CBlock::BuildMerkleTree() const

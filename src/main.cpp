@@ -1153,10 +1153,6 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos)
         return error("%s : Deserialize or I/O error - %s", __func__, e.what());
     }
 
-    // Check the header
-    if (!CheckProofOfWork(block.GetHash(), block.nBits))
-        return error("ReadBlockFromDisk : Errors in block header");
-
     return true;
 }
 
@@ -1266,6 +1262,17 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     if (nHeight < 30)
         return pindexLast->nBits;
+    
+    /* NeoScrypt hard fork */
+    if (nHeight >= Params().NeoScryptHeight())
+    {
+        if (!fNeoScrypt)
+            fNeoScrypt = true;
+
+        // Difficulty reset after the switch
+        if (nHeight < Params().NeoScryptHeight() + 10)
+            return Params().NeoScryptWorkLimit().GetCompact();
+    }
 
     // Only change once per interval
     if ((pindexLast->nHeight+1) % nInterval != 0)
@@ -2323,7 +2330,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                          REJECT_INVALID, "bad-blk-length");
 
     // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits))
+    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits))
         return state.DoS(50, error("CheckBlock() : proof of work failed"),
                          REJECT_INVALID, "high-hash");
 
@@ -2396,6 +2403,17 @@ bool AcceptBlock(CBlock& block, CValidationState& state, CDiskBlockPos* dbp)
         pindexPrev = (*mi).second;
         nHeight = pindexPrev->nHeight+1;
 
+        /* Don't accept v1 blocks after this point */
+        if (block.nTime > Params().NeoScryptFork()) {
+            CScript expect = CScript() << nHeight;
+            if(!std::equal(expect.begin(), expect.end(), block.vtx[0].vin[0].scriptSig.begin()))
+                return(state.DoS(100, error("AcceptBlock() : incorrect block height in coin base")));
+        }
+
+        /* Don't accept blocks with bogus nVersion numbers after this point */
+        if (nHeight >= Params().NeoScryptHeight() && block.nVersion < 2)
+            return(state.DoS(100, error("AcceptBlock() : incorrect block version")));
+
         // Check proof of work
         if (block.nBits != GetNextWorkRequired(pindexPrev, &block))
             return state.DoS(100, error("AcceptBlock() : incorrect proof of work"),
@@ -2425,8 +2443,8 @@ bool AcceptBlock(CBlock& block, CValidationState& state, CDiskBlockPos* dbp)
         // Reject block.nVersion=1 blocks when 95% (75% on testnet) of the network has upgraded:
         if (block.nVersion < 2)
         {
-            if ((!TestNet() && CBlockIndex::IsSuperMajority(2, pindexPrev, 950, 1000)) ||
-                (TestNet() && CBlockIndex::IsSuperMajority(2, pindexPrev, 75, 100)))
+            if ((!TestNet() && CBlockIndex::IsSuperMajority(2, pindexPrev, 950, 1000) && block.nTime > Params().NeoScryptFork()) ||
+                (TestNet() && CBlockIndex::IsSuperMajority(2, pindexPrev, 75, 100) && block.nTime > Params().NeoScryptFork()))
             {
                 return state.Invalid(error("AcceptBlock() : rejected nVersion=1 block"),
                                      REJECT_OBSOLETE, "bad-version");
@@ -2446,8 +2464,8 @@ bool AcceptBlock(CBlock& block, CValidationState& state, CDiskBlockPos* dbp)
         if (block.nVersion >= 2)
         {
             // if 750 of the last 1,000 blocks are version 2 or greater (51/100 if testnet):
-            if ((!TestNet() && CBlockIndex::IsSuperMajority(2, pindexPrev, 750, 1000)) ||
-                (TestNet() && CBlockIndex::IsSuperMajority(2, pindexPrev, 51, 100)))
+            if ((!TestNet() && CBlockIndex::IsSuperMajority(2, pindexPrev, 750, 1000) && block.nTime > Params().NeoScryptFork()) ||
+                (TestNet() && CBlockIndex::IsSuperMajority(2, pindexPrev, 51, 100) && block.nTime > Params().NeoScryptFork()))
             {
                 CScript expect = CScript() << nHeight;
                 if (block.vtx[0].vin[0].scriptSig.size() < expect.size() ||

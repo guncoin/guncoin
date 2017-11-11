@@ -55,8 +55,11 @@ public:
     const uint256& HashGenesisBlock() const { return hashGenesisBlock; }
     const MessageStartChars& MessageStart() const { return pchMessageStart; }
     const vector<unsigned char>& AlertKey() const { return vAlertPubKey; }
+    unsigned int NeoScryptHeight() const { return nNeoScryptHeight;}
+    unsigned int NeoScryptFork() const { return nNeoScryptFork;}
     int GetDefaultPort() const { return nDefaultPort; }
     const CBigNum& ProofOfWorkLimit() const { return bnProofOfWorkLimit; }
+    const CBigNum& NeoScryptWorkLimit() const { return bnNeoScryptSwitch; }
     int SubsidyHalvingInterval() const { return nSubsidyHalvingInterval; }
     virtual const CBlock& GenesisBlock() const = 0;
     virtual bool RequireRPCPassword() const { return true; }
@@ -73,9 +76,12 @@ protected:
     MessageStartChars pchMessageStart;
     // Raw pub key bytes for the broadcast alert signing key.
     vector<unsigned char> vAlertPubKey;
+    int nNeoScryptHeight;
+    unsigned int nNeoScryptFork;
     int nDefaultPort;
     int nRPCPort;
     CBigNum bnProofOfWorkLimit;
+    CBigNum bnNeoScryptSwitch;
     int nSubsidyHalvingInterval;
     string strDataDir;
     vector<CDNSSeedData> vSeeds;
