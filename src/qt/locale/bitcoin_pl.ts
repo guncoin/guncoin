@@ -1329,8 +1329,8 @@ Adres: %4
         <translation>Guncoin Core jeszcze się nie wyłączył bezpiecznie…</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Wprowadź adres Guncoin (np. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Wprowadź adres Guncoin (np. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
 </context>
 <context>
@@ -1866,8 +1866,8 @@ Adres: %4
         <translation>Zapłać &amp;dla:</translation>
     </message>
     <message>
-        <source>The address to send the payment to (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Adres, na który wysłasz płatności (np. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address to send the payment to (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Adres, na który wysłasz płatności (np. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Enter a label for this address to add it to your address book</source>
@@ -1952,8 +1952,8 @@ Adres: %4
         <translation>Możesz podpisywać wiadomości swoimi adresami aby udowodnić, że jesteś ich właścicielem. Uważaj, aby nie podpisywać niczego co wzbudza Twoje podejrzenia, ponieważ ktoś może stosować phishing próbując nakłonić Cię do ich podpisania. Akceptuj i podpisuj tylko w pełni zrozumiałe komunikaty i wiadomości.</translation>
     </message>
     <message>
-        <source>The address to sign the message with (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Wprowadź adres Guncoin (np. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address to sign the message with (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Wprowadź adres Guncoin (np. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2008,8 +2008,8 @@ Adres: %4
         <translation>Wpisz adres podpisu, wiadomość (upewnij się, że dokładnie skopiujesz wszystkie zakończenia linii, spacje, tabulacje itp.) oraz podpis poniżej by sprawdzić wiadomość. Uważaj by nie dodać więcej do podpisu niż do samej podpisywanej wiadomości by uniknąć ataku man-in-the-middle (człowiek pośrodku)</translation>
     </message>
     <message>
-        <source>The address the message was signed with (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Wprowadź adres Guncoin (np. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address the message was signed with (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Wprowadź adres Guncoin (np. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified Guncoin address</source>
@@ -2024,8 +2024,8 @@ Adres: %4
         <translation>Resetuje wszystkie pola weryfikacji wiadomości</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Wprowadź adres Guncoin (np. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Wprowadź adres Guncoin (np. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Click "Sign Message" to generate signature</source>

@@ -1362,8 +1362,8 @@ Adress: %4
         <translation>Guncoin Core avslutades inte ännu säkert...</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Ange en Guncoin-adress (t.ex. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Ange en Guncoin-adress (t.ex. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
 </context>
 <context>
@@ -1903,8 +1903,8 @@ Adress: %4
         <translation>Betala &amp;Till:</translation>
     </message>
     <message>
-        <source>The address to send the payment to (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Adressen som betalningen skall skickas till  (t.ex. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address to send the payment to (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Adressen som betalningen skall skickas till  (t.ex. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Enter a label for this address to add it to your address book</source>
@@ -1993,8 +1993,8 @@ Adress: %4
         <translation>Du kan signera meddelanden med dina adresser för att bevisa att du äger dem. Var försiktig med vad du signerar eftersom phising-attacker kan försöka få dig att skriva över din identitet till någon annan. Signera bara väldetaljerade påståenden du kan gå i god för.</translation>
     </message>
     <message>
-        <source>The address to sign the message with (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Adressen att signera meddelandet med  (t.ex. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address to sign the message with (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Adressen att signera meddelandet med  (t.ex. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2049,8 +2049,8 @@ Adress: %4
         <translation>Skriv in din adress, meddelande (se till att du kopierar radbrytningar, mellanslag, tabbar, osv. exakt) och signatur nedan för att verifiera meddelandet. Var noga med att inte läsa in mer i signaturen än vad som finns i det signerade meddelandet, för att undvika att luras av en man-in-the-middle attack.</translation>
     </message>
     <message>
-        <source>The address the message was signed with (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Adressen som meddelandet var signerat med  (t.ex. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address the message was signed with (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Adressen som meddelandet var signerat med  (t.ex. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified Guncoin address</source>
@@ -2065,8 +2065,8 @@ Adress: %4
         <translation>Rensa alla fält</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Ange en Guncoin-adress (t.ex. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Ange en Guncoin-adress (t.ex. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Click "Sign Message" to generate signature</source>

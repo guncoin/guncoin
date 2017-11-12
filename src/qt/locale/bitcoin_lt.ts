@@ -879,8 +879,8 @@ Adresas: %4</translation>
         <translation>Guncoin</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Įveskite bitkoinų adresą (pvz. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Įveskite bitkoinų adresą (pvz. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
 </context>
 <context>
@@ -1218,8 +1218,8 @@ Adresas: %4</translation>
         <translation>&amp;Pasirašyti žinutę</translation>
     </message>
     <message>
-        <source>The address to sign the message with (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Įveskite bitkoinų adresą (pvz. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address to sign the message with (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Įveskite bitkoinų adresą (pvz. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -1254,16 +1254,16 @@ Adresas: %4</translation>
         <translation>&amp;Patikrinti žinutę</translation>
     </message>
     <message>
-        <source>The address the message was signed with (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Įveskite bitkoinų adresą (pvz. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address the message was signed with (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Įveskite bitkoinų adresą (pvz. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified Guncoin address</source>
         <translation>Patikrinkite žinutę, jog įsitikintumėte, kad ją pasirašė nurodytas Guncoin adresas</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>Įveskite bitkoinų adresą (pvz. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>Įveskite bitkoinų adresą (pvz. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Click "Sign Message" to generate signature</source>

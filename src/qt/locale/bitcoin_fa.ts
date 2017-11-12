@@ -888,8 +888,8 @@ Address: %4
         <translation>خطا: پوشهٔ مشخص شده برای داده‌ها در «%1» وجود ندارد.</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>یک آدرس Guncoin وارد کنید (مثلاً 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>یک آدرس Guncoin وارد کنید (مثلاً GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
 </context>
 <context>
@@ -1145,8 +1145,8 @@ Address: %4
         <translation>پرداخ&amp;ت به:</translation>
     </message>
     <message>
-        <source>The address to send the payment to (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>نشانی مقصد برای پرداخت (مثلاً 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address to send the payment to (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>نشانی مقصد برای پرداخت (مثلاً GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Enter a label for this address to add it to your address book</source>
@@ -1191,8 +1191,8 @@ Address: %4
         <translation>برای احراز اینکه پیام‌ها از جانب شما هستند، می‌توانید آن‌ها را با نشانی خودتان امضا کنید. مراقب باشید چیزی که بدان اطمینان ندارید را امضا نکنید زیرا حملات فیشینگ ممکن است بخواهند از.پیامی با امضای شما سوءاستفاده کنند. تنها مواردی را که حاوی اطلاعات دقیق و قابل قبول برای شما هستند امضا کنید.</translation>
     </message>
     <message>
-        <source>The address to sign the message with (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>نشانی مورد استفاده برای امضا کردن پیام (برای مثال 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address to sign the message with (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>نشانی مورد استفاده برای امضا کردن پیام (برای مثال GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -1243,8 +1243,8 @@ Address: %4
         <translation>برای شناسایی پیام، نشانیِ امضا کننده و متن پیام را وارد کنید. (مطمئن شوید که فاصله‌ها، تب‌ها و خطوط را عیناً کپی می‌کنید.) مراقب باشید در امضا چیزی بیشتر از آنچه در پیام می‌بینید وجود نداشته باشد تا فریب دزدان اینترنتی و حملات از نوع MITM را نخورید.</translation>
     </message>
     <message>
-        <source>The address the message was signed with (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>نشانی مورد استفاده برای امضا کردن پیام (برای مثال 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>The address the message was signed with (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>نشانی مورد استفاده برای امضا کردن پیام (برای مثال GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified Guncoin address</source>
@@ -1259,8 +1259,8 @@ Address: %4
         <translation>بازنشانی تمام فیلدهای پیام</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>یک نشانی Guncoin وارد کنید (مثلاً 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>یک نشانی Guncoin وارد کنید (مثلاً GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Click "Sign Message" to generate signature</source>

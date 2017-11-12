@@ -858,8 +858,8 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>بت كوين</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>إدخال عنوانGuncoin (مثال :1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>إدخال عنوانGuncoin (مثال :GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
 </context>
 <context>
@@ -1269,8 +1269,8 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>تحقق &amp;الرسالة</translation>
     </message>
     <message>
-        <source>Enter a Guncoin address (e.g. 1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</source>
-        <translation>إدخال عنوانGuncoin (مثال :1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L)</translation>
+        <source>Enter a Guncoin address (e.g. GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</source>
+        <translation>إدخال عنوانGuncoin (مثال :GpSd8MzHMEQtv8coJDF78XiTqaEMVZo3Uk)</translation>
     </message>
     <message>
         <source>Click "Sign Message" to generate signature</source>
