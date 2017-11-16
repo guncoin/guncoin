@@ -52,7 +52,7 @@ namespace Checkpoints
 
     static MapCheckpoints mapCheckpointsTestnet =
         boost::assign::map_list_of
-        ( 0, uint256("0x765d9ec322c494d36d36f300c209f13b787b6f67bf978c5b9ab09bc9e10f52b8"))
+        ( 0, uint256("765d9ec322c494d36d36f300c209f13b787b6f67bf978c5b9ab09bc9e10f52b8"))
         ;
     static const CCheckpointData dataTestnet = {
         &mapCheckpointsTestnet,
@@ -150,5 +150,15 @@ namespace Checkpoints
                 return t->second;
         }
         return NULL;
+    }
+    
+	uint256 GetLatestHardenedCheckpoint()
+    {
+        const MapCheckpoints& checkpoints = *Checkpoints().mapCheckpoints;
+
+        if (checkpoints.empty())
+            return Params().HashGenesisBlock();
+
+        return (checkpoints.rbegin()->second);
     }
 }
