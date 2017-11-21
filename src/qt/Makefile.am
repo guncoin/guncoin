@@ -92,6 +92,7 @@ QT_FORMS_UI = \
   forms/editaddressdialog.ui \
   forms/helpmessagedialog.ui \
   forms/intro.ui \
+  forms/miningpage.ui \
   forms/openuridialog.ui \
   forms/optionsdialog.ui \
   forms/overviewpage.ui \
@@ -120,6 +121,7 @@ QT_MOC_CPP = \
   moc_intro.cpp \
   moc_macdockiconhandler.cpp \
   moc_macnotificationhandler.cpp \
+  moc_miningpage.cpp \
   moc_monitoreddatamapper.cpp \
   moc_notificator.cpp \
   moc_openuridialog.cpp \
@@ -183,6 +185,7 @@ BITCOIN_QT_H = \
   intro.h \
   macdockiconhandler.h \
   macnotificationhandler.h \
+  miningpage.h \
   monitoreddatamapper.h \
   notificator.h \
   openuridialog.h \
@@ -270,6 +273,7 @@ BITCOIN_QT_CPP = \
   csvmodelwriter.cpp \
   guiutil.cpp \
   intro.cpp \
+  miningpage.cpp \
   monitoreddatamapper.cpp \
   notificator.cpp \
   optionsdialog.cpp \

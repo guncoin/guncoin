@@ -69,6 +69,7 @@ private:
     WalletFrame *walletFrame;
 
     QLabel *labelEncryptionIcon;
+    QLabel *labelMiningIcon;
     QLabel *labelConnectionsIcon;
     QLabel *labelBlocksIcon;
     QLabel *progressBarLabel;
@@ -79,6 +80,7 @@ private:
     QAction *historyAction;
     QAction *quitAction;
     QAction *sendCoinsAction;
+    QAction *miningAction;
     QAction *usedSendingAddressesAction;
     QAction *usedReceivingAddressesAction;
     QAction *signMessageAction;
@@ -173,6 +175,8 @@ private slots:
     /** Show open dialog */
     void openClicked();
 #endif
+    /** Switch to mining page */
+    void gotoMiningPage();
     /** Show configuration dialog */
     void optionsClicked();
     /** Show about dialog */

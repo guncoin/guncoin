@@ -19,6 +19,7 @@
 #include "walletmodel.h"
 
 #include "ui_interface.h"
+#include "miningpage.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -50,7 +51,7 @@ WalletView::WalletView(QWidget *parent):
     hbox_buttons->addWidget(exportButton);
     vbox->addLayout(hbox_buttons);
     transactionsPage->setLayout(vbox);
-
+    miningPage = new MiningPage(this);
     receiveCoinsPage = new ReceiveCoinsDialog();
     sendCoinsPage = new SendCoinsDialog();
 
@@ -58,6 +59,7 @@ WalletView::WalletView(QWidget *parent):
     addWidget(transactionsPage);
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
+    addWidget(miningPage);
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), transactionView, SLOT(focusTransaction(QModelIndex)));
@@ -171,6 +173,10 @@ void WalletView::gotoSendCoinsPage(QString addr)
 
     if (!addr.isEmpty())
         sendCoinsPage->setAddress(addr);
+}
+
+void WalletView::gotoMiningPage() {
+    setCurrentWidget(miningPage);
 }
 
 void WalletView::gotoSignMessageTab(QString addr)

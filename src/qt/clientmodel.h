@@ -41,12 +41,34 @@ public:
     explicit ClientModel(OptionsModel *optionsModel, QObject *parent = 0);
     ~ClientModel();
 
+    enum MiningType {
+        SoloMining,
+        PoolMining
+    };
+
     OptionsModel *getOptionsModel();
 
     //! Return number of connections, default is in- and outbound (total)
     int getNumConnections(unsigned int flags = CONNECTIONS_ALL) const;
     int getNumBlocks() const;
     int getNumBlocksAtStartup();
+
+    MiningType getMiningType() const;
+    int getMiningThreads() const;
+    bool getMiningStarted() const;
+
+    bool getMiningDebug() const;
+    void setMiningDebug(bool debug);
+    int getMiningScanTime() const;
+    void setMiningScanTime(int scantime);
+    QString getMiningServer() const;
+    void setMiningServer(QString server);
+    QString getMiningPort() const;
+    void setMiningPort(QString port);
+    QString getMiningUsername() const;
+    void setMiningUsername(QString username);
+    QString getMiningPassword() const;
+    void setMiningPassword(QString password);
 
     quint64 getTotalBytesRecv() const;
     quint64 getTotalBytesSent() const;
@@ -63,6 +85,8 @@ public:
     //! Return warnings to be displayed in status bar
     QString getStatusBarWarnings() const;
 
+    void setMining(MiningType type, bool started, uint threads, uint speed);
+
     QString formatFullVersion() const;
     bool isReleaseVersion() const;
     QString clientName() const;
@@ -74,6 +98,16 @@ private:
     int cachedNumBlocks;
     bool cachedReindexing;
     bool cachedImporting;
+
+    MiningType miningType;
+    int miningThreads;
+    bool miningStarted;
+    bool miningDebug;
+    int miningScanTime;
+    QString miningServer;
+    QString miningPort;
+    QString miningUsername;
+    QString miningPassword;
 
     int numBlocksAtStartup;
 

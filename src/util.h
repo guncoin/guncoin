@@ -35,6 +35,12 @@
 class CNetAddr;
 class uint256;
 
+typedef long long  int64;
+typedef unsigned long long  uint64;
+typedef unsigned int    uint;
+typedef unsigned short  ushort;
+typedef unsigned char   uchar;
+
 static const int64_t COIN = 100000000;
 static const int64_t CENT = 1000000;
 
@@ -105,6 +111,9 @@ extern unsigned int nNeoScryptOptions;
 extern bool fNoListen;
 extern bool fLogTimestamps;
 extern volatile bool fReopenDebugLog;
+extern bool fGenerateCoins;
+extern uint nMiningThreads;
+extern uint64 nMiningSpeed;
 
 void RandAddSeed();
 void RandAddSeedPerfmon();

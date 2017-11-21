@@ -10,6 +10,9 @@
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "main.h"
+#include "miner.h"
+#include "util.h"
+#include "init.h" // for pwalletMain
 #include "net.h"
 #include "ui_interface.h"
 
@@ -27,6 +30,14 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     cachedReindexing(0), cachedImporting(0),
     numBlocksAtStartup(-1), pollTimer(0)
 {
+    /* Disable mining even if user enabled */
+    miningType = SoloMining;
+    miningStarted = false;
+    GenerateBitcoins(false, NULL, 0);
+
+    /* Get the number of mining threads */
+    miningThreads = nMiningThreads;
+
     pollTimer = new QTimer(this);
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(updateTimer()));
     pollTimer->start(MODEL_UPDATE_DELAY);
@@ -73,6 +84,66 @@ quint64 ClientModel::getTotalBytesRecv() const
 quint64 ClientModel::getTotalBytesSent() const
 {
     return CNode::GetTotalBytesSent();
+}
+
+ClientModel::MiningType ClientModel::getMiningType() const {
+    return(miningType);
+}
+
+int ClientModel::getMiningThreads() const {
+    return(miningThreads);
+}
+
+bool ClientModel::getMiningStarted() const {
+    return(miningStarted);
+}
+
+bool ClientModel::getMiningDebug() const {
+    return(miningDebug);
+}
+
+void ClientModel::setMiningDebug(bool debug) {
+    miningDebug = debug;
+}
+
+int ClientModel::getMiningScanTime() const {
+    return(miningScanTime);
+}
+
+void ClientModel::setMiningScanTime(int scantime) {
+    miningScanTime = scantime;
+}
+
+QString ClientModel::getMiningServer() const {
+    return(miningServer);
+}
+
+void ClientModel::setMiningServer(QString server) {
+    miningServer = server;
+}
+
+QString ClientModel::getMiningPort() const {
+    return(miningPort);
+}
+
+void ClientModel::setMiningPort(QString port) {
+    miningPort = port;
+}
+
+QString ClientModel::getMiningUsername() const {
+    return(miningUsername);
+}
+
+void ClientModel::setMiningUsername(QString username) {
+    miningUsername = username;
+}
+
+QString ClientModel::getMiningPassword() const {
+    return(miningPassword);
+}
+
+void ClientModel::setMiningPassword(QString password) {
+    miningPassword = password;
 }
 
 QDateTime ClientModel::getLastBlockDate() const
@@ -149,6 +220,15 @@ QString ClientModel::getNetworkName() const
 bool ClientModel::inInitialBlockDownload() const
 {
     return IsInitialBlockDownload();
+}
+
+void ClientModel::setMining(MiningType type, bool started, uint threads, uint speed) {
+    if((type == SoloMining) && (started != miningStarted)) {
+        nMiningThreads = threads;
+        GenerateBitcoins(started, pwalletMain, nMiningThreads);
+    }
+    miningType = type;
+    miningStarted = started;
 }
 
 enum BlockSource ClientModel::getBlockSource() const

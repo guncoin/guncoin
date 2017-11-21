@@ -13,6 +13,7 @@ class OverviewPage;
 class ReceiveCoinsDialog;
 class SendCoinsDialog;
 class SendCoinsRecipient;
+class MiningPage;
 class TransactionView;
 class WalletModel;
 
@@ -58,7 +59,7 @@ private:
     QWidget *transactionsPage;
     ReceiveCoinsDialog *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
-
+    MiningPage *miningPage;
     TransactionView *transactionView;
 
     QProgressDialog *progressDialog;
@@ -72,7 +73,8 @@ public slots:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
-
+    /** Switch to mining page */
+    void gotoMiningPage();
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */

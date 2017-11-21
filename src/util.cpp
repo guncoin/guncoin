@@ -99,6 +99,9 @@ unsigned int nNeoScryptOptions = 0;
 bool fNoListen = false;
 bool fLogTimestamps = false;
 volatile bool fReopenDebugLog = false;
+bool fGenerateCoins = false;
+uint nMiningThreads = 0;
+uint64 nMiningSpeed = 0;
 CClientUIInterface uiInterface;
 
 // Init OpenSSL library multithreading support
