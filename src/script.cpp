@@ -1091,7 +1091,8 @@ public:
                 itBegin = it;
             }
         }
-        s.write((char*)&itBegin[0], it-itBegin);
+        if (itBegin != scriptCode.end())
+            s.write((char*)&itBegin[0], it-itBegin);
     }
 
     /** Serialize an input of txTo */
