@@ -7,18 +7,37 @@ src/guncoin-cli
 src/test/test_bitcoin
 src/qt/test/test_bitcoin-qt
 
+# autoreconf
 Makefile.in
 aclocal.m4
 autom4te.cache/
+build-aux/config.guess
+build-aux/config.sub
+build-aux/depcomp
+build-aux/install-sh
+build-aux/ltmain.sh
+build-aux/m4/libtool.m4
+build-aux/m4/lt~obsolete.m4
+build-aux/m4/ltoptions.m4
+build-aux/m4/ltsugar.m4
+build-aux/m4/ltversion.m4
+build-aux/missing
+build-aux/compile
+build-aux/test-driver
 config.log
 config.status
 configure
+libtool
 src/bitcoin-config.h
 src/bitcoin-config.h.in
-src/build-aux/
 src/stamp-h1
 share/setup.nsi
 share/qt/Info.plist
+share/setup.nsi
+share/qt/Info.plist
+
+src/univalue/gen
+
 
 src/qt/*.moc
 src/qt/moc_*.cpp
