@@ -1,8 +1,8 @@
 package=native_comparisontool
-$(package)_version=adfd3de7
-$(package)_download_path=https://github.com/TheBlueMatt/test-scripts/raw/10222bfdace65a0c5f3bd4a766eeb6b3a8b869fb/
+$(package)_version=0f7b5d8
+$(package)_download_path=https://github.com/TheBlueMatt/test-scripts/raw/38b490a2599d422b12d5ce8f165792f63fd8f54f
 $(package)_file_name=pull-tests-$($(package)_version).jar
-$(package)_sha256_hash=fd2282b112e35f339dbe3729b08a04834ad719f8c9c10eeec1178465e6d36a18
+$(package)_sha256_hash=ecd43b988a8b673b483e4f69f931596360a5e90fc415c75c4c259faa690df198
 $(package)_install_dirname=BitcoindComparisonTool_jar
 $(package)_install_filename=BitcoindComparisonTool.jar
 
