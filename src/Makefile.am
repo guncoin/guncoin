@@ -131,7 +131,6 @@ libbitcoin_common_a_SOURCES = \
   hash.cpp \
   key.cpp \
   neoscrypt.c \
-  neoscrypt_asm.S \
   netbase.cpp \
   protocol.cpp \
   rpcprotocol.cpp \
@@ -140,6 +139,11 @@ libbitcoin_common_a_SOURCES = \
   util.cpp \
   version.cpp \
   $(BITCOIN_CORE_H)
+
+if ASM
+libbitcoin_common_a_SOURCES += \
+  neoscrypt_asm.S
+endif
 
 if GLIBC_BACK_COMPAT
 libbitcoin_common_a_SOURCES += compat/glibc_compat.cpp

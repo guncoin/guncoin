@@ -113,6 +113,12 @@ AC_ARG_ENABLE([sse2],
   [enable SSE2 optimizations (defaults is yes)])],
   [use_sse2=${enableval}],
   [use_sse2=yes])
+  
+AC_ARG_ENABLE([asm],
+  [AC_HELP_STRING([--enable-asm],
+  [enable assembly compilation (default is no)])],
+  [use_asm=${enableval}],
+  [use_asm=no])
 
 AC_ARG_WITH([protoc-bindir],[AS_HELP_STRING([--with-protoc-bindir=BIN_DIR],[specify protoc bin path])], [protoc_bin_path=$withval], [])
 
@@ -317,7 +323,9 @@ if test "$use_sse2" = "yes"; then
     AC_DEFINE([USE_SSE2],[1],[Define if SSE2 support should be compiled in])
 fi
 
-AC_DEFINE([ASM],[1],[Assembly code support])
+if test "$use_asm" = "yes"; then
+    AC_DEFINE([ASM],[1],[Assembly code support])
+fi
 
 dnl Require little endian
 AC_C_BIGENDIAN([AC_MSG_ERROR("Big Endian not supported")])
@@ -368,7 +376,11 @@ fi
 if test x$use_hardening != xno; then
   AX_CHECK_COMPILE_FLAG([-Wstack-protector],[HARDENED_CXXFLAGS="$HARDENED_CXXFLAGS -Wstack-protector"])
   AX_CHECK_COMPILE_FLAG([-fstack-protector-all],[HARDENED_CXXFLAGS="$HARDENED_CXXFLAGS -fstack-protector-all"])
-  AX_CHECK_COMPILE_FLAG([-fPIC],[HARDENED_CXXFLAGS="$HARDENED_CXXFLAGS -fPIC" && CFLAGS="$CFLAGS -fPIC"])
+  if test "$use_asm" = "yes"; then
+      AX_CHECK_COMPILE_FLAG([-fPIC],[HARDENED_CXXFLAGS="$HARDENED_CXXFLAGS -fPIC" && CFLAGS="$CFLAGS -fPIC"])
+  else
+      AX_CHECK_COMPILE_FLAG([-fPIE],[HARDENED_CXXFLAGS="$HARDENED_CXXFLAGS -fPIE" && CFLAGS="$CFLAGS -fPIE"])
+  fi
 
   AX_CHECK_PREPROC_FLAG([-D_FORTIFY_SOURCE=2],[
     AX_CHECK_PREPROC_FLAG([-U_FORTIFY_SOURCE],[
@@ -698,6 +710,7 @@ AM_CONDITIONAL([TARGET_WINDOWS], [test x$TARGET_OS = xwindows])
 AM_CONDITIONAL([ENABLE_WALLET],[test x$enable_wallet == xyes])
 AM_CONDITIONAL([USE_QRCODE], [test x$use_qr = xyes])
 AM_CONDITIONAL([USE_SSE2], [test x$use_sse2 = xyes])
+AM_CONDITIONAL([ASM], [test x$use_asm = xyes])
 AM_CONDITIONAL([USE_LCOV],[test x$use_lcov == xyes])
 AM_CONDITIONAL([USE_COMPARISON_TOOL],[test x$use_comparison_tool != xno])
 AM_CONDITIONAL([USE_COMPARISON_TOOL_REORG_TESTS],[test x$use_comparison_tool_reorg_test != xno])
