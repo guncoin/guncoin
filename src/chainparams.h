@@ -44,8 +44,11 @@ public:
     const uint256& HashGenesisBlock() const { return hashGenesisBlock; }
     const MessageStartChars& MessageStart() const { return pchMessageStart; }
     const std::vector<unsigned char>& AlertKey() const { return vAlertPubKey; }
+    unsigned int NeoScryptFork() const { return nNeoScryptFork;}
+    unsigned int NeoScryptHeight() const { return nNeoScryptHeight;}
     int GetDefaultPort() const { return nDefaultPort; }
     const uint256& ProofOfWorkLimit() const { return bnProofOfWorkLimit; }
+    const uint256& NeoScryptWorkLimit() const { return bnNeoScryptSwitch; }
     /** Used to check majorities for block version upgrade */
     int EnforceBlockUpgradeMajority() const { return nEnforceBlockUpgradeMajority; }
     int RejectBlockOutdatedMajority() const { return nRejectBlockOutdatedMajority; }
@@ -86,8 +89,11 @@ protected:
     MessageStartChars pchMessageStart;
     //! Raw pub key bytes for the broadcast alert signing key.
     std::vector<unsigned char> vAlertPubKey;
+    unsigned int nNeoScryptFork;
+    unsigned int nNeoScryptHeight;
     int nDefaultPort;
     uint256 bnProofOfWorkLimit;
+    uint256 bnNeoScryptSwitch;
     int nEnforceBlockUpgradeMajority;
     int nRejectBlockOutdatedMajority;
     int nToCheckBlockUpgradeMajority;

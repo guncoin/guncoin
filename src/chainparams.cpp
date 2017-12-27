@@ -102,14 +102,17 @@ public:
         pchMessageStart[2] = 0xc6;
         pchMessageStart[3] = 0xab;
         vAlertPubKey = ParseHex("04fc9702847840aaf195de8442ebecedf5b095cdbb9bc716bda9110971b28a49e0ead8564ff0db22209e0374782c093bb899692d524e9d6a6956e7c5ecbcd68284");
+        nNeoScryptHeight = 120000;
+        nNeoScryptFork = 1414482565;
         nDefaultPort = 42954;
         bnProofOfWorkLimit = ~uint256(0) >> 20;
+        bnNeoScryptSwitch = ~uint256(0) >> 28;
         nEnforceBlockUpgradeMajority = 750;
         nRejectBlockOutdatedMajority = 950;
         nToCheckBlockUpgradeMajority = 1000;
         nMinerThreads = 0;
-        nTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-        nTargetSpacing = 10 * 60;
+        nTargetTimespan = 2 * 60; // two weeks
+        nTargetSpacing = 2 * 60;
         nMaxTipAge = 24 * 60 * 60;
 
         const char* pszTimestamp = "1May launch of guncoin";
@@ -133,9 +136,6 @@ public:
 
         vSeeds.push_back(CDNSSeedData("guncoin.info", "seed.guncoin.info"));
         vSeeds.push_back(CDNSSeedData("guncoin.info", "seed2.guncoin.info"));
-        vSeeds.push_back(CDNSSeedData("dashjr.org", "dnsseed.bitcoin.dashjr.org"));
-        vSeeds.push_back(CDNSSeedData("bitcoinstats.com", "seed.bitcoinstats.com"));
-        vSeeds.push_back(CDNSSeedData("xf2.org", "bitseed.xf2.org"));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,39);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,5);
@@ -175,13 +175,14 @@ public:
         pchMessageStart[2] = 0xcc;
         pchMessageStart[3] = 0xad;
         vAlertPubKey = ParseHex("04302390343f91cc401d56d68b123028bf52e5fca1939df127f63c6467cdf9c8e2c14b61104cf817d0b780da337893ecc4aaff1309e536162dabbdb45200ca2b0a");
+        nNeoScryptHeight = 1;
         nDefaultPort = 52954;
         nEnforceBlockUpgradeMajority = 51;
         nRejectBlockOutdatedMajority = 75;
         nToCheckBlockUpgradeMajority = 100;
         nMinerThreads = 0;
-        nTargetTimespan = 14 * 24 * 60 * 60; //! two weeks
-        nTargetSpacing = 10 * 60;
+        nTargetTimespan = 2 * 60; //! two weeks
+        nTargetSpacing = 2 * 60;
         nMaxTipAge = 0x7fffffff;
 
         //! Modify the testnet genesis block so the timestamp is valid for a later start.
@@ -234,8 +235,8 @@ public:
         nRejectBlockOutdatedMajority = 950;
         nToCheckBlockUpgradeMajority = 1000;
         nMinerThreads = 1;
-        nTargetTimespan = 14 * 24 * 60 * 60; //! two weeks
-        nTargetSpacing = 10 * 60;
+        nTargetTimespan = 2 * 60; //! two weeks
+        nTargetSpacing = 2 * 60;
         bnProofOfWorkLimit = ~uint256(0) >> 1;
         nMaxTipAge = 24 * 60 * 60;
         genesis.nTime = 1296688602;

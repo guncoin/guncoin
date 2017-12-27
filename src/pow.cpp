@@ -14,10 +14,20 @@
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock)
 {
     unsigned int nProofOfWorkLimit = Params().ProofOfWorkLimit().GetCompact();
+    int64_t nTargetTimespan = Params().TargetTimespan();
 
     // Genesis block
     if (pindexLast == NULL)
         return nProofOfWorkLimit;
+    
+    int nHeight = pindexLast->nHeight + 1;
+
+    if (nHeight < 30)
+        return pindexLast->nBits;
+    
+    // Difficulty reset after the switch
+    if (nHeight >= Params().NeoScryptHeight() && nHeight < Params().NeoScryptHeight() + 10)
+        return Params().NeoScryptWorkLimit().GetCompact();
 
     // Only change once per interval
     if ((pindexLast->nHeight+1) % Params().Interval() != 0)
@@ -25,7 +35,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         if (Params().AllowMinDifficultyBlocks())
         {
             // Special difficulty rule for testnet:
-            // If the new block's timestamp is more than 2* 10 minutes
+            // If the new block's timestamp is more than 2* nTargetSpacing minutes
             // then allow mining of a min-difficulty block.
             if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + Params().TargetSpacing()*2)
                 return nProofOfWorkLimit;
@@ -43,34 +53,26 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     // Go back by what we want to be 14 days worth of blocks
     const CBlockIndex* pindexFirst = pindexLast;
-    for (int i = 0; pindexFirst && i < Params().Interval()-1; i++)
+    for (int i = 0; pindexFirst && i < Params().Interval(); i++)
         pindexFirst = pindexFirst->pprev;
     assert(pindexFirst);
 
     // Limit adjustment step
     int64_t nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
-    LogPrintf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
-    if (nActualTimespan < Params().TargetTimespan()/4)
-        nActualTimespan = Params().TargetTimespan()/4;
-    if (nActualTimespan > Params().TargetTimespan()*4)
-        nActualTimespan = Params().TargetTimespan()*4;
 
     // Retarget
     uint256 bnNew;
-    uint256 bnOld;
     bnNew.SetCompact(pindexLast->nBits);
-    bnOld = bnNew;
+
+    nActualTimespan = nTargetTimespan + (nActualTimespan - nTargetTimespan)/8;
+    if (nActualTimespan < (nTargetTimespan - (nTargetTimespan/4)) ) nActualTimespan = (nTargetTimespan - (nTargetTimespan/4));
+    if (nActualTimespan > (nTargetTimespan + (nTargetTimespan/2)) ) nActualTimespan = (nTargetTimespan + (nTargetTimespan/2));
+
     bnNew *= nActualTimespan;
     bnNew /= Params().TargetTimespan();
 
     if (bnNew > Params().ProofOfWorkLimit())
         bnNew = Params().ProofOfWorkLimit();
-
-    /// debug print
-    LogPrintf("GetNextWorkRequired RETARGET\n");
-    LogPrintf("Params().TargetTimespan() = %d    nActualTimespan = %d\n", Params().TargetTimespan(), nActualTimespan);
-    LogPrintf("Before: %08x  %s\n", pindexLast->nBits, bnOld.ToString());
-    LogPrintf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.ToString());
 
     return bnNew.GetCompact();
 }
