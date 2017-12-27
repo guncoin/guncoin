@@ -1234,14 +1234,20 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
 CAmount GetBlockValue(int nHeight, const CAmount& nFees)
 {
     CAmount nSubsidy = 50 * COIN;
-    int halvings = nHeight / Params().SubsidyHalvingInterval();
 
-    // Force block reward to zero when right shift is undefined.
-    if (halvings >= 64)
-        return nFees;
-
-    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
-    nSubsidy >>= halvings;
+    if(nHeight == 1) {
+        nSubsidy = 50000000 * COIN;
+    } else if(nHeight < 180) {
+        nSubsidy = 1 * COIN;
+    } else if(nHeight < 500000) {
+        nSubsidy = 200 * COIN;
+    } else if(nHeight < 1000000) {
+        nSubsidy = 150 * COIN;
+    } else if(nHeight < 1500000) {
+        nSubsidy = 100 * COIN;
+    } else if(nHeight < 2000000) {
+        nSubsidy = 75 * COIN;
+    }
 
     return nSubsidy + nFees;
 }
