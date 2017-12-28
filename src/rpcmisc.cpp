@@ -288,9 +288,9 @@ Value createmultisig(const Array& params, bool fHelp)
 
             "\nExamples:\n"
             "\nCreate a multisig address from 2 addresses\n"
-            + HelpExampleCli("createmultisig", "2 \"[\\\"16sSauSf5pF2UkUwvKGq4qjNRzBZYqgEL5\\\",\\\"171sgjn4YtPu27adkKGrdDwzRTxnRkBfKV\\\"]\"") +
+            + HelpExampleCli("createmultisig", "2 \"[\\\"GU4YXZ3N9v2pqvdFXyJf8MazB7hThgR5N1\\\",\\\"GRkyF8vq37ocxhojS5bfqnYv33gFCzCyv4\\\"]\"") +
             "\nAs a json rpc call\n"
-            + HelpExampleRpc("createmultisig", "2, \"[\\\"16sSauSf5pF2UkUwvKGq4qjNRzBZYqgEL5\\\",\\\"171sgjn4YtPu27adkKGrdDwzRTxnRkBfKV\\\"]\"")
+            + HelpExampleRpc("createmultisig", "2, \"[\\\"GU4YXZ3N9v2pqvdFXyJf8MazB7hThgR5N1\\\",\\\"GRkyF8vq37ocxhojS5bfqnYv33gFCzCyv4\\\"]\"")
         ;
         throw runtime_error(msg);
     }
