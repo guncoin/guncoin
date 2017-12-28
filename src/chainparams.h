@@ -44,6 +44,7 @@ public:
     const uint256& HashGenesisBlock() const { return hashGenesisBlock; }
     const MessageStartChars& MessageStart() const { return pchMessageStart; }
     const std::vector<unsigned char>& AlertKey() const { return vAlertPubKey; }
+    const std::string CheckpointKey() const { return checkpointPubKey;}
     unsigned int NeoScryptFork() const { return nNeoScryptFork;}
     unsigned int NeoScryptHeight() const { return nNeoScryptHeight;}
     int GetDefaultPort() const { return nDefaultPort; }
@@ -89,6 +90,7 @@ protected:
     MessageStartChars pchMessageStart;
     //! Raw pub key bytes for the broadcast alert signing key.
     std::vector<unsigned char> vAlertPubKey;
+    std::string checkpointPubKey;
     unsigned int nNeoScryptFork;
     unsigned int nNeoScryptHeight;
     int nDefaultPort;
