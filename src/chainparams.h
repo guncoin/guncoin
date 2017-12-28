@@ -46,7 +46,7 @@ public:
     const std::vector<unsigned char>& AlertKey() const { return vAlertPubKey; }
     const std::string CheckpointKey() const { return checkpointPubKey;}
     unsigned int NeoScryptFork() const { return nNeoScryptFork;}
-    unsigned int NeoScryptHeight() const { return nNeoScryptHeight;}
+    int NeoScryptHeight() const { return nNeoScryptHeight;}
     int GetDefaultPort() const { return nDefaultPort; }
     const uint256& ProofOfWorkLimit() const { return bnProofOfWorkLimit; }
     const uint256& NeoScryptWorkLimit() const { return bnNeoScryptSwitch; }
@@ -92,7 +92,7 @@ protected:
     std::vector<unsigned char> vAlertPubKey;
     std::string checkpointPubKey;
     unsigned int nNeoScryptFork;
-    unsigned int nNeoScryptHeight;
+    int nNeoScryptHeight;
     int nDefaultPort;
     uint256 bnProofOfWorkLimit;
     uint256 bnNeoScryptSwitch;
