@@ -17,9 +17,9 @@ BitcoinUnits::BitcoinUnits(QObject *parent):
 QList<BitcoinUnits::Unit> BitcoinUnits::availableUnits()
 {
     QList<BitcoinUnits::Unit> unitlist;
-    unitlist.append(BTC);
-    unitlist.append(mBTC);
-    unitlist.append(uBTC);
+    unitlist.append(GUN);
+    unitlist.append(mGUN);
+    unitlist.append(uGUN);
     return unitlist;
 }
 
@@ -27,9 +27,9 @@ bool BitcoinUnits::valid(int unit)
 {
     switch(unit)
     {
-    case BTC:
-    case mBTC:
-    case uBTC:
+    case GUN:
+    case mGUN:
+    case uGUN:
         return true;
     default:
         return false;
@@ -40,9 +40,9 @@ QString BitcoinUnits::id(int unit)
 {
     switch(unit)
     {
-    case BTC: return QString("btc");
-    case mBTC: return QString("mbtc");
-    case uBTC: return QString("ubtc");
+    case GUN: return QString("gun");
+    case mGUN: return QString("mgun");
+    case uGUN: return QString("ugun");
     default: return QString("???");
     }
 }
@@ -51,9 +51,9 @@ QString BitcoinUnits::name(int unit)
 {
     switch(unit)
     {
-    case BTC: return QString("BTC");
-    case mBTC: return QString("mBTC");
-    case uBTC: return QString::fromUtf8("μBTC");
+    case GUN: return QString("GUN");
+    case mGUN: return QString("mGUN");
+    case uGUN: return QString::fromUtf8("μGUN");
     default: return QString("???");
     }
 }
@@ -62,9 +62,9 @@ QString BitcoinUnits::description(int unit)
 {
     switch(unit)
     {
-    case BTC: return QString("Bitcoins");
-    case mBTC: return QString("Milli-Bitcoins (1 / 1" THIN_SP_UTF8 "000)");
-    case uBTC: return QString("Micro-Bitcoins (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+    case GUN: return QString("GUN");
+    case mGUN: return QString("Milli-GUN (1 / 1" THIN_SP_UTF8 "000)");
+    case uGUN: return QString("Micro-GUN (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     default: return QString("???");
     }
 }
@@ -73,9 +73,9 @@ qint64 BitcoinUnits::factor(int unit)
 {
     switch(unit)
     {
-    case BTC:  return 100000000;
-    case mBTC: return 100000;
-    case uBTC: return 100;
+    case GUN:  return 100000000;
+    case mGUN: return 100000;
+    case uGUN: return 100;
     default:   return 100000000;
     }
 }
@@ -84,9 +84,9 @@ int BitcoinUnits::decimals(int unit)
 {
     switch(unit)
     {
-    case BTC: return 8;
-    case mBTC: return 5;
-    case uBTC: return 2;
+    case GUN: return 8;
+    case mGUN: return 5;
+    case uGUN: return 2;
     default: return 0;
     }
 }
