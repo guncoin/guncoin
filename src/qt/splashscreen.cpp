@@ -24,17 +24,19 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
     QWidget(0, f), curAlignment(0)
 {
     // set reference point, paddings
-    int paddingRight            = 50;
-    int paddingTop              = 50;
-    int titleVersionVSpace      = 17;
-    int titleCopyrightVSpace    = 40;
+    int padding                 = 5;
+    int paddingTop              = 25;
+    int titleVSpace             = 17;
 
     float fontFactor            = 1.0;
 
     // define text to place
-    QString titleText       = tr("Bitcoin Core");
-    QString versionText     = QString("Version %1").arg(QString::fromStdString(FormatFullVersion()));
-    QString copyrightText   = QChar(0xA9)+QString(" 2009-%1 ").arg(COPYRIGHT_YEAR) + QString(tr("The Bitcoin Core developers"));
+    QString titleText       = tr("Guncoin Core");
+    QString versionText     = QString("%1").arg(QString::fromStdString(FormatFullVersion()));
+    QString copyrightText   = QChar(0xA9)+QString(" 2009-%1").arg(COPYRIGHT_YEAR);
+    QString copyrightTextA  = QString(tr("Bitcoin Core"));
+    QString copyrightText2  = QChar(0xA9)+QString(" 2014-%1").arg(COPYRIGHT_YEAR);
+    QString copyrightText2A = QString(tr("Guncoin"));
     QString titleAddText    = networkStyle->getTitleAddText();
 
     QString font            = QApplication::font().toString();
@@ -54,25 +56,16 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
         fontFactor = 0.75;
     }
 
-    pixPaint.setFont(QFont(font, 33*fontFactor));
-    fm = pixPaint.fontMetrics();
-    titleTextWidth  = fm.width(titleText);
-    pixPaint.drawText(pixmap.width()-titleTextWidth-paddingRight,paddingTop,titleText);
-
     pixPaint.setFont(QFont(font, 15*fontFactor));
 
-    // if the version string is to long, reduce size
-    fm = pixPaint.fontMetrics();
-    int versionTextWidth  = fm.width(versionText);
-    if(versionTextWidth > titleTextWidth+paddingRight-10) {
-        pixPaint.setFont(QFont(font, 10*fontFactor));
-        titleVersionVSpace -= 5;
-    }
-    pixPaint.drawText(pixmap.width()-titleTextWidth-paddingRight+2,paddingTop+titleVersionVSpace,versionText);
+    pixPaint.drawText(padding,paddingTop,versionText);
 
     // draw copyright stuff
     pixPaint.setFont(QFont(font, 10*fontFactor));
-    pixPaint.drawText(pixmap.width()-titleTextWidth-paddingRight,paddingTop+titleCopyrightVSpace,copyrightText);
+    pixPaint.drawText(padding,paddingTop+titleVSpace+padding,copyrightText);
+    pixPaint.drawText(padding,paddingTop+(titleVSpace*2+padding),copyrightTextA);
+    pixPaint.drawText(padding,paddingTop+(titleVSpace*3)+(padding*2),copyrightText2);
+    pixPaint.drawText(padding,paddingTop+(titleVSpace*4)+(padding*2),copyrightText2A);
 
     // draw additional text if special network
     if(!titleAddText.isEmpty()) {
