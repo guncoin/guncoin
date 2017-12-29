@@ -97,6 +97,10 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn)
         return NULL;
     CBlock *pblock = &pblocktemplate->block; // pointer for convenience
 
+    // Set block version to 4 after BlockVersionChange
+    if (chainActive.Tip()->nHeight + 1 >= Params().BlockVersionChange())
+        pblock->nVersion = CBlockHeader::NEW_VERSION;
+
     // -regtest only: allow overriding block.nVersion with
     // -blockversion=N to test forking scenarios
     if (Params().MineBlocksOnDemand())

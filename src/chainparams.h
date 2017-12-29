@@ -47,6 +47,7 @@ public:
     const std::string CheckpointKey() const { return checkpointPubKey;}
     unsigned int NeoScryptFork() const { return nNeoScryptFork;}
     int NeoScryptHeight() const { return nNeoScryptHeight;}
+    int BlockVersionChange() const { return nBlockVersionChange;}
     int GetDefaultPort() const { return nDefaultPort; }
     const uint256& ProofOfWorkLimit() const { return bnProofOfWorkLimit; }
     const uint256& NeoScryptWorkLimit() const { return bnNeoScryptSwitch; }
@@ -93,6 +94,7 @@ protected:
     std::string checkpointPubKey;
     unsigned int nNeoScryptFork;
     int nNeoScryptHeight;
+    int nBlockVersionChange;
     int nDefaultPort;
     uint256 bnProofOfWorkLimit;
     uint256 bnNeoScryptSwitch;
