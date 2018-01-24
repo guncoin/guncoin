@@ -10,17 +10,11 @@ NSEEDS=512
 
 MAX_SEEDS_PER_ASN=2
 
-MIN_BLOCKS = 337600
+MIN_BLOCKS = 800000
 
 # These are hosts that have been observed to be behaving strangely (e.g.
 # aggressively connecting to every node).
-SUSPICIOUS_HOSTS = set([
-    "130.211.129.106", "178.63.107.226",
-    "83.81.130.26", "88.198.17.7", "148.251.238.178", "176.9.46.6",
-    "54.173.72.127", "54.174.10.182", "54.183.64.54", "54.194.231.211",
-    "54.66.214.167", "54.66.220.137", "54.67.33.14", "54.77.251.214",
-    "54.94.195.96", "54.94.200.247"
-])
+SUSPICIOUS_HOSTS = set([])
 
 import re
 import sys
@@ -30,7 +24,7 @@ import collections
 PATTERN_IPV4 = re.compile(r"^((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})):(\d+)$")
 PATTERN_IPV6 = re.compile(r"^\[([0-9a-z:]+)\]:(\d+)$")
 PATTERN_ONION = re.compile(r"^([abcdefghijklmnopqrstuvwxyz234567]{16}\.onion):(\d+)$")
-PATTERN_AGENT = re.compile(r"^(\/Satoshi:0\.8\.6\/|\/Satoshi:0\.9\.(2|3|4|5)\/|\/Satoshi:0\.10\.\d{1,2}\/|\/Satoshi:0\.11\.\d{1,2}\/)$")
+PATTERN_AGENT = re.compile(r"^(\/Guncoin:1\.1\.0\/|\/Guncoin:1\.2\.0\/|\/Guncoin:1\.3\.0\/|\/Guncoin:1\.4\.0\/)$")
 
 def parseline(line):
     sline = line.split()
@@ -149,8 +143,8 @@ def main():
     ips = [ip for ip in ips if ip['blocks'] >= MIN_BLOCKS]
     # Require service bit 1.
     ips = [ip for ip in ips if (ip['service'] & 1) == 1]
-    # Require at least 50% 30-day uptime.
-    ips = [ip for ip in ips if ip['uptime'] > 50]
+    # Require at least 25% 30-day uptime.
+    ips = [ip for ip in ips if ip['uptime'] > 25]
     # Require a known and recent user agent.
     ips = [ip for ip in ips if PATTERN_AGENT.match(ip['agent'])]
     # Sort by availability (and use last success as tie breaker)
