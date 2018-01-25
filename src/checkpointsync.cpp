@@ -180,8 +180,11 @@ bool CheckSyncCheckpoint(const uint256& hashBlock, const CBlockIndex* pindexPrev
     int nHeight = pindexPrev->nHeight + 1;
 
     LOCK(cs_hashSyncCheckpoint);
-    // sync-checkpoint should always be accepted block
-    assert(mapBlockIndex.count(hashSyncCheckpoint));
+    // Reset checkpoint to Genesis block if not found or initialised
+    if (hashSyncCheckpoint == 0 || !(mapBlockIndex.count(hashSyncCheckpoint))) {
+        WriteSyncCheckpoint(Params().HashGenesisBlock());
+        return true;
+    }
     const CBlockIndex* pindexSync = mapBlockIndex[hashSyncCheckpoint];
 
     if (nHeight > pindexSync->nHeight)
