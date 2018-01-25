@@ -58,6 +58,7 @@ struct Params {
     /** Proof of work parameters */
     uint256 powLimit;
     uint256 powNeoScryptLimit;
+    int nDiffChange;
     std::string checkpointPubKey;
     std::vector<unsigned char> vAlertPubKey;
     bool fPowAllowMinDifficultyBlocks;
