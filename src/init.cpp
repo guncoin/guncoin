@@ -892,6 +892,10 @@ bool AppInitParameterInteraction()
     const CChainParams& chainparams = Params();
     // ********************************************************* Step 2: parameter interactions
 
+#if defined (USE_ASM)
+    nNeoScryptOptions |= 0x1000;
+#endif
+
     // also see: InitParameterInteraction()
 
     // if using block pruning, then disallow txindex
