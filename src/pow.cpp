@@ -14,6 +14,16 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 {
     assert(pindexLast != nullptr);
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
+    int64_t nTargetTimespan = params.nPowTargetTimespan;
+
+    int nHeight = pindexLast->nHeight + 1;
+
+    if (nHeight < 30)
+        return pindexLast->nBits;
+
+    // Difficulty reset after the switch
+    if (nHeight >= params.nNeoScryptHeight && nHeight < params.nNeoScryptHeight + 10)
+        return UintToArith256(params.powNeoScryptLimit).GetCompact();
 
     // Only change once per difficulty adjustment interval
     if ((pindexLast->nHeight+1) % params.DifficultyAdjustmentInterval() != 0)
@@ -21,7 +31,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         if (params.fPowAllowMinDifficultyBlocks)
         {
             // Special difficulty rule for testnet:
-            // If the new block's timestamp is more than 2* 10 minutes
+            // If the new block's timestamp is more than 2* nTargetSpacing minutes
             // then allow mining of a min-difficulty block.
             if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing*2)
                 return nProofOfWorkLimit;
@@ -38,25 +48,22 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     }
 
     // Go back by what we want to be 14 days worth of blocks
-    int nHeightFirst = pindexLast->nHeight - (params.DifficultyAdjustmentInterval()-1);
-    assert(nHeightFirst >= 0);
-    const CBlockIndex* pindexFirst = pindexLast->GetAncestor(nHeightFirst);
+    const CBlockIndex* pindexFirst = pindexLast;
+    for (int i = 0; pindexFirst && i < params.DifficultyAdjustmentInterval(); i++)
+        pindexFirst = pindexFirst->pprev;
     assert(pindexFirst);
 
-    return CalculateNextWorkRequired(pindexLast, pindexFirst->GetBlockTime(), params);
-}
-
-unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
-{
     if (params.fPowNoRetargeting)
         return pindexLast->nBits;
 
     // Limit adjustment step
-    int64_t nActualTimespan = pindexLast->GetBlockTime() - nFirstBlockTime;
-    if (nActualTimespan < params.nPowTargetTimespan/4)
-        nActualTimespan = params.nPowTargetTimespan/4;
-    if (nActualTimespan > params.nPowTargetTimespan*4)
-        nActualTimespan = params.nPowTargetTimespan*4;
+    int64_t nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
+
+    nActualTimespan = nTargetTimespan + (nActualTimespan - nTargetTimespan)/8;
+    if (nActualTimespan < (nTargetTimespan - (nTargetTimespan/4)))
+        nActualTimespan = (nTargetTimespan - (nTargetTimespan/4));
+    if (nActualTimespan > (nTargetTimespan + (nTargetTimespan/2)))
+        nActualTimespan = (nTargetTimespan + (nTargetTimespan/2));
 
     // Retarget
     arith_uint256 bnNew;
