@@ -21,6 +21,9 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (nHeight < 30)
         return pindexLast->nBits;
 
+    if (nHeight >= params.nDiffChange)
+        return GetNextWorkRequired_eHRC(pindexLast, params);
+
     // Difficulty reset after the switch
     if (nHeight >= params.nNeoScryptHeight && nHeight < params.nNeoScryptHeight + 10)
         return UintToArith256(params.powNeoScryptLimit).GetCompact();
@@ -79,6 +82,79 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     if (bnNew > bnPowLimit)
         bnNew = bnPowLimit;
+
+    return bnNew.GetCompact();
+}
+
+/**
+ * eHRC difficulty adjust
+ * Short, medium and long samples averaged together and compared against the target time span.
+ * Adjust every block but limted to 9% change maximum.
+*/
+unsigned int GetNextWorkRequired_eHRC(const CBlockIndex* pindexLast, const Consensus::Params& params)
+{
+    int nHeight = pindexLast->nHeight + 1;
+    int nTargetTimespan = 90;
+    int shortSample = 15;
+    int mediumSample = 180;
+    int longSample = 720;
+    int pindexFirstShortTime = 0;
+    int pindexFirstMediumTime = 0;
+    int nActualTimespan = 0;
+    int nActualTimespanShort = 0;
+    int nActualTimespanMedium = 0;
+    int nActualTimespanLong = 0;
+
+    // Genesis block or new chain
+    if (pindexLast == NULL || nHeight <= longSample + 1)
+        return UintToArith256(params.powLimit).GetCompact();
+
+    const CBlockIndex* pindexFirstLong = pindexLast;
+    for(int i = 0; pindexFirstLong && i < longSample; i++) {
+        pindexFirstLong = pindexFirstLong->pprev;
+        if (i == shortSample - 1)
+            pindexFirstShortTime = pindexFirstLong->GetBlockTime();
+
+        if (i == mediumSample - 1)
+            pindexFirstMediumTime = pindexFirstLong->GetBlockTime();
+    }
+
+    if (pindexLast->GetBlockTime() - pindexFirstShortTime != 0)
+        nActualTimespanShort = (pindexLast->GetBlockTime() - pindexFirstShortTime) / shortSample;
+
+    if (pindexLast->GetBlockTime() - pindexFirstMediumTime != 0)
+        nActualTimespanMedium = (pindexLast->GetBlockTime() - pindexFirstMediumTime)/ mediumSample;
+
+    if (pindexLast->GetBlockTime() - pindexFirstLong->GetBlockTime() != 0)
+        nActualTimespanLong = (pindexLast->GetBlockTime() - pindexFirstLong->GetBlockTime()) / longSample;
+
+    int nActualTimespanSum = nActualTimespanShort + nActualTimespanMedium + nActualTimespanLong;
+
+    if (nActualTimespanSum != 0)
+        nActualTimespan = nActualTimespanSum / 3;
+
+    // Apply .25 damping
+    nActualTimespan = nActualTimespan + (3 * nTargetTimespan);
+    nActualTimespan /= 4;
+
+    // 9% difficulty limiter
+    int nActualTimespanMax = nTargetTimespan * 494 / 453;
+    int nActualTimespanMin = nTargetTimespan * 453 / 494;
+
+    if(nActualTimespan < nActualTimespanMin)
+        nActualTimespan = nActualTimespanMin;
+
+    if(nActualTimespan > nActualTimespanMax)
+        nActualTimespan = nActualTimespanMax;
+
+    // Retarget
+    arith_uint256 bnNew;
+    bnNew.SetCompact(pindexLast->nBits);
+    bnNew *= nActualTimespan;
+    bnNew /= nTargetTimespan;
+
+    if (bnNew > UintToArith256(params.powLimit))
+        bnNew = UintToArith256(params.powLimit);
 
     return bnNew.GetCompact();
 }
