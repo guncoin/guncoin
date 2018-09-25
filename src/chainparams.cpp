@@ -80,7 +80,7 @@ public:
         consensus.nNeoScryptFork = 1414482565;
         consensus.nPowTargetTimespan = 2 * 60; // two weeks
         consensus.nPowTargetSpacing = 2 * 60;
-        consensus.checkpointPubKey = "04c1e0b0db27b846cd9b8f151904f7edfc2dfaf6f062471f8f86fc23418e0a23f2551e34b02642c79bfeb75755d23d5194243b73318ce35eace6e6042ec399b37c";
+        consensus.checkpointPubKey = "0405f97712fd241d9af801b5839955c6a55ce742a34eb7074610a703c18202faa769e08ba30e055b925fc5b546393e1b7374e5c54f0f095104da8f96124acf4c40";
         consensus.vAlertPubKey = ParseHex("045a8927ef4e11ac24f4e65de016ae415fb3eb7ac0396b2dcf9f8451d96caf58908f8925811dea37f6c5b5789a2b4f78c7a1b5f56f019554061bbd01924612b4a0");
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
