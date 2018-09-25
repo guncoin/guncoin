@@ -326,8 +326,6 @@ bool CSyncCheckpoint::ProcessSyncCheckpoint(CNode* pfrom)
     if (!ValidateSyncCheckpoint(hashCheckpoint))
         return false;
 
-	CBlockIndex* pindexCheckpoint = mapBlockIndex[hashCheckpoint];
-
 	if (!WriteSyncCheckpoint(hashCheckpoint))
         return error("ProcessSyncCheckpoint(): failed to write sync checkpoint %s", hashCheckpoint.ToString().c_str());
 
