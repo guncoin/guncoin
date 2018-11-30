@@ -7,6 +7,7 @@
 
 #include <arith_uint256.h>
 #include <chain.h>
+#include <chainparams.h>
 #include <primitives/block.h>
 #include <uint256.h>
 
@@ -19,6 +20,13 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     int nHeight = pindexLast->nHeight + 1;
 
     if (nHeight < 30)
+        return pindexLast->nBits;
+
+    // Easy difficulty for reward generation block so generate can mine it
+    if (nHeight == params.nReplacementFunds)
+        return UintToArith256(params.powLimit).GetCompact();
+
+    if (params.fPowNoRetargeting)
         return pindexLast->nBits;
 
     if (nHeight >= params.nDiffChange)

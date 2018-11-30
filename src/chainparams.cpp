@@ -9,6 +9,7 @@
 #include <tinyformat.h>
 #include <util.h>
 #include <utilstrencodings.h>
+#include <base58.h>
 
 #include <assert.h>
 
@@ -78,6 +79,7 @@ public:
         consensus.nDiffChange = 850000;
         consensus.nNeoScryptHeight = 120000;
         consensus.nNeoScryptFork = 1414482565;
+        consensus.nReplacementFunds = 1097000;
         consensus.nPowTargetTimespan = 2 * 60; // two weeks
         consensus.nPowTargetSpacing = 2 * 60;
         consensus.checkpointPubKey = "0405f97712fd241d9af801b5839955c6a55ce742a34eb7074610a703c18202faa769e08ba30e055b925fc5b546393e1b7374e5c54f0f095104da8f96124acf4c40";
@@ -180,6 +182,7 @@ public:
         consensus.nNeoScryptHeight = 1;
         consensus.nNeoScryptFork = 1397925815;
         consensus.nDiffChange = 100;
+        consensus.nReplacementFunds = 1713;
         consensus.nPowTargetTimespan = 2 * 60; // two weeks
         consensus.nPowTargetSpacing = 2 * 60;
         consensus.checkpointPubKey = "04b0c74b4334f0fd96f09070fbc28dc61a7dc1fbe8988ac98321f45fdd8ce8fed848f04ecaa398bfadb51b5f5adf706e9507f403ab5dce3c57bccf6c3a7db7e7a9";
@@ -272,6 +275,7 @@ public:
         consensus.powNeoScryptLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nNeoScryptHeight = 1;
         consensus.nDiffChange = 1;
+        consensus.nReplacementFunds = 1000;
         consensus.nPowTargetTimespan = 2 * 60; // two weeks
         consensus.nPowTargetSpacing = 2 * 60;
         consensus.checkpointPubKey = "04b0c74b4334f0fd96f09070fbc28dc61a7dc1fbe8988ac98321f45fdd8ce8fed848f04ecaa398bfadb51b5f5adf706e9507f403ab5dce3c57bccf6c3a7db7e7a9";
@@ -365,4 +369,19 @@ void SelectParams(const std::string& network)
 void UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout)
 {
     globalChainParams->UpdateVersionBitsParameters(d, nStartTime, nTimeout);
+}
+
+CScript CChainParams::GetRewardScriptAtHeight(int nHeight) const {
+    assert(nHeight == consensus.nReplacementFunds);
+
+    CTxDestination destination;
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN)
+        destination = DecodeDestination("GtoEJDevx7sd4xGLXykL7wRV4JJopXYvYT");
+    else if (Params().NetworkIDString() == CBaseChainParams::TESTNET)
+        destination = DecodeDestination("mh5BZckayvuKSkJSr1ALTkWkJe4LacaD2j");
+    else if (Params().NetworkIDString() == CBaseChainParams::REGTEST)
+        destination = DecodeDestination("tHbHVEfnapHgkAm6eL6FSGkYEDhVBmDeBe");
+
+    assert(IsValidDestination(destination));
+    return GetScriptForDestination(destination);
 }
