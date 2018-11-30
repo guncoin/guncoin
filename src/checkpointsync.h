@@ -27,9 +27,8 @@ extern std::string strCheckpointWarning;
 bool WriteSyncCheckpoint(const uint256& hashCheckpoint);
 bool AcceptPendingSyncCheckpoint();
 uint256 AutoSelectSyncCheckpoint();
-bool CheckSyncCheckpoint(const uint256& hashBlock, const CBlockIndex* pindexPrev);
+bool CheckSyncCheckpoint(const CBlockIndex* pindexNew);
 bool ResetSyncCheckpoint();
-void AskForPendingSyncCheckpoint(CNode* pfrom);
 bool CheckCheckpointPubKey();
 bool SetCheckpointPrivKey(std::string strPrivKey);
 bool SendSyncCheckpoint(uint256 hashCheckpoint);
@@ -112,21 +111,18 @@ public:
 
     bool RelayTo(CNode* pfrom) const
     {
-        const CNetMsgMaker msgMaker(pfrom->GetSendVersion());
-
         // returns true if wasn't already sent
-        if (pfrom->hashCheckpointKnown != hashCheckpoint)
+        if (g_connman && pfrom->hashCheckpointKnown != hashCheckpoint)
         {
-            CConnman& connman = *g_connman;
             pfrom->hashCheckpointKnown = hashCheckpoint;
-            connman.PushMessage(pfrom, msgMaker.Make(NetMsgType::CHECKPOINT, *this));
+            g_connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::CHECKPOINT, *this));
             return true;
         }
         return false;
     }
 
     bool CheckSignature();
-    bool ProcessSyncCheckpoint(CNode* pfrom);
+    bool ProcessSyncCheckpoint();
 };
 
 #endif

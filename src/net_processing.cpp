@@ -1718,9 +1718,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         pfrom->nTimeOffset = nTimeOffset;
         AddTimeData(pfrom->addr, nTimeOffset);
 
-        if (!IsInitialBlockDownload())
-            AskForPendingSyncCheckpoint(pfrom);
-
         // Feeler connections exist only to verify if address is online.
         if (pfrom->fFeeler) {
             assert(pfrom->fInbound == false);
@@ -2793,7 +2790,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         CSyncCheckpoint checkpoint;
         vRecv >> checkpoint;
 
-        if (checkpoint.ProcessSyncCheckpoint(pfrom))
+        if (checkpoint.ProcessSyncCheckpoint())
         {
             LogPrintf("%s: hashCheckpoint=%s\n", __func__, checkpoint.hashCheckpoint.ToString().c_str());
 
