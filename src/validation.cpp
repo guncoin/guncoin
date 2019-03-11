@@ -1169,6 +1169,14 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 
     CAmount nSubsidy = 50 * COIN;
 
+    // Move height forward at 100 coin reward to compensate for 38.75m of the 50m extra coins
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN && nHeight >= consensusParams.nReplacementFunds)
+        nHeight += 387500;
+
+    // Move height forward at 75 coin reward to compensate for 11.25m of the 50m extra coins
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN && nHeight >= 1500000)
+        nHeight += 150000;
+
     if(nHeight == 1) {
         nSubsidy = 50000000 * COIN;
     } else if(nHeight < 180) {
@@ -1189,6 +1197,12 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
     nSubsidy >>= halvings;
 
     return nSubsidy;
+}
+
+CAmount GetSubsidy(int nHeight) {
+    if (nHeight == Params().GetConsensus().nReplacementFunds)
+        return 50000000 * COIN;
+    return 0;
 }
 
 bool IsInitialBlockDownload()
@@ -1989,6 +2003,8 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
     CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
+    if (pindex->nHeight == chainparams.GetConsensus().nReplacementFunds)
+        blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus()) + GetSubsidy(pindex->nHeight);
     if (block.vtx[0]->GetValueOut() > blockReward)
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
@@ -3286,6 +3302,22 @@ static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, c
                 return state.DoS(100, false, REJECT_INVALID, "unexpected-witness", true, strprintf("%s : unexpected witness data found", __func__));
             }
         }
+    }
+
+    // Coinbase transaction must include additional one off reward
+    if (nHeight == consensusParams.nReplacementFunds) {
+        bool found = false;
+
+        for (const CTxOut& output : block.vtx[0]->vout) {
+            if (output.scriptPubKey == Params().GetRewardScriptAtHeight(nHeight)) {
+                if (output.nValue == GetSubsidy(nHeight)) {
+                    found = true;
+                }
+            }
+        }
+
+        if (!found)
+            return state.DoS(100, error("%s: additional reward missing", __func__), REJECT_INVALID, "additional-reward-missing");
     }
 
     // After the coinbase witness reserved value and commitment are verified,

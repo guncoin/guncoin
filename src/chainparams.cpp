@@ -9,6 +9,7 @@
 #include <tinyformat.h>
 #include <util.h>
 #include <utilstrencodings.h>
+#include <base58.h>
 
 #include <assert.h>
 
@@ -79,6 +80,7 @@ public:
         consensus.nDiffChange = 850000;
         consensus.nNeoScryptHeight = 120000;
         consensus.nNeoScryptFork = 1414482565;
+        consensus.nReplacementFunds = 1097000;
         consensus.nPowTargetTimespan = 2 * 60;
         consensus.nPowTargetSpacing = 2 * 60;
         consensus.fPowAllowMinDifficultyBlocks = false;
@@ -178,6 +180,7 @@ public:
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powNeoScryptLimit = uint256S("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nDiffChange = 100;
+        consensus.nReplacementFunds = 1713;
         consensus.nNeoScryptHeight = 1;
         consensus.nNeoScryptFork = 1397925815;
         consensus.nPowTargetTimespan = 2 * 60;
@@ -272,6 +275,7 @@ public:
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powNeoScryptLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nDiffChange = 1;
+        consensus.nReplacementFunds = 1000;
         consensus.nNeoScryptHeight = 1;
         consensus.nPowTargetTimespan = 2 * 60;
         consensus.nPowTargetSpacing = 2 * 60;
@@ -367,4 +371,19 @@ void SelectParams(const std::string& network)
 void UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout)
 {
     globalChainParams->UpdateVersionBitsParameters(d, nStartTime, nTimeout);
+}
+
+CScript CChainParams::GetRewardScriptAtHeight(int nHeight) const {
+    assert(nHeight == consensus.nReplacementFunds);
+
+    CTxDestination destination;
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN)
+        destination = DecodeDestination("GtoEJDevx7sd4xGLXykL7wRV4JJopXYvYT");
+    else if (Params().NetworkIDString() == CBaseChainParams::TESTNET)
+        destination = DecodeDestination("mh5BZckayvuKSkJSr1ALTkWkJe4LacaD2j");
+    else if (Params().NetworkIDString() == CBaseChainParams::REGTEST)
+        destination = DecodeDestination("tHbHVEfnapHgkAm6eL6FSGkYEDhVBmDeBe");
+
+    assert(IsValidDestination(destination));
+    return GetScriptForDestination(destination);
 }
