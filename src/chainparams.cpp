@@ -9,7 +9,7 @@
 #include <tinyformat.h>
 #include <util.h>
 #include <utilstrencodings.h>
-#include <base58.h>
+#include <key_io.h>
 
 #include <assert.h>
 
