@@ -71,6 +71,7 @@ struct Params {
     uint256 powNeoScryptLimit;
     unsigned int nNeoScryptFork;
     unsigned int nNeoScryptHeight;
+    int nDiffChange;
     bool fPowAllowMinDifficultyBlocks;
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;

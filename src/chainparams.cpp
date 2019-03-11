@@ -76,6 +76,7 @@ public:
         consensus.BIP66Height = 845000; // fe1250d69e8541ceb38eff15cecc632353df02c8efdb12de612e498b160eeeb7
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powNeoScryptLimit = uint256S("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nDiffChange = 850000;
         consensus.nNeoScryptHeight = 120000;
         consensus.nNeoScryptFork = 1414482565;
         consensus.nPowTargetTimespan = 2 * 60;
@@ -176,6 +177,7 @@ public:
         consensus.BIP66Height = 751;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powNeoScryptLimit = uint256S("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nDiffChange = 100;
         consensus.nNeoScryptHeight = 1;
         consensus.nNeoScryptFork = 1397925815;
         consensus.nPowTargetTimespan = 2 * 60;
@@ -269,6 +271,7 @@ public:
         consensus.BIP66Height = 1251; // BIP66 activated on regtest (Used in rpc activation tests)
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.powNeoScryptLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nDiffChange = 1;
         consensus.nNeoScryptHeight = 1;
         consensus.nPowTargetTimespan = 2 * 60;
         consensus.nPowTargetSpacing = 2 * 60;
