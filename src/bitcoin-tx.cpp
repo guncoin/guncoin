@@ -98,9 +98,9 @@ static int AppInitRawTx(int argc, char* argv[])
 
     if (argc < 2 || HelpRequested(gArgs)) {
         // First part of help message is specific to this utility
-        std::string strUsage = PACKAGE_NAME " bitcoin-tx utility version " + FormatFullVersion() + "\n\n" +
-            "Usage:  bitcoin-tx [options] <hex-tx> [commands]  Update hex-encoded bitcoin transaction\n" +
-            "or:     bitcoin-tx [options] -create [commands]   Create hex-encoded bitcoin transaction\n" +
+        std::string strUsage = PACKAGE_NAME " guncoin-tx utility version " + FormatFullVersion() + "\n\n" +
+            "Usage:  guncoin-tx [options] <hex-tx> [commands]  Update hex-encoded guncoin transaction\n" +
+            "or:     guncoin-tx [options] -create [commands]   Create hex-encoded guncoin transaction\n" +
             "\n";
         strUsage += gArgs.GetHelpMessage();
 
