@@ -83,6 +83,7 @@ public:
         consensus.nReplacementFunds = 1097000;
         consensus.nPowTargetTimespan = 2 * 60;
         consensus.nPowTargetSpacing = 2 * 60;
+        consensus.checkpointPubKey = "0405f97712fd241d9af801b5839955c6a55ce742a34eb7074610a703c18202faa769e08ba30e055b925fc5b546393e1b7374e5c54f0f095104da8f96124acf4c40";
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 7560; // 75% of 10080
@@ -185,6 +186,7 @@ public:
         consensus.nNeoScryptFork = 1397925815;
         consensus.nPowTargetTimespan = 2 * 60;
         consensus.nPowTargetSpacing = 2 * 60;
+        consensus.checkpointPubKey = "04b0c74b4334f0fd96f09070fbc28dc61a7dc1fbe8988ac98321f45fdd8ce8fed848f04ecaa398bfadb51b5f5adf706e9507f403ab5dce3c57bccf6c3a7db7e7a9";
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 375;
@@ -279,6 +281,7 @@ public:
         consensus.nNeoScryptHeight = 1;
         consensus.nPowTargetTimespan = 2 * 60;
         consensus.nPowTargetSpacing = 2 * 60;
+        consensus.checkpointPubKey = "04b0c74b4334f0fd96f09070fbc28dc61a7dc1fbe8988ac98321f45fdd8ce8fed848f04ecaa398bfadb51b5f5adf706e9507f403ab5dce3c57bccf6c3a7db7e7a9";
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
