@@ -10,6 +10,7 @@
 #include <limits>
 #include <map>
 #include <string>
+#include <vector>
 
 namespace Consensus {
 
@@ -72,6 +73,7 @@ struct Params {
     unsigned int nNeoScryptFork;
     unsigned int nNeoScryptHeight;
     std::string checkpointPubKey;
+    std::vector<unsigned char> vAlertPubKey;
     int nReplacementFunds;
     int nDiffChange;
     bool fPowAllowMinDifficultyBlocks;
