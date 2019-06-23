@@ -19,6 +19,10 @@
 #include <util.h> // for GetBoolArg
 #include <wallet/coincontrol.h>
 #include <wallet/wallet.h>
+#include <wallet/walletdb.h> // for BackupWallet
+
+#include <instantx.h>
+#include <privatesend-client.h>
 
 #include <stdint.h>
 
@@ -33,7 +37,9 @@ WalletModel::WalletModel(std::unique_ptr<interfaces::Wallet> wallet, interfaces:
     transactionTableModel(0),
     recentRequestsTableModel(0),
     cachedEncryptionStatus(Unencrypted),
-    cachedNumBlocks(0)
+    cachedNumBlocks(0),
+    cachedTxLocks(0),
+    cachedPrivateSendRounds(0)
 {
     fHaveWatchOnly = m_wallet->haveWatchOnly();
     fForceCheckBalanceChanged = false;
@@ -76,12 +82,13 @@ void WalletModel::pollBalanceChanged()
         return;
     }
 
-    if(fForceCheckBalanceChanged || m_node.getNumBlocks() != cachedNumBlocks)
+    if(fForceCheckBalanceChanged || m_node.getNumBlocks() != cachedNumBlocks || privateSendClient.nPrivateSendRounds != cachedPrivateSendRounds || cachedTxLocks != nCompleteTXLocks)
     {
         fForceCheckBalanceChanged = false;
 
         // Balance and number of transactions might have changed
         cachedNumBlocks = m_node.getNumBlocks();
+        cachedPrivateSendRounds = privateSendClient.nPrivateSendRounds;
 
         checkBalanceChanged(new_balances);
         if(transactionTableModel)
@@ -91,8 +98,9 @@ void WalletModel::pollBalanceChanged()
 
 void WalletModel::checkBalanceChanged(const interfaces::WalletBalances& new_balances)
 {
-    if(new_balances.balanceChanged(m_cached_balances)) {
+    if(new_balances.balanceChanged(m_cached_balances) || cachedTxLocks != nCompleteTXLocks ) {
         m_cached_balances = new_balances;
+        cachedTxLocks = nCompleteTXLocks;
         Q_EMIT balanceChanged(new_balances);
     }
 }
@@ -201,10 +209,29 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
         std::string strFailReason;
 
         auto& newTx = transaction.getWtx();
-        newTx = m_wallet->createTransaction(vecSend, coinControl, true /* sign */, nChangePosRet, nFeeRequired, strFailReason);
+
+        if(recipients[0].fUseInstantSend && total > INSTANTSEND_MAX_VALUE){
+            Q_EMIT message(tr("Send Coins"), tr("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 GUN.").arg(INSTANTSEND_MAX_VALUE),
+                         CClientUIInterface::MSG_ERROR);
+            return TransactionCreationFailed;
+        }
+
+        newTx = m_wallet->createTransaction(vecSend, coinControl, true /* sign */, nChangePosRet, nFeeRequired, strFailReason, recipients[0].inputType, recipients[0].fUseInstantSend);
         transaction.setTransactionFee(nFeeRequired);
         if (fSubtractFeeFromAmount && newTx)
             transaction.reassignAmounts(nChangePosRet);
+
+        if(recipients[0].fUseInstantSend) {
+            if(newTx->get().GetValueOut() > INSTANTSEND_MAX_VALUE) {
+                Q_EMIT message(tr("Send Coins"), tr("InstantSend doesn't support sending values that high yet. Transactions are currently limited to %1 GUN.").arg(INSTANTSEND_MAX_VALUE),
+                             CClientUIInterface::MSG_ERROR);
+                return TransactionCreationFailed;
+            }
+            if(newTx->get().vin.size() > CTxLockRequest::WARN_MANY_INPUTS) {
+                Q_EMIT message(tr("Send Coins"), tr("Used way too many inputs (>%1) for this InstantSend transaction, fees could be huge.").arg(CTxLockRequest::WARN_MANY_INPUTS),
+                             CClientUIInterface::MSG_WARNING);
+            }
+        }
 
         if(!newTx)
         {
@@ -233,7 +260,8 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction &tran
 
     {
         std::vector<std::pair<std::string, std::string>> vOrderForm;
-        for (const SendCoinsRecipient &rcp : transaction.getRecipients())
+        QList<SendCoinsRecipient> recipients = transaction.getRecipients();
+        for (const SendCoinsRecipient &rcp : recipients)
         {
             if (rcp.paymentRequest.IsInitialized())
             {
@@ -253,7 +281,7 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction &tran
 
         auto& newTx = transaction.getWtx();
         std::string rejectReason;
-        if (!newTx->commit({} /* mapValue */, std::move(vOrderForm), {} /* fromAccount */, rejectReason))
+        if (!newTx->commit({} /* mapValue */, std::move(vOrderForm), {} /* fromAccount */, rejectReason, recipients[0].fUseInstantSend ? NetMsgType::TXLOCKREQUEST : NetMsgType::TX))
             return SendCoinsReturn(TransactionCommitFailed, QString::fromStdString(rejectReason));
 
         CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
@@ -319,9 +347,13 @@ WalletModel::EncryptionStatus WalletModel::getEncryptionStatus() const
     {
         return Unencrypted;
     }
-    else if(m_wallet->isLocked())
+    else if(m_wallet->isLocked(true))
     {
         return Locked;
+    }
+    else if (m_wallet->isLocked())
+    {
+        return UnlockedForMixingOnly;
     }
     else
     {
@@ -343,7 +375,7 @@ bool WalletModel::setWalletEncrypted(bool encrypted, const SecureString &passphr
     }
 }
 
-bool WalletModel::setWalletLocked(bool locked, const SecureString &passPhrase)
+bool WalletModel::setWalletLocked(bool locked, const SecureString &passPhrase, bool fMixing)
 {
     if(locked)
     {
@@ -353,7 +385,7 @@ bool WalletModel::setWalletLocked(bool locked, const SecureString &passPhrase)
     else
     {
         // Unlock
-        return m_wallet->unlock(passPhrase);
+        return m_wallet->unlock(passPhrase, fMixing);
     }
 }
 
@@ -437,32 +469,49 @@ void WalletModel::unsubscribeFromCoreSignals()
 }
 
 // WalletModel::UnlockContext implementation
-WalletModel::UnlockContext WalletModel::requestUnlock()
+WalletModel::UnlockContext WalletModel::requestUnlock(bool fForMixingOnly)
 {
-    bool was_locked = getEncryptionStatus() == Locked;
-    if(was_locked)
-    {
-        // Request UI to unlock wallet
-        Q_EMIT requireUnlock();
-    }
-    // If wallet is still locked, unlock was failed or cancelled, mark context as invalid
-    bool valid = getEncryptionStatus() != Locked;
+    EncryptionStatus encStatusOld = getEncryptionStatus();
 
-    return UnlockContext(this, valid, was_locked);
+    // Wallet was completely locked
+    bool was_locked = (encStatusOld == Locked);
+    // Wallet was unlocked for mixing
+    bool was_mixing = (encStatusOld == UnlockedForMixingOnly);
+    // Wallet was unlocked for mixing and now user requested to fully unlock it
+    bool fMixingToFullRequested = !fForMixingOnly && was_mixing;
+
+    if(was_locked || fMixingToFullRequested) {
+        // Request UI to unlock wallet
+        Q_EMIT requireUnlock(fForMixingOnly);
+    }
+
+    EncryptionStatus encStatusNew = getEncryptionStatus();
+
+    // Wallet was locked, user requested to unlock it for mixing and failed to do so
+    bool fMixingUnlockFailed = fForMixingOnly && !(encStatusNew == UnlockedForMixingOnly);
+    // Wallet was unlocked for mixing, user requested to fully unlock it and failed
+    bool fMixingToFullFailed = fMixingToFullRequested && !(encStatusNew == Unlocked);
+    // If wallet is still locked, unlock failed or was cancelled, mark context as invalid
+    bool fInvalid = (encStatusNew == Locked) || fMixingUnlockFailed || fMixingToFullFailed;
+    // Wallet was not locked in any way or user tried to unlock it for mixing only and succeeded, keep it unlocked
+    bool fKeepUnlocked = !was_locked || (fForMixingOnly && !fMixingUnlockFailed);
+
+    return UnlockContext(this, !fInvalid, !fKeepUnlocked, was_mixing);
 }
 
-WalletModel::UnlockContext::UnlockContext(WalletModel *_wallet, bool _valid, bool _relock):
+WalletModel::UnlockContext::UnlockContext(WalletModel *_wallet, bool _valid, bool _was_locked, bool _was_mixing):
         wallet(_wallet),
         valid(_valid),
-        relock(_relock)
+        was_locked(_was_locked),
+        was_mixing(_was_mixing)
 {
 }
 
 WalletModel::UnlockContext::~UnlockContext()
 {
-    if(valid && relock)
+    if(valid && (was_locked || was_mixing))
     {
-        wallet->setWalletLocked(true);
+        wallet->setWalletLocked(true, "", was_mixing);
     }
 }
 
@@ -470,7 +519,8 @@ void WalletModel::UnlockContext::CopyFrom(const UnlockContext& rhs)
 {
     // Transfer context; old object no longer relocks wallet
     *this = rhs;
-    rhs.relock = false;
+    rhs.was_locked = false;
+    rhs.was_mixing = false;
 }
 
 void WalletModel::loadReceiveRequests(std::vector<std::string>& vReceiveRequests)

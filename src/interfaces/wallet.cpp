@@ -40,11 +40,12 @@ public:
     bool commit(WalletValueMap value_map,
         WalletOrderForm order_form,
         std::string from_account,
-        std::string& reject_reason) override
+        std::string& reject_reason,
+        const std::string& strCommand) override
     {
         LOCK2(cs_main, m_wallet.cs_wallet);
         CValidationState state;
-        if (!m_wallet.CommitTransaction(m_tx, std::move(value_map), std::move(order_form), std::move(from_account), m_key, g_connman.get(), state)) {
+        if (!m_wallet.CommitTransaction(m_tx, std::move(value_map), std::move(order_form), std::move(from_account), m_key, g_connman.get(), state, strCommand)) {
             reject_reason = state.GetRejectReason();
             return false;
         }
@@ -104,13 +105,14 @@ WalletTxStatus MakeWalletTxStatus(const CWalletTx& wtx)
 }
 
 //! Construct wallet TxOut struct.
-WalletTxOut MakeWalletTxOut(CWallet& wallet, const CWalletTx& wtx, int n, int depth)
+WalletTxOut MakeWalletTxOut(CWallet& wallet, const CWalletTx& wtx, int n, int depth, int round)
 {
     WalletTxOut result;
     result.txout = wtx.tx->vout[n];
     result.time = wtx.GetTxTime();
     result.depth_in_main_chain = depth;
     result.is_spent = wallet.IsSpent(wtx.GetHash(), n);
+    result.rounds = round;
     return result;
 }
 
@@ -125,8 +127,8 @@ public:
     }
     bool isCrypted() override { return m_wallet.IsCrypted(); }
     bool lock() override { return m_wallet.Lock(); }
-    bool unlock(const SecureString& wallet_passphrase) override { return m_wallet.Unlock(wallet_passphrase); }
-    bool isLocked() override { return m_wallet.IsLocked(); }
+    bool unlock(const SecureString& wallet_passphrase, bool fForMixingOnly) override { return m_wallet.Unlock(wallet_passphrase, fForMixingOnly); }
+    bool isLocked(bool fForMixing) override { return m_wallet.IsLocked(fForMixing); }
     bool changeWalletPassphrase(const SecureString& old_wallet_passphrase,
         const SecureString& new_wallet_passphrase) override
     {
@@ -216,17 +218,23 @@ public:
         LOCK2(cs_main, m_wallet.cs_wallet);
         return m_wallet.ListLockedCoins(outputs);
     }
+    bool isDenominated(const COutPoint& output) override
+    {
+        LOCK2(cs_main, m_wallet.cs_wallet);
+        return m_wallet.IsDenominated(output);
+    }
     std::unique_ptr<PendingWalletTx> createTransaction(const std::vector<CRecipient>& recipients,
         const CCoinControl& coin_control,
         bool sign,
         int& change_pos,
         CAmount& fee,
-        std::string& fail_reason) override
+        std::string& fail_reason,
+        AvailableCoinsType nCoinType,
+        bool fUseInstantSend) override
     {
         LOCK2(cs_main, m_wallet.cs_wallet);
         auto pending = MakeUnique<PendingWalletTxImpl>(m_wallet);
-        if (!m_wallet.CreateTransaction(recipients, pending->m_tx, pending->m_key, fee, change_pos,
-                fail_reason, coin_control, sign)) {
+        if (!m_wallet.CreateTransaction(recipients, pending->m_tx, pending->m_key, fee, change_pos, fail_reason, coin_control, sign, nCoinType, fUseInstantSend)) {
             return {};
         }
         return std::move(pending);
@@ -336,6 +344,7 @@ public:
         result.balance = m_wallet.GetBalance();
         result.unconfirmed_balance = m_wallet.GetUnconfirmedBalance();
         result.immature_balance = m_wallet.GetImmatureBalance();
+        result.anonymized_balance = m_wallet.GetAnonymizedBalance();
         result.have_watch_only = m_wallet.HaveWatchOnly();
         if (result.have_watch_only) {
             result.watch_only_balance = m_wallet.GetBalance(ISMINE_WATCH_ONLY);
@@ -388,8 +397,9 @@ public:
         for (const auto& entry : m_wallet.ListCoins()) {
             auto& group = result[entry.first];
             for (const auto& coin : entry.second) {
+                auto out = COutPoint(coin.tx->GetHash(), coin.i);
                 group.emplace_back(
-                    COutPoint(coin.tx->GetHash(), coin.i), MakeWalletTxOut(m_wallet, *coin.tx, coin.i, coin.nDepth));
+                    out, MakeWalletTxOut(m_wallet, *coin.tx, coin.i, coin.nDepth, m_wallet.GetOutpointPrivateSendRounds(out)));
             }
         }
         return result;
@@ -405,7 +415,7 @@ public:
             if (it != m_wallet.mapWallet.end()) {
                 int depth = it->second.GetDepthInMainChain();
                 if (depth >= 0) {
-                    result.back() = MakeWalletTxOut(m_wallet, it->second, output.n, depth);
+                    result.back() = MakeWalletTxOut(m_wallet, it->second, output.n, depth, m_wallet.GetOutpointPrivateSendRounds(output));
                 }
             }
         }
@@ -426,6 +436,21 @@ public:
     }
     unsigned int getConfirmTarget() override { return m_wallet.m_confirm_target; }
     bool hdEnabled() override { return m_wallet.IsHDEnabled(); }
+    int64_t getKeysLeftSinceBackup() override { return m_wallet.nKeysLeftSinceAutoBackup; }
+    int getOutpointPrivateSendRounds(const COutPoint& outpoint) override { return m_wallet.GetOutpointPrivateSendRounds(outpoint); }
+    bool getMasternodeOutpointAndKeys(COutPoint& outpointRet,
+                                      CPubKey& pubKeyRet,
+                                      CKey& keyRet,
+                                      const std::string& strTxHash,
+                                      const std::string& strOutputIndex) override
+    {
+        return m_wallet.GetMasternodeOutpointAndKeys(outpointRet, pubKeyRet, keyRet, strTxHash, strOutputIndex);
+    }
+    CAmount getAnonymizableBalance(bool fSkipDenominated, bool fSkipUnconfirmed) override { return m_wallet.GetAnonymizableBalance(fSkipDenominated, fSkipUnconfirmed); }
+    CAmount getDenominatedBalance(bool unconfirmed) override {return m_wallet.GetDenominatedBalance(unconfirmed); }
+    CAmount getNormalizedAnonymizedBalance() override { return m_wallet.GetNormalizedAnonymizedBalance(); }
+    float getAverageAnonymizedRounds() override { return m_wallet.GetAverageAnonymizedRounds(); }
+    CWallet* getCWallet() override { return &m_wallet; }
     bool IsWalletFlagSet(uint64_t flag) override { return m_wallet.IsWalletFlagSet(flag); }
     OutputType getDefaultAddressType() override { return m_wallet.m_default_address_type; }
     OutputType getDefaultChangeType() override { return m_wallet.m_default_change_type; }

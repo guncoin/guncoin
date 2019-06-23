@@ -48,6 +48,14 @@ AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget *parent) :
             ui->passEdit1->hide();
             setWindowTitle(tr("Encrypt wallet"));
             break;
+        case UnlockMixing:
+            ui->warningLabel->setText(tr("This operation needs your wallet passphrase to unlock the wallet."));
+            ui->passLabel2->hide();
+            ui->passEdit2->hide();
+            ui->passLabel3->hide();
+            ui->passEdit3->hide();
+            setWindowTitle(tr("Unlock wallet for mixing only"));
+            break;
         case Unlock: // Ask passphrase
             ui->warningLabel->setText(tr("This operation needs your wallet passphrase to unlock the wallet."));
             ui->passLabel2->hide();
@@ -152,8 +160,9 @@ void AskPassphraseDialog::accept()
             QDialog::reject(); // Cancelled
         }
         } break;
+    case UnlockMixing:
     case Unlock:
-        if(!model->setWalletLocked(false, oldpass))
+        if(!model->setWalletLocked(false, oldpass, mode == UnlockMixing))
         {
             QMessageBox::critical(this, tr("Wallet unlock failed"),
                                   tr("The passphrase entered for the wallet decryption was incorrect."));
@@ -207,6 +216,7 @@ void AskPassphraseDialog::textChanged()
     case Encrypt: // New passphrase x2
         acceptable = !ui->passEdit2->text().isEmpty() && !ui->passEdit3->text().isEmpty();
         break;
+    case UnlockMixing: // Old passphrase x1
     case Unlock: // Old passphrase x1
     case Decrypt:
         acceptable = !ui->passEdit1->text().isEmpty();

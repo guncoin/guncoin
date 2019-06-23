@@ -53,6 +53,11 @@ namespace BCLog {
         COINDB      = (1 << 18),
         QT          = (1 << 19),
         LEVELDB     = (1 << 20),
+        MASTERNODE  = (1 << 21),
+        MNPAYMENTS  = (1 << 22),
+        MNSYNC      = (1 << 23),
+        PRIVATESEND = (1 << 24),
+        INSTANTSEND = (1 << 25),
         ALL         = ~(uint32_t)0,
     };
 

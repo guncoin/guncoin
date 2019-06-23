@@ -586,6 +586,10 @@ DBErrors WalletBatch::LoadWallet(CWallet* pwallet)
                 pwallet->WalletLogPrintf("%s\n", strErr);
         }
         pcursor->close();
+
+        // Store initial external keypool size since we mostly use external keys in mixing
+        pwallet->nKeysLeftSinceAutoBackup = pwallet->KeypoolCountExternalKeys();
+        LogPrintf("nKeysLeftSinceAutoBackup: %d\n", pwallet->nKeysLeftSinceAutoBackup);
     }
     catch (const boost::thread_interrupted&) {
         throw;

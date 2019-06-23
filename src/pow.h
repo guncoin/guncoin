@@ -15,6 +15,7 @@ class CBlockIndex;
 class uint256;
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params&);
+unsigned int GetNextWorkRequired_Dash(const CBlockIndex* pindexLast, const Consensus::Params&);
 unsigned int GetNextWorkRequired_eHRC(const CBlockIndex* pindexLast, const Consensus::Params&);
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params&);
 

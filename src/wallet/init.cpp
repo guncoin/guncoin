@@ -79,7 +79,8 @@ void WalletInit::AddWalletOptions() const
     gArgs.AddArg("-walletrbf", strprintf("Send transactions with full-RBF opt-in enabled (RPC only, default: %u)", DEFAULT_WALLET_RBF), false, OptionsCategory::WALLET);
     gArgs.AddArg("-zapwallettxes=<mode>", "Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup"
                                " (1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)", false, OptionsCategory::WALLET);
-
+    gArgs.AddArg("-createwalletbackups=<n>", strprintf(_("Number of automatic wallet backups (default: %u)"), nWalletBackups), false, OptionsCategory::WALLET);
+    gArgs.AddArg("-walletbackupsdir=<dir>", _("Specify full path to directory for automatic wallet backups (must exist)"), false, OptionsCategory::WALLET);
     gArgs.AddArg("-dblogsize=<n>", strprintf("Flush wallet database activity from memory to disk log every <n> megabytes (default: %u)", DEFAULT_WALLET_DBLOGSIZE), true, OptionsCategory::WALLET_DEBUG_TEST);
     gArgs.AddArg("-flushwallet", strprintf("Run a thread to flush wallet periodically (default: %u)", DEFAULT_FLUSHWALLET), true, OptionsCategory::WALLET_DEBUG_TEST);
     gArgs.AddArg("-privdb", strprintf("Sets the DB_PRIVATE flag in the wallet db environment (default: %u)", DEFAULT_WALLET_PRIVDB), true, OptionsCategory::WALLET_DEBUG_TEST);
@@ -156,6 +157,12 @@ bool WalletInit::ParameterInteraction() const
         {
             return InitError(strprintf(_("Invalid amount for -maxtxfee=<amount>: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)"),
                                        gArgs.GetArg("-maxtxfee", ""), ::minRelayTxFee.ToString()));
+        }
+    }
+
+    if (gArgs.IsArgSet("-walletbackupsdir")) {
+        if (!boost::filesystem::is_directory(gArgs.GetArg("-walletbackupsdir", ""))) {
+            return InitError("Warning: incorrect parameter -walletbackupsdir, path must exist! Using default path.\n");
         }
     }
 

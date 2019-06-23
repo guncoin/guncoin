@@ -58,10 +58,10 @@ public:
     virtual bool lock() = 0;
 
     //! Unlock wallet.
-    virtual bool unlock(const SecureString& wallet_passphrase) = 0;
+    virtual bool unlock(const SecureString& wallet_passphrase, bool fForMixingOnly = false) = 0;
 
     //! Return whether wallet is locked.
-    virtual bool isLocked() = 0;
+    virtual bool isLocked(bool fForMixing = false) = 0;
 
     //! Change wallet passphrase.
     virtual bool changeWalletPassphrase(const SecureString& old_wallet_passphrase,
@@ -128,6 +128,9 @@ public:
     //! Return whether coin is locked.
     virtual bool isLockedCoin(const COutPoint& output) = 0;
 
+    //! Return whether output is a dnominated amount.
+    virtual bool isDenominated(const COutPoint& outpoint) = 0;
+
     //! List locked coins.
     virtual void listLockedCoins(std::vector<COutPoint>& outputs) = 0;
 
@@ -137,7 +140,9 @@ public:
         bool sign,
         int& change_pos,
         CAmount& fee,
-        std::string& fail_reason) = 0;
+        std::string& fail_reason,
+        AvailableCoinsType nCoinType,
+        bool fUseInstantSend) = 0;
 
     //! Return whether transaction can be abandoned.
     virtual bool transactionCanBeAbandoned(const uint256& txid) = 0;
@@ -236,6 +241,28 @@ public:
     // Return whether HD enabled.
     virtual bool hdEnabled() = 0;
 
+    //! Return number of keys in keypool left since last backup.
+    virtual int64_t getKeysLeftSinceBackup() = 0;
+
+    //! Get number of private send rounds.
+    virtual int getOutpointPrivateSendRounds(const COutPoint& outpoint) = 0;
+
+    //! Get masternode output and keys
+    virtual bool getMasternodeOutpointAndKeys(COutPoint& outpointRet,
+                                      CPubKey& pubKeyRet,
+                                      CKey& keyRet,
+                                      const std::string& strTxHash,
+                                      const std::string& strOutputIndex) = 0;
+
+
+    virtual CAmount getAnonymizableBalance(bool fSkipDenominated, bool fSkipUnconfirmed) = 0;
+    virtual CAmount getDenominatedBalance(bool unconfirmed) = 0;
+    virtual CAmount getNormalizedAnonymizedBalance() = 0;
+    virtual float getAverageAnonymizedRounds() = 0;
+
+    //! Return CWallet being used by the interface.
+    virtual CWallet* getCWallet() = 0;
+
     // check if a certain wallet flag is set.
     virtual bool IsWalletFlagSet(uint64_t flag) = 0;
 
@@ -290,7 +317,8 @@ public:
     virtual bool commit(WalletValueMap value_map,
         WalletOrderForm order_form,
         std::string from_account,
-        std::string& reject_reason) = 0;
+        std::string& reject_reason,
+        const std::string& strCommand) = 0;
 };
 
 //! Information about one wallet address.
@@ -313,6 +341,7 @@ struct WalletBalances
     CAmount balance = 0;
     CAmount unconfirmed_balance = 0;
     CAmount immature_balance = 0;
+    CAmount anonymized_balance = 0;
     bool have_watch_only = false;
     CAmount watch_only_balance = 0;
     CAmount unconfirmed_watch_only_balance = 0;
@@ -322,6 +351,7 @@ struct WalletBalances
     {
         return balance != prev.balance || unconfirmed_balance != prev.unconfirmed_balance ||
                immature_balance != prev.immature_balance || watch_only_balance != prev.watch_only_balance ||
+               anonymized_balance != prev.anonymized_balance ||
                unconfirmed_watch_only_balance != prev.unconfirmed_watch_only_balance ||
                immature_watch_only_balance != prev.immature_watch_only_balance;
     }
@@ -365,6 +395,7 @@ struct WalletTxOut
     int64_t time;
     int depth_in_main_chain = -1;
     bool is_spent = false;
+    int rounds;
 };
 
 //! Return implementation of Wallet interface. This function will be undefined

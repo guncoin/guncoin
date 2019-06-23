@@ -125,6 +125,8 @@ private:
     //! keeps track of whether Unlock has run a thorough check before
     bool fDecryptionThoroughlyChecked;
 
+    //! if fOnlyMixingAllowed is true, only mixing should be allowed in unlocked wallet
+    bool fOnlyMixingAllowed;
 protected:
     using CryptedKeyMap = std::map<CKeyID, std::pair<CPubKey, std::vector<unsigned char>>>;
 
@@ -133,17 +135,27 @@ protected:
     //! will encrypt previously unencrypted keys
     bool EncryptKeys(CKeyingMaterial& vMasterKeyIn);
 
-    bool Unlock(const CKeyingMaterial& vMasterKeyIn);
+    bool Unlock(const CKeyingMaterial& vMasterKeyIn, bool fForMixingOnly = false);
     CryptedKeyMap mapCryptedKeys GUARDED_BY(cs_KeyStore);
 
 public:
-    CCryptoKeyStore() : fUseCrypto(false), fDecryptionThoroughlyChecked(false)
+    CCryptoKeyStore() : fUseCrypto(false), fDecryptionThoroughlyChecked(false), fOnlyMixingAllowed(false)
     {
     }
 
     bool IsCrypted() const { return fUseCrypto; }
-    bool IsLocked() const;
-    bool Lock();
+    /**
+     * This function should be used in a different combinations to determine
+     * if CCryptoKeyStore is fully locked so that no operations requiring access
+     * to private keys are possible:
+     *     IsLocked(true)
+     * or if CCryptoKeyStore's private keys are available for mixing only:
+     *     !IsLocked(true) && IsLocked()
+     * or if they are available for everything:
+     *     !IsLocked()
+     */
+    bool IsLocked(bool fForMixing = false) const;
+    bool Lock(bool fAllowMixing = false);
 
     virtual bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey) override;

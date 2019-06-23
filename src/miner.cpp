@@ -23,6 +23,8 @@
 #include <timedata.h>
 #include <util.h>
 #include <utilmoneystr.h>
+#include <masternode-payments.h>
+#include <masternode-sync.h>
 #include <validationinterface.h>
 
 #include <algorithm>
@@ -157,8 +159,15 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     coinbaseTx.vin[0].prevout.SetNull();
     coinbaseTx.vout.resize(1);
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+    CAmount blockReward = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+    coinbaseTx.vout[0].nValue = blockReward;
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
+
+    // Update coinbase transaction with additional info about masternode payments,
+    // get some info back to pass to getblocktemplate
+    if (nHeight >= chainparams.GetConsensus().nMasternodeEnforcePayment)
+        FillBlockPayments(coinbaseTx, nHeight, blockReward, pblock->txoutMasternode, pblock->txoutDeveloper);
+
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
     pblocktemplate->vTxFees[0] = -nFees;

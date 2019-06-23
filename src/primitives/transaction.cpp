@@ -14,6 +14,11 @@ std::string COutPoint::ToString() const
     return strprintf("COutPoint(%s, %u)", hash.ToString().substr(0,10), n);
 }
 
+std::string COutPoint::ToStringShort() const
+{
+    return strprintf("%s-%u", hash.ToString().substr(0,64), n);
+}
+
 CTxIn::CTxIn(COutPoint prevoutIn, CScript scriptSigIn, uint32_t nSequenceIn)
 {
     prevout = prevoutIn;
@@ -47,6 +52,7 @@ CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn)
 {
     nValue = nValueIn;
     scriptPubKey = scriptPubKeyIn;
+    nRounds = -10;
 }
 
 std::string CTxOut::ToString() const
@@ -60,6 +66,22 @@ CMutableTransaction::CMutableTransaction(const CTransaction& tx) : vin(tx.vin), 
 uint256 CMutableTransaction::GetHash() const
 {
     return SerializeHash(*this, SER_GETHASH, SERIALIZE_TRANSACTION_NO_WITNESS);
+}
+
+std::string CMutableTransaction::ToString() const
+{
+    std::string str;
+    str += strprintf("CMutableTransaction(hash=%s, ver=%d, vin.size=%u, vout.size=%u, nLockTime=%u)\n",
+        GetHash().ToString().substr(0,10),
+        nVersion,
+        vin.size(),
+        vout.size(),
+        nLockTime);
+    for (unsigned int i = 0; i < vin.size(); i++)
+        str += "    " + vin[i].ToString() + "\n";
+    for (unsigned int i = 0; i < vout.size(); i++)
+        str += "    " + vout[i].ToString() + "\n";
+    return str;
 }
 
 uint256 CTransaction::ComputeHash() const

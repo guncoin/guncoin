@@ -150,4 +150,26 @@ bool Random_SanityCheck();
 /** Initialize the RNG. */
 void RandomInit();
 
+class FastRandomContextDash {
+public:
+    explicit FastRandomContextDash(bool fDeterministic=false);
+
+    uint32_t rand32() {
+        Rz = 36969 * (Rz & 65535) + (Rz >> 16);
+        Rw = 18000 * (Rw & 65535) + (Rw >> 16);
+        return (Rw << 16) + Rz;
+    }
+
+    uint32_t rand32(uint32_t nMax) {
+        return rand32() % nMax;
+    }
+
+    uint32_t operator()(uint32_t nMax) {
+        return rand32(nMax);
+    }
+
+    uint32_t Rz;
+    uint32_t Rw;
+};
+
 #endif // BITCOIN_RANDOM_H

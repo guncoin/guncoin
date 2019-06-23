@@ -34,6 +34,10 @@
 #include <boost/signals2/signal.hpp>
 #include <boost/thread/condition_variable.hpp> // for boost::thread_interrupted
 
+extern bool fMasternodeMode;
+extern bool fLiteMode;
+extern int nWalletBackups;
+
 // Application startup time (used for uptime calculation)
 int64_t GetStartupTime();
 
@@ -45,7 +49,6 @@ public:
     boost::signals2::signal<std::string (const char* psz)> Translate;
 };
 
-extern unsigned int nNeoScryptOptions;
 extern CTranslationInterface translationInterface;
 
 extern const char * const BITCOIN_CONF_FILENAME;
@@ -89,8 +92,10 @@ bool TryCreateDirectories(const fs::path& p);
 fs::path GetDefaultDataDir();
 const fs::path &GetBlocksDir(bool fNetSpecific = true);
 const fs::path &GetDataDir(bool fNetSpecific = true);
+boost::filesystem::path GetBackupsDir();
 void ClearDatadirCache();
 fs::path GetConfigFile(const std::string& confPath);
+boost::filesystem::path GetMasternodeConfigFile();
 #ifndef WIN32
 fs::path GetPidFile();
 void CreatePidFile(const fs::path &path, pid_t pid);
@@ -127,6 +132,9 @@ enum class OptionsCategory {
     ZMQ,
     DEBUG_TEST,
     CHAINPARAMS,
+    MASTERNODE,
+    PRIVATESEND,
+    INSTANTSEND,
     NODE_RELAY,
     BLOCK_CREATION,
     RPC,
@@ -346,6 +354,33 @@ template <typename Callable> void TraceThread(const char* name,  Callable func)
 }
 
 std::string CopyrightHolders(const std::string& strPrefix);
+
+/**
+ * @brief Converts version strings to 4-byte unsigned integer
+ * @param strVersion version in "x.x.x" format (decimal digits only)
+ * @return 4-byte unsigned integer, most significant byte is always 0
+ * Throws std::bad_cast if format doesn\t match.
+ */
+uint32_t StringVersionToInt(const std::string& strVersion);
+
+
+/**
+ * @brief Converts version as 4-byte unsigned integer to string
+ * @param nVersion 4-byte unsigned integer, most significant byte is always 0
+ * @return version string in "x.x.x" format (last 3 bytes as version parts)
+ * Throws std::bad_cast if format doesn\t match.
+ */
+std::string IntVersionToString(uint32_t nVersion);
+
+
+/**
+ * @brief Copy of the IntVersionToString, that returns "Invalid version" string
+ * instead of throwing std::bad_cast
+ * @param nVersion 4-byte unsigned integer, most significant byte is always 0
+ * @return version string in "x.x.x" format (last 3 bytes as version parts)
+ * or "Invalid version" if can't cast the given value
+ */
+std::string SafeIntVersionToString(uint32_t nVersion);
 
 /**
  * On platforms that support it, tell the kernel the calling thread is

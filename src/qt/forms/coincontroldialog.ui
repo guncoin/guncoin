@@ -432,6 +432,11 @@
      </column>
      <column>
       <property name="text">
+       <string>PS Rounds</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Date</string>
       </property>
      </column>

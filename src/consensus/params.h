@@ -50,6 +50,11 @@ struct BIP9Deployment {
 struct Params {
     uint256 hashGenesisBlock;
     int nSubsidyHalvingInterval;
+    int nInstantSendConfirmationsRequired;
+    int nInstantSendKeepLock;
+    int nMasternodeMinimumConfirmations;
+    int nMasternodeEnforcePayment;
+    int nMasternodeDisconnectOldClients;
     /* Block hash that is excepted from BIP16 enforcement */
     uint256 BIP16Exception;
     /** Block height and hash at which BIP34 becomes active */
@@ -71,7 +76,7 @@ struct Params {
     uint256 powLimit;
     uint256 powNeoScryptLimit;
     unsigned int nNeoScryptFork;
-    unsigned int nNeoScryptHeight;
+    int nNeoScryptHeight;
     std::string checkpointPubKey;
     std::vector<unsigned char> vAlertPubKey;
     int nReplacementFunds;

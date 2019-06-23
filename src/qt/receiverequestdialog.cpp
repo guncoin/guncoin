@@ -148,6 +148,7 @@ void ReceiveRequestDialog::update()
     if(model->isMultiwallet()) {
         html += "<b>"+tr("Wallet")+"</b>: " + GUIUtil::HtmlEscape(model->getWalletName()) + "<br>";
     }
+    html += "<b>"+tr("InstantSend")+"</b>: " + (info.fUseInstantSend ? tr("Yes") : tr("No")) + "<br>";
     ui->outUri->setText(html);
 
 #ifdef USE_QRCODE

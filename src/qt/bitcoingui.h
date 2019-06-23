@@ -104,6 +104,7 @@ private:
     QToolBar* appToolBar = nullptr;
     QAction* overviewAction = nullptr;
     QAction* historyAction = nullptr;
+    QAction* masternodeAction = nullptr;
     QAction* quitAction = nullptr;
     QAction* sendCoinsAction = nullptr;
     QAction* sendCoinsMenuAction = nullptr;
@@ -123,6 +124,7 @@ private:
     QAction* openRPCConsoleAction = nullptr;
     QAction* openAction = nullptr;
     QAction* showHelpMessageAction = nullptr;
+    QAction *showPrivateSendHelpAction = nullptr;
     QAction* m_wallet_selector_label_action = nullptr;
     QAction* m_wallet_selector_action = nullptr;
 
@@ -177,6 +179,8 @@ public Q_SLOTS:
     void setNetworkActive(bool networkActive);
     /** Set number of blocks and last block date shown in the UI */
     void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers);
+    /** Set additional data sync status shown in the UI */
+    void setAdditionalDataSyncProgress(double nSyncProgress);
 
     /** Notify the user of an event from the core network or transaction handling code.
        @param[in] title     the message box / notification title
@@ -222,6 +226,8 @@ private Q_SLOTS:
 #ifdef ENABLE_WALLET
     /** Switch to overview (home) page */
     void gotoOverviewPage();
+    /** Switch to masternode page */
+    void gotoMasternodePage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
     /** Switch to receive coins page */
@@ -247,6 +253,8 @@ private Q_SLOTS:
     void showDebugWindowActivateConsole();
     /** Show help message dialog */
     void showHelpMessageClicked();
+    /** Show PrivateSend help message dialog */
+    void showPrivateSendHelpClicked();
 #ifndef Q_OS_MAC
     /** Handle tray icon clicked */
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);

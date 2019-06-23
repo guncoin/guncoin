@@ -81,7 +81,10 @@ struct CNodeStateStats {
     std::vector<int> vHeightInFlight;
 };
 
+bool DisconnectOldVersion(CNode* pfrom, CConnman& connman, const std::string& strCommand, int nVersion, bool& enable_bip61);
 /** Get statistics from node state */
 bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats);
+/** Increase a node's misbehavior score. */
+void Misbehaving(NodeId nodeid, int howmuch, const std::string& message="") EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 #endif // BITCOIN_NET_PROCESSING_H

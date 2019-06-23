@@ -76,13 +76,15 @@ public:
     bool IsFallbackFeeEnabled() const { return m_fallback_fee_enabled; }
     /** Return the list of hostnames to look up for DNS seeds */
     const std::vector<std::string>& DNSSeeds() const { return vSeeds; }
-    CScript GetRewardScriptAtHeight(int height) const;
+    CScript GetRewardScript() const;
     const std::vector<unsigned char>& Base58Prefix(Base58Type type) const { return base58Prefixes[type]; }
     const std::string& Bech32HRP() const { return bech32_hrp; }
     const std::vector<SeedSpec6>& FixedSeeds() const { return vFixedSeeds; }
     const CCheckpointData& Checkpoints() const { return checkpointData; }
     const ChainTxData& TxData() const { return chainTxData; }
     void UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout);
+    int PoolMaxTransactions() const { return nPoolMaxTransactions; }
+    int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
 protected:
     CChainParams() {}
 
@@ -101,6 +103,8 @@ protected:
     bool fMineBlocksOnDemand;
     CCheckpointData checkpointData;
     ChainTxData chainTxData;
+    int nPoolMaxTransactions;
+    int nFulfilledRequestExpireTime;
     bool m_fallback_fee_enabled;
 };
 
@@ -116,6 +120,11 @@ std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain);
  * startup, except for unit tests.
  */
 const CChainParams &Params();
+
+/**
+ * Return CChainParams for the given chain name.
+ */
+CChainParams& Params(const std::string& chain);
 
 /**
  * Sets the params returned by Params() to those for the given BIP70 chain name.

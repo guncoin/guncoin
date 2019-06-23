@@ -76,6 +76,23 @@ protected:
      */
     ~CValidationInterface() = default;
     /**
+     * Notifies listeners of accepted block header
+    */
+    virtual void AcceptedBlockHeader(const CBlockIndex *pindexNew) {}
+    /**
+     * Notifies listeners of updated block header tip
+    */
+    virtual void NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload) {}
+    /**
+     * Notifies listeners of updated transaction data (transaction, and
+     * optionally the block it is found in). Called with block data when
+     * transaction is included in a connected block, and without block data when
+     * transaction was accepted to mempool, removed from mempool (only when
+     * removal was due to conflict from connected block), or appeared in a
+     * disconnected block.
+    */
+    virtual void SyncTransaction(const CTransaction &tx, const CBlockIndex *pindex, int posInBlock) {}
+    /**
      * Notifies listeners when the block chain tip advances.
      *
      * When multiple blocks are connected at once, UpdatedBlockTip will be called on the final tip
@@ -115,6 +132,15 @@ protected:
      * Called on a background thread.
      */
     virtual void BlockDisconnected(const std::shared_ptr<const CBlock> &block) {}
+    /**
+     * Notifies listeners of an updated transaction lock without new data.
+    */
+    virtual void NotifyTransactionLock(const CTransaction &tx) {}
+    /**
+     * Notifies listeners of an updated transaction without new data
+     * (for now: a coinbase potentially becoming visible).
+    */
+    virtual bool UpdatedTransaction(const uint256 &hash) { return false;}
     /**
      * Notifies listeners of the new active block chain on-disk.
      *
@@ -177,14 +203,23 @@ public:
     /** Unregister with mempool */
     void UnregisterWithMempoolSignals(CTxMemPool& pool);
 
+    void AcceptedBlockHeader(const CBlockIndex *pindexNew);
+    void NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload);
+    void SyncTransaction(const CTransaction &tx, const CBlockIndex *pindex, int posInBlock);
     void UpdatedBlockTip(const CBlockIndex *, const CBlockIndex *, bool fInitialDownload);
     void TransactionAddedToMempool(const CTransactionRef &);
     void BlockConnected(const std::shared_ptr<const CBlock> &, const CBlockIndex *pindex, const std::shared_ptr<const std::vector<CTransactionRef>> &);
     void BlockDisconnected(const std::shared_ptr<const CBlock> &);
+    void NotifyTransactionLock(const CTransaction &);
+    void UpdatedTransaction(const uint256 &);
     void ChainStateFlushed(const CBlockLocator &);
     void Broadcast(int64_t nBestBlockTime, CConnman* connman);
     void BlockChecked(const CBlock&, const CValidationState&);
     void NewPoWValidBlock(const CBlockIndex *, const std::shared_ptr<const CBlock>&);
+    /** A posInBlock value for SyncTransaction calls for tranactions not
+     * included in connected blocks such as transactions removed from mempool,
+     * accepted to mempool or appearing in disconnected blocks.*/
+    static const int SYNC_TRANSACTION_NOT_IN_BLOCK = -1;
 };
 
 CMainSignals& GetMainSignals();

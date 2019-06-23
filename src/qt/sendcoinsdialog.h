@@ -80,6 +80,7 @@ private Q_SLOTS:
     void removeEntry(SendCoinsEntry* entry);
     void useAvailableBalance(SendCoinsEntry* entry);
     void updateDisplayUnit();
+    void updateInstantSend();
     void coinControlFeatureChanged(bool);
     void coinControlButtonClicked();
     void coinControlChangeChecked(int);

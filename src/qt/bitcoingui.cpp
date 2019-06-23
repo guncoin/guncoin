@@ -33,6 +33,8 @@
 #include <interfaces/node.h>
 #include <ui_interface.h>
 #include <util.h>
+#include <masternode-sync.h>
+#include <qt/masternodelist.h>
 
 #include <iostream>
 
@@ -94,7 +96,7 @@ BitcoinGUI::BitcoinGUI(interfaces::Node& node, const PlatformStyle *_platformSty
     setWindowTitle(windowTitle);
 
     rpcConsole = new RPCConsole(node, _platformStyle, 0);
-    helpMessageDialog = new HelpMessageDialog(node, this, false);
+    helpMessageDialog = new HelpMessageDialog(node, this, HelpMessageDialog::cmdline);
 #ifdef ENABLE_WALLET
     if(enableWallet)
     {
@@ -259,6 +261,18 @@ void BitcoinGUI::createActions()
     tabGroup->addAction(historyAction);
 
 #ifdef ENABLE_WALLET
+    QSettings settings;
+    if (!fLiteMode && settings.value("fShowMasternodesTab").toBool()) {
+        masternodeAction = new QAction(QIcon(":/icons/masternodes"), tr("&Masternodes"), this);
+        masternodeAction->setStatusTip(tr("Browse masternodes"));
+        masternodeAction->setToolTip(masternodeAction->statusTip());
+        masternodeAction->setCheckable(true);
+        masternodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+        tabGroup->addAction(masternodeAction);
+        connect(masternodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+        connect(masternodeAction, SIGNAL(triggered()), this, SLOT(gotoMasternodePage()));
+    }
+
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -322,12 +336,17 @@ void BitcoinGUI::createActions()
     showHelpMessageAction->setMenuRole(QAction::NoRole);
     showHelpMessageAction->setStatusTip(tr("Show the %1 help message to get a list with possible Guncoin command-line options").arg(tr(PACKAGE_NAME)));
 
+    showPrivateSendHelpAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("&PrivateSend information"), this);
+    showPrivateSendHelpAction->setMenuRole(QAction::NoRole);
+    showPrivateSendHelpAction->setStatusTip(tr("Show the PrivateSend basic information"));
+
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
     connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
     connect(showHelpMessageAction, SIGNAL(triggered()), this, SLOT(showHelpMessageClicked()));
+    connect(showPrivateSendHelpAction, SIGNAL(triggered()), this, SLOT(showPrivateSendHelpClicked()));
     connect(openRPCConsoleAction, SIGNAL(triggered()), this, SLOT(showDebugWindow()));
     // prevents an open debug window from becoming stuck/unusable on client shutdown
     connect(quitAction, SIGNAL(triggered()), rpcConsole, SLOT(hide()));
@@ -392,6 +411,7 @@ void BitcoinGUI::createMenuBar()
         help->addAction(openRPCConsoleAction);
     }
     help->addAction(showHelpMessageAction);
+    help->addAction(showPrivateSendHelpAction);
     help->addSeparator();
     help->addAction(aboutAction);
     help->addAction(aboutQtAction);
@@ -410,6 +430,12 @@ void BitcoinGUI::createToolBars()
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
+        QSettings settings;
+        if (!fLiteMode && settings.value("fShowMasternodesTab").toBool() && masternodeAction)
+        {
+            toolbar->addAction(masternodeAction);
+        }
+        toolbar->setMovable(false); // remove unused icon in upper left corner
         overviewAction->setChecked(true);
 
 #ifdef ENABLE_WALLET
@@ -450,6 +476,8 @@ void BitcoinGUI::setClientModel(ClientModel *_clientModel)
         modalOverlay->setKnownBestHeight(_clientModel->getHeaderTipHeight(), QDateTime::fromTime_t(_clientModel->getHeaderTipTime()));
         setNumBlocks(m_node.getNumBlocks(), QDateTime::fromTime_t(m_node.getLastBlockTime()), m_node.getVerificationProgress(), false);
         connect(_clientModel, SIGNAL(numBlocksChanged(int,QDateTime,double,bool)), this, SLOT(setNumBlocks(int,QDateTime,double,bool)));
+
+        connect(_clientModel, SIGNAL(additionalDataSyncProgressChanged(double)), this, SLOT(setAdditionalDataSyncProgress(double)));
 
         // Receive and report messages from client model
         connect(_clientModel, SIGNAL(message(QString,QString,unsigned int)), this, SLOT(message(QString,QString,unsigned int)));
@@ -561,6 +589,10 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled)
     receiveCoinsAction->setEnabled(enabled);
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
+    QSettings settings;
+    if (!fLiteMode && settings.value("fShowMasternodesTab").toBool() && masternodeAction) {
+        masternodeAction->setEnabled(enabled);
+    }
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -659,7 +691,7 @@ void BitcoinGUI::aboutClicked()
     if(!clientModel)
         return;
 
-    HelpMessageDialog dlg(m_node, this, true);
+    HelpMessageDialog dlg(m_node, this, HelpMessageDialog::about);
     dlg.exec();
 }
 
@@ -677,6 +709,15 @@ void BitcoinGUI::showDebugWindowActivateConsole()
 void BitcoinGUI::showHelpMessageClicked()
 {
     helpMessageDialog->show();
+}
+
+void BitcoinGUI::showPrivateSendHelpClicked()
+{
+    if(!clientModel)
+        return;
+
+    HelpMessageDialog dlg(m_node, this, HelpMessageDialog::pshelp);
+    dlg.exec();
 }
 
 #ifdef ENABLE_WALLET
@@ -699,6 +740,15 @@ void BitcoinGUI::gotoHistoryPage()
 {
     historyAction->setChecked(true);
     if (walletFrame) walletFrame->gotoHistoryPage();
+}
+
+void BitcoinGUI::gotoMasternodePage()
+{
+    QSettings settings;
+    if (!fLiteMode && settings.value("fShowMasternodesTab").toBool() && masternodeAction) {
+        masternodeAction->setChecked(true);
+        if (walletFrame) walletFrame->gotoMasternodePage();
+    }
 }
 
 void BitcoinGUI::gotoReceiveCoinsPage()
@@ -823,24 +873,23 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
 
     tooltip = tr("Processed %n block(s) of transaction history.", "", count);
 
-    // Set icon state: spinning if catching up, tick otherwise
-    if(secs < 90*60)
-    {
-        tooltip = tr("Up to date") + QString(".<br>") + tooltip;
-        labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-
 #ifdef ENABLE_WALLET
-        if(walletFrame)
+    if(walletFrame)
+    {
+        if(secs < 25*60) // 90*60 in bitcoin
         {
-            walletFrame->showOutOfSyncWarning(false);
             modalOverlay->showHide(true, true);
+            // TODO instead of hiding it forever, we should add meaningful information about MN sync to the overlay
+            modalOverlay->hideForever();
         }
+        else
+        {
+            modalOverlay->showHide();
+        }
+    }
 #endif // ENABLE_WALLET
 
-        progressBarLabel->setVisible(false);
-        progressBar->setVisible(false);
-    }
-    else
+    if(!masternodeSync.IsBlockchainSynced())
     {
         QString timeBehindText = GUIUtil::formatNiceTimeOffset(secs);
 
@@ -864,7 +913,6 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
         if(walletFrame)
         {
             walletFrame->showOutOfSyncWarning(true);
-            modalOverlay->showHide();
         }
 #endif // ENABLE_WALLET
 
@@ -872,7 +920,59 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
         tooltip += tr("Last received block was generated %1 ago.").arg(timeBehindText);
         tooltip += QString("<br>");
         tooltip += tr("Transactions after this will not yet be visible.");
+    } else if (fLiteMode) {
+        setAdditionalDataSyncProgress(1);
     }
+
+    // Don't word-wrap this (fixed-width) tooltip
+    tooltip = QString("<nobr>") + tooltip + QString("</nobr>");
+
+    labelBlocksIcon->setToolTip(tooltip);
+    progressBarLabel->setToolTip(tooltip);
+    progressBar->setToolTip(tooltip);
+}
+
+void BitcoinGUI::setAdditionalDataSyncProgress(double nSyncProgress)
+{
+    if(!clientModel)
+        return;
+
+    // No additional data sync should be happening while blockchain is not synced, nothing to update
+    if(!masternodeSync.IsBlockchainSynced())
+        return;
+
+    // Prevent orphan statusbar messages (e.g. hover Quit in main menu, wait until chain-sync starts -> garbelled text)
+    statusBar()->clearMessage();
+
+    QString tooltip;
+
+    QString strSyncStatus;
+    tooltip = tr("Up to date") + QString(".<br>") + tooltip;
+
+#ifdef ENABLE_WALLET
+    if(walletFrame)
+        walletFrame->showOutOfSyncWarning(false);
+#endif // ENABLE_WALLET
+
+    if(masternodeSync.IsSynced()) {
+        progressBarLabel->setVisible(false);
+        progressBar->setVisible(false);
+        labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+    } else {
+
+        labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(QString(
+            ":/movies/spinner-%1").arg(spinnerFrame, 3, 10, QChar('0')))
+            .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES;
+
+        progressBar->setFormat(tr("Synchronizing additional data: %p%"));
+        progressBar->setMaximum(1000000000);
+        progressBar->setValue(nSyncProgress * 1000000000.0 + 0.5);
+    }
+
+    strSyncStatus = QString(masternodeSync.GetSyncStatus().c_str());
+    progressBarLabel->setText(strSyncStatus);
+    tooltip = strSyncStatus + QString("<br>") + tooltip;
 
     // Don't word-wrap this (fixed-width) tooltip
     tooltip = QString("<nobr>") + tooltip + QString("</nobr>");
@@ -1083,6 +1183,14 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelWalletEncryptionIcon->show();
         labelWalletEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelWalletEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
+        encryptWalletAction->setChecked(true);
+        changePassphraseAction->setEnabled(true);
+        encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
+        break;
+    case WalletModel::UnlockedForMixingOnly:
+        labelWalletEncryptionIcon->show();
+        labelWalletEncryptionIcon->setPixmap(QIcon("/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelWalletEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b> for mixing only"));
         encryptWalletAction->setChecked(true);
         changePassphraseAction->setEnabled(true);
         encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported

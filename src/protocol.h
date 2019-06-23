@@ -250,6 +250,25 @@ extern const char *BLOCKTXN;
  * @since protocol version 61000
  */
 extern const char *CHECKPOINT;
+
+// Masternode message types
+extern const char *TXLOCKREQUEST;
+extern const char *TXLOCKVOTE;
+extern const char *MASTERNODEPAYMENTVOTE;
+extern const char *MASTERNODEPAYMENTSYNC;
+extern const char *MNANNOUNCE;
+extern const char *MNPING;
+extern const char *DSACCEPT;
+extern const char *DSVIN;
+extern const char *DSFINALTX;
+extern const char *DSSIGNFINALTX;
+extern const char *DSCOMPLETE;
+extern const char *DSSTATUSUPDATE;
+extern const char *DSTX;
+extern const char *DSQUEUE;
+extern const char *DSEG;
+extern const char *SYNCSTATUSCOUNT;
+extern const char *MNVERIFY;
 };
 
 /* Get a vector of all valid message types (see above) */
@@ -393,6 +412,14 @@ enum GetDataMsg
     // The following can only occur in getdata. Invs always use TX or BLOCK.
     MSG_FILTERED_BLOCK = 3,  //!< Defined in BIP37
     MSG_CMPCT_BLOCK = 4,     //!< Defined in BIP152
+    MSG_TXLOCK_REQUEST = 5,
+    MSG_TXLOCK_VOTE = 6,
+    MSG_MASTERNODE_PAYMENT_VOTE = 7,
+    MSG_MASTERNODE_PAYMENT_BLOCK = 8,
+    MSG_MASTERNODE_ANNOUNCE = 14,
+    MSG_MASTERNODE_PING = 15,
+    MSG_DSTX = 16,
+    MSG_MASTERNODE_VERIFY = 19,
     MSG_WITNESS_BLOCK = MSG_BLOCK | MSG_WITNESS_FLAG, //!< Defined in BIP144
     MSG_WITNESS_TX = MSG_TX | MSG_WITNESS_FLAG,       //!< Defined in BIP144
     MSG_FILTERED_WITNESS_BLOCK = MSG_FILTERED_BLOCK | MSG_WITNESS_FLAG,

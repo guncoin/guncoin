@@ -70,6 +70,11 @@ public:
     CMainParams() {
         strNetworkID = "main";
         consensus.nSubsidyHalvingInterval = 1000000;
+        consensus.nInstantSendConfirmationsRequired = 6;
+        consensus.nInstantSendKeepLock = 24;
+        consensus.nMasternodeMinimumConfirmations = 15;
+        consensus.nMasternodeEnforcePayment = 1277000;
+        consensus.nMasternodeDisconnectOldClients = 1276280;
         consensus.BIP16Exception = uint256();
         consensus.BIP34Height = 951;
         consensus.BIP34Hash = uint256S("0x787d245e4a83412ed32cad11171b8f312a489f2f2e655a7ade7d57e4edc0157c ");
@@ -161,10 +166,14 @@ public:
             /* dTxRate  */ 0.007
         };
 
+        nPoolMaxTransactions = 3;
+        nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
+
         /* disable fallback fee on mainnet */
         m_fallback_fee_enabled = true;
     }
 };
+static CMainParams mainParams;
 
 /**
  * Testnet (v3)
@@ -174,15 +183,20 @@ public:
     CTestNetParams() {
         strNetworkID = "test";
         consensus.nSubsidyHalvingInterval = 1000000;
+        consensus.nInstantSendConfirmationsRequired = 2;
+        consensus.nInstantSendKeepLock = 6;
+        consensus.nMasternodeMinimumConfirmations = 1;
+        consensus.nMasternodeEnforcePayment = 1820;
+        consensus.nMasternodeDisconnectOldClients = 1800;
         consensus.BIP16Exception = uint256();
         consensus.BIP34Height = 0;
-        consensus.BIP34Hash = uint256S("0x765d9ec322c494d36d36f300c209f13b787b6f67bf978c5b9ab09bc9e10f52b8");
-        consensus.BIP65Height = 751;
-        consensus.BIP66Height = 751;
-        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.powNeoScryptLimit = uint256S("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nDiffChange = 100;
-        consensus.nReplacementFunds = 1713;
+        consensus.BIP34Hash = uint256();
+        consensus.BIP65Height = 0;
+        consensus.BIP66Height = 0;
+        consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.powNeoScryptLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nDiffChange = 0;
+        consensus.nReplacementFunds = std::numeric_limits<int>::max();
         consensus.nNeoScryptHeight = 1;
         consensus.nNeoScryptFork = 1397925815;
         consensus.nPowTargetTimespan = 2 * 60;
@@ -190,7 +204,7 @@ public:
         consensus.checkpointPubKey = "04b0c74b4334f0fd96f09070fbc28dc61a7dc1fbe8988ac98321f45fdd8ce8fed848f04ecaa398bfadb51b5f5adf706e9507f403ab5dce3c57bccf6c3a7db7e7a9";
         consensus.vAlertPubKey = ParseHex("04e4f58b6a870d4ac13b35ca00f390c674561fea1c161b0c28b34c22ebb34afa5c8d874d12106c34a06c06d20a32d863079a4162003961a88bae4655ebd6a0440f");
         consensus.fPowAllowMinDifficultyBlocks = true;
-        consensus.fPowNoRetargeting = false;
+        consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 375;
         consensus.nMinerConfirmationWindow = 500;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -199,19 +213,19 @@ public:
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1517011200; // Jan 27th, 2018
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1548547200; // Jan 27th, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
 
         // Deployment of SegWit (BIP141, BIP143, and BIP147)
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].bit = 1;
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 1517011200; // Jan 27th, 2018
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1548547200; // Jan 27th, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
+        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000000000001000");
+        consensus.nMinimumChainWork = uint256S("0x00");
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x765d9ec322c494d36d36f300c209f13b787b6f67bf978c5b9ab09bc9e10f52b8");
+        consensus.defaultAssumeValid = uint256S("0x00");
 
         pchMessageStart[0] = 0xdd;
         pchMessageStart[1] = 0xbb;
@@ -220,9 +234,9 @@ public:
         nDefaultPort = 52954;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1397925814, 385915966, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1397925814, 0, 0x207fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x765d9ec322c494d36d36f300c209f13b787b6f67bf978c5b9ab09bc9e10f52b8"));
+        assert(consensus.hashGenesisBlock == uint256S("0x7f6750c681b94faf661785baaee135e4a950fb835c16f54440f4055393418095"));
         assert(genesis.hashMerkleRoot == uint256S("0x9279661f2031143951417ef97ea70bcd7172f1bff7831c339c97e0e8392a926a"));
 
         vFixedSeeds.clear();
@@ -248,7 +262,7 @@ public:
 
         checkpointData = {
             {
-                {0, uint256S("765d9ec322c494d36d36f300c209f13b787b6f67bf978c5b9ab09bc9e10f52b8")},
+                {0, uint256S("0x7f6750c681b94faf661785baaee135e4a950fb835c16f54440f4055393418095")},
             }
         };
 
@@ -258,10 +272,14 @@ public:
             /* dTxRate  */ 0.001
         };
 
+        nPoolMaxTransactions = 3;
+        nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
+
         /* enable fallback fee on testnet */
         m_fallback_fee_enabled = true;
     }
 };
+static CTestNetParams testNetParams;
 
 /**
  * Regression test
@@ -271,6 +289,11 @@ public:
     CRegTestParams() {
         strNetworkID = "regtest";
         consensus.nSubsidyHalvingInterval = 150;
+        consensus.nInstantSendConfirmationsRequired = 2;
+        consensus.nInstantSendKeepLock = 6;
+        consensus.nMasternodeMinimumConfirmations = 1;
+        consensus.nMasternodeEnforcePayment = std::numeric_limits<int>::max();
+        consensus.nMasternodeDisconnectOldClients = std::numeric_limits<int>::max();
         consensus.BIP16Exception = uint256();
         consensus.BIP34Height = 100000000; // BIP34 has not activated on regtest (far in the future so block v1 are not rejected in tests)
         consensus.BIP34Hash = uint256();
@@ -345,16 +368,32 @@ public:
 
         bech32_hrp = "gcrt";
 
+        nPoolMaxTransactions = 3;
+        nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
+
         /* enable fallback fee on regtest */
         m_fallback_fee_enabled = true;
     }
 };
+static CRegTestParams regTestParams;
 
 static std::unique_ptr<CChainParams> globalChainParams;
 
 const CChainParams &Params() {
     assert(globalChainParams);
     return *globalChainParams;
+}
+
+CChainParams& Params(const std::string& chain)
+{
+    if (chain == CBaseChainParams::MAIN)
+        return mainParams;
+    else if (chain == CBaseChainParams::TESTNET)
+        return testNetParams;
+    else if (chain == CBaseChainParams::REGTEST)
+        return regTestParams;
+    else
+        throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, chain));
 }
 
 std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain)
@@ -379,14 +418,12 @@ void UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime,
     globalChainParams->UpdateVersionBitsParameters(d, nStartTime, nTimeout);
 }
 
-CScript CChainParams::GetRewardScriptAtHeight(int nHeight) const {
-    assert(nHeight == consensus.nReplacementFunds);
-
+CScript CChainParams::GetRewardScript() const {
     CTxDestination destination;
     if (Params().NetworkIDString() == CBaseChainParams::MAIN)
         destination = DecodeDestination("GtoEJDevx7sd4xGLXykL7wRV4JJopXYvYT");
     else if (Params().NetworkIDString() == CBaseChainParams::TESTNET)
-        destination = DecodeDestination("mh5BZckayvuKSkJSr1ALTkWkJe4LacaD2j");
+        destination = DecodeDestination("mqVA68qMeemg7xZcQKT3sk9CZp51zFmwiB");
     else if (Params().NetworkIDString() == CBaseChainParams::REGTEST)
         destination = DecodeDestination("tHbHVEfnapHgkAm6eL6FSGkYEDhVBmDeBe");
 

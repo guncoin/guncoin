@@ -64,6 +64,9 @@ public:
     /** Current number of blocks (to know whether cached status is still valid) */
     int cur_num_blocks;
 
+    /** Know when to update transaction for ix locks */
+    int cur_num_ix_locks;
+
     bool needsUpdate;
 };
 
@@ -81,7 +84,13 @@ public:
         SendToOther,
         RecvWithAddress,
         RecvFromOther,
-        SendToSelf
+        SendToSelf,
+        RecvWithPrivateSend,
+        PrivateSendDenominate,
+        PrivateSendCollateralPayment,
+        PrivateSendMakeCollaterals,
+        PrivateSendCreateDenominations,
+        PrivateSend
     };
 
     /** Number of confirmation recommended for accepting a transaction */
@@ -109,7 +118,7 @@ public:
     /** Decompose CWallet transaction to model transaction records.
      */
     static bool showTransaction();
-    static QList<TransactionRecord> decomposeTransaction(const interfaces::WalletTx& wtx);
+    static QList<TransactionRecord> decomposeTransaction(const interfaces::WalletTx& wtx, interfaces::Wallet& wallet);
 
     /** @name Immutable transaction attributes
       @{*/

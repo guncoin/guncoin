@@ -152,30 +152,46 @@ bool CCryptoKeyStore::SetCrypted()
     return true;
 }
 
-bool CCryptoKeyStore::IsLocked() const
+bool CCryptoKeyStore::IsLocked(bool fForMixing) const
 {
     if (!IsCrypted()) {
         return false;
     }
-    LOCK(cs_KeyStore);
-    return vMasterKey.empty();
+    bool result;
+    {
+        LOCK(cs_KeyStore);
+        result = vMasterKey.empty();
+    }
+    /* fForMixing   fOnlyMixingAllowed  return
+     * ---------------------------------------
+     * true         true                result
+     * true         false               result
+     * false        true                true
+     * false        false               result
+     */
+
+    if (!fForMixing && fOnlyMixingAllowed)
+        return true;
+
+    return result;
 }
 
-bool CCryptoKeyStore::Lock()
+bool CCryptoKeyStore::Lock(bool fAllowMixing)
 {
     if (!SetCrypted())
         return false;
 
-    {
+    if(!fAllowMixing) {
         LOCK(cs_KeyStore);
         vMasterKey.clear();
     }
 
+    fOnlyMixingAllowed = fAllowMixing;
     NotifyStatusChanged(this);
     return true;
 }
 
-bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn)
+bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn, bool fForMixingOnly)
 {
     {
         LOCK(cs_KeyStore);
@@ -209,6 +225,7 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn)
         vMasterKey = vMasterKeyIn;
         fDecryptionThoroughlyChecked = true;
     }
+    fOnlyMixingAllowed = fForMixingOnly;
     NotifyStatusChanged(this);
     return true;
 }
@@ -220,7 +237,7 @@ bool CCryptoKeyStore::AddKeyPubKey(const CKey& key, const CPubKey &pubkey)
         return CBasicKeyStore::AddKeyPubKey(key, pubkey);
     }
 
-    if (IsLocked()) {
+    if (IsLocked(true)) {
         return false;
     }
 

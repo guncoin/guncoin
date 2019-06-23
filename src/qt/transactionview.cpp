@@ -30,16 +30,21 @@
 #include <QMenu>
 #include <QPoint>
 #include <QScrollBar>
+#include <QSettings>
 #include <QSignalMapper>
 #include <QTableView>
 #include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
 
+/** Date format for persistence */
+static const char* PERSISTENCE_DATE_FORMAT = "yyyy-MM-dd";
+
 TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent), model(0), transactionProxyModel(0),
     transactionView(0), abandonAction(0), bumpFeeAction(0), columnResizingFixer(0)
 {
+    QSettings settings;
     // Build filter row
     setContentsMargins(0,0,0,0);
 
@@ -74,6 +79,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     dateWidget->addItem(tr("Last month"), LastMonth);
     dateWidget->addItem(tr("This year"), ThisYear);
     dateWidget->addItem(tr("Range..."), Range);
+    dateWidget->setCurrentIndex(settings.value("transactionDate").toInt());
     hlayout->addWidget(dateWidget);
 
     typeWidget = new QComboBox(this);
@@ -84,13 +90,20 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     }
 
     typeWidget->addItem(tr("All"), TransactionFilterProxy::ALL_TYPES);
+    typeWidget->addItem(tr("Most Common"), TransactionFilterProxy::COMMON_TYPES);
     typeWidget->addItem(tr("Received with"), TransactionFilterProxy::TYPE(TransactionRecord::RecvWithAddress) |
                                         TransactionFilterProxy::TYPE(TransactionRecord::RecvFromOther));
     typeWidget->addItem(tr("Sent to"), TransactionFilterProxy::TYPE(TransactionRecord::SendToAddress) |
                                   TransactionFilterProxy::TYPE(TransactionRecord::SendToOther));
+    typeWidget->addItem(tr("PrivateSend"), TransactionFilterProxy::TYPE(TransactionRecord::PrivateSend));
+    typeWidget->addItem(tr("PrivateSend Make Collateral Inputs"), TransactionFilterProxy::TYPE(TransactionRecord::PrivateSendMakeCollaterals));
+    typeWidget->addItem(tr("PrivateSend Create Denominations"), TransactionFilterProxy::TYPE(TransactionRecord::PrivateSendCreateDenominations));
+    typeWidget->addItem(tr("PrivateSend Denominate"), TransactionFilterProxy::TYPE(TransactionRecord::PrivateSendDenominate));
+    typeWidget->addItem(tr("PrivateSend Collateral Payment"), TransactionFilterProxy::TYPE(TransactionRecord::PrivateSendCollateralPayment));
     typeWidget->addItem(tr("To yourself"), TransactionFilterProxy::TYPE(TransactionRecord::SendToSelf));
     typeWidget->addItem(tr("Mined"), TransactionFilterProxy::TYPE(TransactionRecord::Generated));
     typeWidget->addItem(tr("Other"), TransactionFilterProxy::TYPE(TransactionRecord::Other));
+    typeWidget->setCurrentIndex(settings.value("transactionType").toInt());
 
     hlayout->addWidget(typeWidget);
 
@@ -205,6 +218,7 @@ void TransactionView::setModel(WalletModel *_model)
     this->model = _model;
     if(_model)
     {
+        QSettings settings;
         transactionProxyModel = new TransactionFilterProxy(this);
         transactionProxyModel->setSourceModel(_model->getTransactionTableModel());
         transactionProxyModel->setDynamicSortFilter(true);
@@ -254,12 +268,18 @@ void TransactionView::setModel(WalletModel *_model)
 
         // Watch-only signal
         connect(_model, SIGNAL(notifyWatchonlyChanged(bool)), this, SLOT(updateWatchOnlyColumn(bool)));
+
+        // Update transaction list with persisted settings
+        chooseType(settings.value("transactionType").toInt());
+        chooseDate(settings.value("transactionDate").toInt());
     }
 }
 
 void TransactionView::chooseDate(int idx)
 {
     if (!transactionProxyModel) return;
+
+    QSettings settings;
     QDate current = QDate::currentDate();
     dateRangeWidget->setVisible(false);
     switch(dateWidget->itemData(idx).toInt())
@@ -302,6 +322,12 @@ void TransactionView::chooseDate(int idx)
         dateRangeChanged();
         break;
     }
+    // Persist new date settings
+    settings.setValue("transactionDate", idx);
+    if (dateWidget->itemData(idx).toInt() == Range){
+        settings.setValue("transactionDateFrom", dateFrom->date().toString(PERSISTENCE_DATE_FORMAT));
+        settings.setValue("transactionDateTo", dateTo->date().toString(PERSISTENCE_DATE_FORMAT));
+    }
 }
 
 void TransactionView::chooseType(int idx)
@@ -310,6 +336,9 @@ void TransactionView::chooseType(int idx)
         return;
     transactionProxyModel->setTypeFilter(
         typeWidget->itemData(idx).toInt());
+    // Persist settings
+    QSettings settings;
+    settings.setValue("transactionType", idx);
 }
 
 void TransactionView::chooseWatchonly(int idx)
@@ -534,6 +563,11 @@ void TransactionView::openThirdPartyTxUrl(QString url)
 
 QWidget *TransactionView::createDateRangeWidget()
 {
+    // Create default dates in case nothing is persisted
+    QString defaultDateFrom = QDate::currentDate().toString(PERSISTENCE_DATE_FORMAT);
+    QString defaultDateTo = QDate::currentDate().addDays(1).toString(PERSISTENCE_DATE_FORMAT);
+    QSettings settings;
+
     dateRangeWidget = new QFrame();
     dateRangeWidget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     dateRangeWidget->setContentsMargins(1,1,1,1);
@@ -546,7 +580,9 @@ QWidget *TransactionView::createDateRangeWidget()
     dateFrom->setDisplayFormat("dd/MM/yy");
     dateFrom->setCalendarPopup(true);
     dateFrom->setMinimumWidth(100);
-    dateFrom->setDate(QDate::currentDate().addDays(-7));
+    // Load persisted FROM date
+    dateFrom->setDate(QDate::fromString(settings.value("transactionDateFrom", defaultDateFrom).toString(), PERSISTENCE_DATE_FORMAT));
+
     layout->addWidget(dateFrom);
     layout->addWidget(new QLabel(tr("to")));
 
@@ -554,7 +590,9 @@ QWidget *TransactionView::createDateRangeWidget()
     dateTo->setDisplayFormat("dd/MM/yy");
     dateTo->setCalendarPopup(true);
     dateTo->setMinimumWidth(100);
-    dateTo->setDate(QDate::currentDate());
+    // Load persisted TO date
+    dateTo->setDate(QDate::fromString(settings.value("transactionDateTo", defaultDateTo).toString(), PERSISTENCE_DATE_FORMAT));
+
     layout->addWidget(dateTo);
     layout->addStretch();
 
@@ -572,6 +610,12 @@ void TransactionView::dateRangeChanged()
 {
     if(!transactionProxyModel)
         return;
+
+    // Persist new date range
+    QSettings settings;
+    settings.setValue("transactionDateFrom", dateFrom->date().toString(PERSISTENCE_DATE_FORMAT));
+    settings.setValue("transactionDateTo", dateTo->date().toString(PERSISTENCE_DATE_FORMAT));
+
     transactionProxyModel->setDateRange(
             QDateTime(dateFrom->date()),
             QDateTime(dateTo->date()).addDays(1));

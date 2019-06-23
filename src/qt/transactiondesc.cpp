@@ -15,15 +15,18 @@
 #include <validation.h>
 #include <script/script.h>
 #include <timedata.h>
+#include <uint256.h>
 #include <util.h>
 #include <wallet/db.h>
 #include <wallet/wallet.h>
 #include <policy/policy.h>
 
+#include <instantx.h>
+
 #include <stdint.h>
 #include <string>
 
-QString TransactionDesc::FormatTxStatus(const interfaces::WalletTx& wtx, const interfaces::WalletTxStatus& status, bool inMempool, int numBlocks, int64_t adjustedTime)
+QString TransactionDesc::FormatTxStatus(const interfaces::WalletTx& wtx, const interfaces::WalletTxStatus& status, bool inMempool, int numBlocks, int64_t adjustedTime, uint256 &hash)
 {
     if (!status.is_final)
     {
@@ -37,12 +40,31 @@ QString TransactionDesc::FormatTxStatus(const interfaces::WalletTx& wtx, const i
         int nDepth = status.depth_in_main_chain;
         if (nDepth < 0)
             return tr("conflicted with a transaction with %1 confirmations").arg(-nDepth);
-        else if (nDepth == 0)
-            return tr("0/unconfirmed, %1").arg((inMempool ? tr("in memory pool") : tr("not in memory pool"))) + (status.is_abandoned ? ", "+tr("abandoned") : "");
+
+        QString strTxStatus;
+        if (nDepth == 0)
+            strTxStatus = tr("0/unconfirmed, %1").arg((inMempool ? tr("in memory pool") : tr("not in memory pool"))) + (status.is_abandoned ? ", "+tr("abandoned") : "");
         else if (nDepth < 6)
-            return tr("%1/unconfirmed").arg(nDepth);
+            strTxStatus = tr("%1/unconfirmed").arg(nDepth);
         else
-            return tr("%1 confirmations").arg(nDepth);
+            strTxStatus = tr("%1 confirmations").arg(nDepth);
+
+        if(!instantsend.HasTxLockRequest(hash)) return strTxStatus; // regular tx
+
+        int nSignatures = instantsend.GetTransactionLockSignatures(hash);
+        int nSignaturesMax = CTxLockRequest(*wtx.tx).GetMaxSignatures();
+        // InstantSend
+        strTxStatus += " (";
+        if(instantsend.IsLockedInstantSendTransaction(hash)) {
+            strTxStatus += tr("verified via InstantSend");
+        } else if(!instantsend.IsTxLockCandidateTimedOut(hash)) {
+            strTxStatus += tr("InstantSend verification in progress - %1 of %2 signatures").arg(nSignatures).arg(nSignaturesMax);
+        } else {
+            strTxStatus += tr("InstantSend verification failed");
+        }
+        strTxStatus += ")";
+
+        return strTxStatus;
     }
 }
 
@@ -65,7 +87,7 @@ QString TransactionDesc::toHTML(interfaces::Node& node, interfaces::Wallet& wall
     CAmount nDebit = wtx.debit;
     CAmount nNet = nCredit - nDebit;
 
-    strHTML += "<b>" + tr("Status") + ":</b> " + FormatTxStatus(wtx, status, inMempool, numBlocks, adjustedTime);
+    strHTML += "<b>" + tr("Status") + ":</b> " + FormatTxStatus(wtx, status, inMempool, numBlocks, adjustedTime, rec->hash);
     strHTML += "<br>";
 
     strHTML += "<b>" + tr("Date") + ":</b> " + (nTime ? GUIUtil::dateTimeStr(nTime) : "") + "<br>";

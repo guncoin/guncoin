@@ -466,3 +466,21 @@ void RandomInit()
 {
     RDRandInit();
 }
+
+FastRandomContextDash::FastRandomContextDash(bool fDeterministic)
+{
+    // The seed values have some unlikely fixed points which we avoid.
+    if (fDeterministic) {
+        Rz = Rw = 11;
+    } else {
+        uint32_t tmp;
+        do {
+            GetRandBytes((unsigned char*)&tmp, 4);
+        } while (tmp == 0 || tmp == 0x9068ffffU);
+        Rz = tmp;
+        do {
+            GetRandBytes((unsigned char*)&tmp, 4);
+        } while (tmp == 0 || tmp == 0x464fffffU);
+        Rw = tmp;
+    }
+}

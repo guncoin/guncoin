@@ -16,6 +16,8 @@
 class CCoinControl
 {
 public:
+    bool fUsePrivateSend;
+    bool fUseInstantSend;
     //! Custom change destination, if not set an address is generated
     CTxDestination destChange;
     //! Override the default change type if set, ignored if destChange is set

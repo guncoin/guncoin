@@ -42,6 +42,7 @@ class CBlockPolicyEstimator;
 class CTxMemPool;
 class CValidationState;
 struct ChainTxData;
+class COutPoint;
 
 struct PrecomputedTransactionData;
 struct LockPoints;
@@ -118,7 +119,9 @@ static const int64_t MAX_FEE_ESTIMATION_TIP_AGE = 3 * 60 * 60;
 /** Default for -permitbaremultisig */
 static const bool DEFAULT_PERMIT_BAREMULTISIG = true;
 static const bool DEFAULT_CHECKPOINTS_ENABLED = true;
-static const bool DEFAULT_TXINDEX = false;
+static const bool DEFAULT_TXINDEX = true;
+static const bool DEFAULT_LITEMODE = false;
+static const bool DEFAULT_MASTERNODE = false;
 static const unsigned int DEFAULT_BANSCORE_THRESHOLD = 100;
 /** Default for -persistmempool */
 static const bool DEFAULT_PERSIST_MEMPOOL = true;
@@ -278,6 +281,8 @@ bool GetTransaction(const uint256& hash, CTransactionRef& tx, const Consensus::P
  */
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, std::shared_ptr<const CBlock> pblock = std::shared_ptr<const CBlock>());
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams);
+CAmount GetMasternodePayment(CAmount blockValue);
+CAmount GetDeveloperPayment(CAmount blockValue);
 CAmount GetSubsidy(int nHeight);
 
 /** Guess verification progress (as a fraction between 0.0=genesis and 1.0=current tip). */
@@ -308,6 +313,10 @@ void PruneBlockFilesManual(int nManualPruneHeight);
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransactionRef &tx,
                         bool* pfMissingInputs, std::list<CTransactionRef>* plTxnReplaced,
                         bool bypass_limits, const CAmount nAbsurdFee, bool test_accept=false);
+
+bool GetUTXOCoin(const COutPoint& outpoint, Coin& coin);
+int GetUTXOHeight(const COutPoint& outpoint);
+int GetUTXOConfirmations(const COutPoint& outpoint);
 
 /** Convert CValidationState to a human-readable message for logging */
 std::string FormatStateMessage(const CValidationState &state);
@@ -481,6 +490,12 @@ extern VersionBitsCache versionbitscache;
  * Determine what nVersion a new block should use.
  */
 int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Params& params);
+
+/**
+ * Return true if hash can be found in chainActive at nBlockHeight height.
+ * Fills hashRet with found hash, if no nBlockHeight is specified - chainActive.Height() is used.
+ */
+bool GetBlockHash(uint256& hashRet, int nBlockHeight = -1);
 
 /** Reject codes greater or equal to this can be returned by AcceptToMemPool
  * for transactions, to signal internal conditions. They cannot and should not

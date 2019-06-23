@@ -24,6 +24,10 @@
 #include <util.h>
 #include <warnings.h>
 
+#include <masternodeman.h>
+#include <masternode-sync.h>
+#include <privatesend.h>
+
 #include <stdint.h>
 
 #include <QDebug>
@@ -37,6 +41,7 @@ ClientModel::ClientModel(interfaces::Node& node, OptionsModel *_optionsModel, QO
     m_node(node),
     optionsModel(_optionsModel),
     peerTableModel(0),
+    cachedMasternodeCountString(""),
     banTableModel(0),
     pollTimer(0)
 {
@@ -47,6 +52,11 @@ ClientModel::ClientModel(interfaces::Node& node, OptionsModel *_optionsModel, QO
     pollTimer = new QTimer(this);
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(updateTimer()));
     pollTimer->start(MODEL_UPDATE_DELAY);
+
+    pollMnTimer = new QTimer(this);
+    connect(pollMnTimer, SIGNAL(timeout()), this, SLOT(updateMnTimer()));
+    // no need to update as frequent as data for balances/txes/blocks
+    pollMnTimer->start(MODEL_UPDATE_DELAY * 4);
 
     subscribeToCoreSignals();
 }
@@ -68,6 +78,14 @@ int ClientModel::getNumConnections(unsigned int flags) const
         connections = CConnman::CONNECTIONS_ALL;
 
     return m_node.getNodeCount(connections);
+}
+
+QString ClientModel::getMasternodeCountString() const
+{
+    return tr("Total: %1 (PS compatible: %2 / Enabled: %3)")
+            .arg(QString::number((int)mnodeman.size()))
+            .arg(QString::number((int)mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)))
+            .arg(QString::number((int)mnodeman.CountEnabled()));
 }
 
 int ClientModel::getHeaderTipHeight() const
@@ -104,6 +122,18 @@ void ClientModel::updateTimer()
     // the following calls will acquire the required lock
     Q_EMIT mempoolSizeChanged(m_node.getMempoolSize(), m_node.getMempoolDynamicUsage());
     Q_EMIT bytesChanged(m_node.getTotalBytesRecv(), m_node.getTotalBytesSent());
+}
+
+void ClientModel::updateMnTimer()
+{
+    QString newMasternodeCountString = getMasternodeCountString();
+
+    if (cachedMasternodeCountString != newMasternodeCountString)
+    {
+        cachedMasternodeCountString = newMasternodeCountString;
+
+        Q_EMIT strMasternodesChanged(cachedMasternodeCountString);
+    }
 }
 
 void ClientModel::updateNumConnections(int numConnections)
@@ -225,6 +255,12 @@ static void NotifyAlertChanged(ClientModel *clientmodel, const uint256 &hash, Ch
                               Q_ARG(int, status));
 }
 
+static void NotifyAdditionalDataSyncProgressChanged(ClientModel *clientmodel, double nSyncProgress)
+{
+    QMetaObject::invokeMethod(clientmodel, "additionalDataSyncProgressChanged", Qt::QueuedConnection,
+                              Q_ARG(double, nSyncProgress));
+}
+
 static void BannedListChanged(ClientModel *clientmodel)
 {
     qDebug() << QString("%1: Requesting update for peer banlist").arg(__func__);
@@ -269,6 +305,7 @@ void ClientModel::subscribeToCoreSignals()
     m_handler_banned_list_changed = m_node.handleBannedListChanged(boost::bind(BannedListChanged, this));
     m_handler_notify_block_tip = m_node.handleNotifyBlockTip(boost::bind(BlockTipChanged, this, _1, _2, _3, _4, false));
     m_handler_notify_header_tip = m_node.handleNotifyHeaderTip(boost::bind(BlockTipChanged, this, _1, _2, _3, _4, true));
+    m_handler_notify_additional_data_sync_progress_changed = m_node.handleNotifyAdditionalDataSyncProgressChanged(boost::bind(NotifyAdditionalDataSyncProgressChanged, this, _1));
 }
 
 void ClientModel::unsubscribeFromCoreSignals()
@@ -281,6 +318,7 @@ void ClientModel::unsubscribeFromCoreSignals()
     m_handler_banned_list_changed->disconnect();
     m_handler_notify_block_tip->disconnect();
     m_handler_notify_header_tip->disconnect();
+    m_handler_notify_additional_data_sync_progress_changed->disconnect();
 }
 
 bool ClientModel::getProxyInfo(std::string& ip_port) const

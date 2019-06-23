@@ -110,6 +110,9 @@ public:
 
     /** Banlist did change. */
     boost::signals2::signal<void (void)> BannedListChanged;
+
+    /** Additional network activity state changed. */
+    boost::signals2::signal<void (double nSyncProgress)> NotifyAdditionalDataSyncProgressChanged;
 };
 
 /** Show warning message **/

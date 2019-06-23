@@ -26,6 +26,9 @@
 #include <validationinterface.h>
 #include <warnings.h>
 
+#include <masternode-payments.h>
+#include <masternode-sync.h>
+
 #include <memory>
 #include <stdint.h>
 
@@ -444,6 +447,13 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Guncoin is downloading blocks...");
 
+    if (chainActive.Height() + 1 >= Params().GetConsensus().nMasternodeEnforcePayment) {
+        CScript payee;
+        if (!masternodeSync.IsWinnersListSynced()
+                && !mnpayments.GetBlockPayee(chainActive.Height() + 1, payee))
+                    throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Guncoin Core is downloading masternode winners...");
+    }
+
     static unsigned int nTransactionsUpdatedLast;
 
     if (!lpval.isNull())
@@ -671,6 +681,32 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     result.pushKV("curtime", pblock->GetBlockTime());
     result.pushKV("bits", strprintf("%08x", pblock->nBits));
     result.pushKV("height", (int64_t)(pindexPrev->nHeight+1));
+
+    UniValue masternodeObj(UniValue::VOBJ);
+    if(pblock->txoutMasternode != CTxOut()) {
+        CTxDestination address1;
+        ExtractDestination(pblock->txoutMasternode.scriptPubKey, address1);
+
+        masternodeObj.pushKV("payee", EncodeDestination(address1));
+        masternodeObj.pushKV("script", HexStr(pblock->txoutMasternode.scriptPubKey));
+        masternodeObj.pushKV("amount", pblock->txoutMasternode.nValue);
+    }
+    result.pushKV("masternode", masternodeObj);
+    result.pushKV("masternode_payments_started", pindexPrev->nHeight + 1 > consensusParams.nMasternodeEnforcePayment);
+    result.pushKV("masternode_payments_enforced", pindexPrev->nHeight + 1 > consensusParams.nMasternodeEnforcePayment);
+
+    UniValue developerObj(UniValue::VOBJ);
+    if(pblock->txoutDeveloper != CTxOut()) {
+        CTxDestination address1;
+        ExtractDestination(pblock->txoutDeveloper.scriptPubKey, address1);
+
+        developerObj.pushKV("payee", EncodeDestination(address1));
+        developerObj.pushKV("script", HexStr(pblock->txoutDeveloper.scriptPubKey));
+        developerObj.pushKV("amount", pblock->txoutDeveloper.nValue);
+    }
+    result.pushKV("developer", developerObj);
+    result.pushKV("developer_payments_started", pindexPrev->nHeight + 1 > consensusParams.nMasternodeEnforcePayment);
+    result.pushKV("developer_payments_enforced", pindexPrev->nHeight + 1 > consensusParams.nMasternodeEnforcePayment);
 
     if (!pblocktemplate->vchCoinbaseCommitment.empty() && fSupportsSegwit) {
         result.pushKV("default_witness_commitment", HexStr(pblocktemplate->vchCoinbaseCommitment.begin(), pblocktemplate->vchCoinbaseCommitment.end()));

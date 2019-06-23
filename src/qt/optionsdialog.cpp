@@ -18,6 +18,11 @@
 #include <netbase.h>
 #include <txdb.h> // for -dbcache defaults
 
+#ifdef ENABLE_WALLET
+#include "wallet/wallet.h"
+#include "privatesend-client.h"
+#endif // ENABLE_WALLET
+
 #include <QDataWidgetMapper>
 #include <QDir>
 #include <QIntValidator>
@@ -164,6 +169,7 @@ void OptionsDialog::setModel(OptionsModel *_model)
     connect(ui->databaseCache, SIGNAL(valueChanged(int)), this, SLOT(showRestartWarning()));
     connect(ui->threadsScriptVerif, SIGNAL(valueChanged(int)), this, SLOT(showRestartWarning()));
     /* Wallet */
+    connect(ui->showMasternodesTab, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
     connect(ui->spendZeroConfChange, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
     /* Network */
     connect(ui->allowIncoming, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
@@ -186,6 +192,12 @@ void OptionsDialog::setMapper()
     /* Wallet */
     mapper->addMapping(ui->spendZeroConfChange, OptionsModel::SpendZeroConfChange);
     mapper->addMapping(ui->coinControlFeatures, OptionsModel::CoinControlFeatures);
+    mapper->addMapping(ui->showMasternodesTab, OptionsModel::ShowMasternodesTab);
+    mapper->addMapping(ui->showAdvancedPSUI, OptionsModel::ShowAdvancedPSUI);
+    mapper->addMapping(ui->lowKeysWarning, OptionsModel::LowKeysWarning);
+    mapper->addMapping(ui->spendZeroConfChange, OptionsModel::SpendZeroConfChange);
+    mapper->addMapping(ui->privateSendRounds, OptionsModel::PrivateSendRounds);
+    mapper->addMapping(ui->privateSendAmount, OptionsModel::PrivateSendAmount);
 
     /* Network */
     mapper->addMapping(ui->mapPortUpnp, OptionsModel::MapPortUPnP);
@@ -250,6 +262,12 @@ void OptionsDialog::on_openBitcoinConfButton_clicked()
 void OptionsDialog::on_okButton_clicked()
 {
     mapper->submit();
+#ifdef ENABLE_WALLET
+    privateSendClient.nCachedNumBlocks = std::numeric_limits<int>::max();
+    std::vector<std::shared_ptr<CWallet>> wallets = GetWallets();
+    if(wallets[0])
+        wallets[0]->MarkDirty();
+#endif // ENABLE_WALLET
     accept();
     updateDefaultProxyNets();
 }

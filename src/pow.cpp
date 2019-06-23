@@ -22,12 +22,15 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (nHeight < 30)
         return pindexLast->nBits;
 
-    // Easy difficulty for reward generation block so generate can mine it
-    if (nHeight == params.nReplacementFunds)
+    // Easy difficulty for reward generation or masternode enablement
+    if (nHeight == params.nReplacementFunds || nHeight == params.nMasternodeEnforcePayment)
         return UintToArith256(params.powLimit).GetCompact();
 
     if (params.fPowNoRetargeting)
         return pindexLast->nBits;
+
+    if (nHeight >= params.nMasternodeEnforcePayment)
+        return GetNextWorkRequired_Dash(pindexLast, params);
 
     if (nHeight >= params.nDiffChange)
         return GetNextWorkRequired_eHRC(pindexLast, params);
@@ -64,9 +67,6 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         pindexFirst = pindexFirst->pprev;
     assert(pindexFirst);
 
-    if (params.fPowNoRetargeting)
-        return pindexLast->nBits;
-
     // Limit adjustment step
     int64_t nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
     nActualTimespan = nTargetTimespan + (nActualTimespan - nTargetTimespan)/8;
@@ -89,6 +89,56 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     if (bnNew > bnPowLimit)
         bnNew = bnPowLimit;
+
+    return bnNew.GetCompact();
+}
+
+// Use Dash's difficulty adjust for PoW blocks only
+unsigned int GetNextWorkRequired_Dash(const CBlockIndex* pindexLast, const Consensus::Params& params)
+{
+    /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
+
+    const arith_uint256 nTargetLimit = UintToArith256(params.powLimit);
+    int64_t nPastBlocks = 30;
+
+    const CBlockIndex *pindex = pindexLast;
+    arith_uint256 bnPastTargetAvg;
+
+    for (unsigned int nCountBlocks = 1; nCountBlocks <= nPastBlocks; nCountBlocks++) {
+        arith_uint256 bnTarget = arith_uint256().SetCompact(pindex->nBits);
+        if (nCountBlocks == 1) {
+            bnPastTargetAvg = bnTarget;
+        } else {
+            // NOTE: that's not an average really...
+            bnPastTargetAvg = (bnPastTargetAvg * nCountBlocks + bnTarget) / (nCountBlocks + 1);
+        }
+
+        if(nCountBlocks != nPastBlocks) {
+            // If we hit start of chain return min diff
+            if (pindex->pprev == nullptr)
+                return nTargetLimit.GetCompact();
+
+            pindex = pindex->pprev;
+        }
+    }
+
+    arith_uint256 bnNew(bnPastTargetAvg);
+
+    int64_t nActualTimespan = pindexLast->GetBlockTime() - pindex->GetBlockTime();
+    int64_t nTargetTimespan = nPastBlocks * params.nPowTargetSpacing;
+
+    if (nActualTimespan < nTargetTimespan/3)
+        nActualTimespan = nTargetTimespan/3;
+    if (nActualTimespan > nTargetTimespan*3)
+        nActualTimespan = nTargetTimespan*3;
+
+    // Retarget
+    bnNew *= nActualTimespan;
+    bnNew /= nTargetTimespan;
+
+    if (bnNew > nTargetLimit) {
+        bnNew = nTargetLimit;
+    }
 
     return bnNew.GetCompact();
 }

@@ -10,6 +10,9 @@
 #include <timedata.h>
 #include <validation.h>
 
+#include <instantx.h>
+#include <privatesend.h>
+
 #include <stdint.h>
 
 
@@ -25,7 +28,7 @@ bool TransactionRecord::showTransaction()
 /*
  * Decompose CWallet transaction to model transaction records.
  */
-QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interfaces::WalletTx& wtx)
+QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interfaces::WalletTx& wtx, interfaces::Wallet& wallet)
 {
     QList<TransactionRecord> parts;
     int64_t nTime = wtx.time;
@@ -47,7 +50,6 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
             if(mine)
             {
                 TransactionRecord sub(hash, nTime);
-                CTxDestination address;
                 sub.idx = i; // vout index
                 sub.credit = txout.nValue;
                 sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
@@ -75,28 +77,82 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
     }
     else
     {
+        bool fAllFromMeDenom = true;
+        int nFromMe = 0;
         bool involvesWatchAddress = false;
         isminetype fAllFromMe = ISMINE_SPENDABLE;
-        for (isminetype mine : wtx.txin_is_mine)
+        for(unsigned int i = 0; i < wtx.tx->vin.size(); i++)
         {
+            isminetype mine = wtx.txin_is_mine[i];
+            if(mine) {
+                fAllFromMeDenom = fAllFromMeDenom && wallet.isDenominated(wtx.tx->vin[i].prevout);
+                nFromMe++;
+            }
             if(mine & ISMINE_WATCH_ONLY) involvesWatchAddress = true;
             if(fAllFromMe > mine) fAllFromMe = mine;
         }
 
         isminetype fAllToMe = ISMINE_SPENDABLE;
-        for (isminetype mine : wtx.txout_is_mine)
-        {
+        bool fAllToMeDenom = true;
+        int nToMe = 0;
+        for(unsigned int i = 0; i < wtx.tx->vout.size(); i++) {
+            isminetype mine = wtx.txout_is_mine[i];
+            if(mine) {
+                fAllToMeDenom = fAllToMeDenom && CPrivateSend::IsDenominatedAmount(wtx.tx->vout[i].nValue);
+                nToMe++;
+            }
             if(mine & ISMINE_WATCH_ONLY) involvesWatchAddress = true;
             if(fAllToMe > mine) fAllToMe = mine;
         }
 
-        if (fAllFromMe && fAllToMe)
+        if(fAllFromMeDenom && fAllToMeDenom && nFromMe * nToMe) {
+            parts.append(TransactionRecord(hash, nTime, TransactionRecord::PrivateSendDenominate, "", -nDebit, nCredit));
+            parts.last().involvesWatchAddress = false;   // maybe pass to TransactionRecord as constructor argument
+        }
+        else if (fAllFromMe && fAllToMe)
         {
             // Payment to self
+            // TODO: this section still not accurate but covers most cases,
+            // might need some additional work however
+
+            TransactionRecord sub(hash, nTime);
+            // Payment to self by default
+            sub.type = TransactionRecord::SendToSelf;
+            sub.address = "";
+
+            if(mapValue["DS"] == "1")
+            {
+                sub.type = TransactionRecord::PrivateSend;
+                CTxDestination address;
+                if (ExtractDestination(wtx.tx->vout[0].scriptPubKey, address))
+                {
+                    // Sent to Guncoin Address
+                    sub.address = EncodeDestination(address);
+                }
+                else
+                {
+                    // Sent to IP, or other non-address transaction like OP_EVAL
+                    sub.address = mapValue["to"];
+                }
+            }
+            else
+            {
+                for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++)
+                {
+                    const CTxOut& txout = wtx.tx->vout[nOut];
+                    sub.idx = parts.size();
+
+                    if(txout.nValue == CPrivateSend::GetMaxCollateralAmount()) sub.type = TransactionRecord::PrivateSendMakeCollaterals;
+                    if(CPrivateSend::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendCreateDenominations;
+                    if(nDebit - wtx.tx->GetValueOut() == CPrivateSend::GetCollateralAmount()) sub.type = TransactionRecord::PrivateSendCollateralPayment;
+                }
+            }
+
             CAmount nChange = wtx.change;
 
-            parts.append(TransactionRecord(hash, nTime, TransactionRecord::SendToSelf, "",
-                            -(nDebit - nChange), nCredit - nChange));
+            sub.debit = -(nDebit - nChange);
+            sub.credit = nCredit - nChange;
+            parts.append(sub);
             parts.last().involvesWatchAddress = involvesWatchAddress;   // maybe pass to TransactionRecord as constructor argument
         }
         else if (fAllFromMe)
@@ -131,6 +187,11 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
                     // Sent to IP, or other non-address transaction like OP_EVAL
                     sub.type = TransactionRecord::SendToOther;
                     sub.address = mapValue["to"];
+                }
+
+                if(mapValue["DS"] == "1")
+                {
+                    sub.type = TransactionRecord::PrivateSend;
                 }
 
                 CAmount nValue = txout.nValue;
@@ -171,6 +232,7 @@ void TransactionRecord::updateStatus(const interfaces::WalletTxStatus& wtx, int 
     status.countsForBalance = wtx.is_trusted && !(wtx.blocks_to_maturity > 0);
     status.depth = wtx.depth_in_main_chain;
     status.cur_num_blocks = numBlocks;
+    status.cur_num_ix_locks = nCompleteTXLocks;
 
     if (!wtx.is_final)
     {
@@ -232,7 +294,7 @@ void TransactionRecord::updateStatus(const interfaces::WalletTxStatus& wtx, int 
 
 bool TransactionRecord::statusUpdateNeeded(int numBlocks) const
 {
-    return status.cur_num_blocks != numBlocks || status.needsUpdate;
+    return status.cur_num_blocks != numBlocks || status.needsUpdate || status.cur_num_ix_locks != nCompleteTXLocks;
 }
 
 QString TransactionRecord::getTxHash() const

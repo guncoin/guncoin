@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <wallet/coinselection.h>
+#include <wallet/wallet.h>
 #include <util.h>
 #include <utilmoneystr.h>
 
@@ -165,7 +166,7 @@ bool SelectCoinsBnB(std::vector<OutputGroup>& utxo_pool, const CAmount& target_v
 }
 
 static void ApproximateBestSubset(const std::vector<OutputGroup>& groups, const CAmount& nTotalLower, const CAmount& nTargetValue,
-                                  std::vector<char>& vfBest, CAmount& nBest, int iterations = 1000)
+                                  std::vector<char>& vfBest, CAmount& nBest, bool fUseInstantSend = false, int iterations = 1000)
 {
     std::vector<char> vfIncluded;
 
@@ -183,6 +184,8 @@ static void ApproximateBestSubset(const std::vector<OutputGroup>& groups, const 
         {
             for (unsigned int i = 0; i < groups.size(); i++)
             {
+                if (fUseInstantSend && nTotal + groups[i].m_value > INSTANTSEND_MAX_VALUE)
+                    continue;
                 //The solver here uses a randomized algorithm,
                 //the randomness serves no real security purpose but is just
                 //needed to prevent degenerate behavior and it is important
@@ -210,7 +213,20 @@ static void ApproximateBestSubset(const std::vector<OutputGroup>& groups, const 
     }
 }
 
-bool KnapsackSolver(const CAmount& nTargetValue, std::vector<OutputGroup>& groups, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet)
+// move denoms down
+bool less_then_denom (const OutputGroup& group1, const OutputGroup& group2)
+{
+    bool found1 = false;
+    bool found2 = false;
+    for (const auto& d : CPrivateSend::GetStandardDenominations()) // loop through predefined denoms
+    {
+        if(group1.m_value == d) found1 = true;
+        if(group2.m_value == d) found2 = true;
+    }
+    return (!found1 && found2);
+}
+
+bool KnapsackSolver(const CAmount& nTargetValue, std::vector<OutputGroup>& groups, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, bool fUseInstantSend)
 {
     setCoinsRet.clear();
     nValueRet = 0;
@@ -219,35 +235,55 @@ bool KnapsackSolver(const CAmount& nTargetValue, std::vector<OutputGroup>& group
     boost::optional<OutputGroup> lowest_larger;
     std::vector<OutputGroup> applicable_groups;
     CAmount nTotalLower = 0;
+    CAmount initialLimit = fUseInstantSend ? INSTANTSEND_MAX_VALUE : std::numeric_limits<CAmount>::max();
 
     random_shuffle(groups.begin(), groups.end(), GetRandInt);
 
-    for (const OutputGroup& group : groups) {
-        if (group.m_value == nTargetValue) {
-            util::insert(setCoinsRet, group.m_outputs);
-            nValueRet += group.m_value;
+    // move denoms down on the list
+    std::sort(groups.begin(), groups.end(), less_then_denom);
+
+    // try to find nondenom first to prevent unneeded spending of mixed coins
+    for (unsigned int tryDenom = 0; tryDenom < 2; tryDenom++)
+    {
+        for (const OutputGroup& group : groups) {
+            if (tryDenom == 0 && CPrivateSend::IsDenominatedAmount(group.m_value))
+                continue; // we don't want denom values on first run
+            if (group.m_value == nTargetValue) {
+                util::insert(setCoinsRet, group.m_outputs);
+                nValueRet += group.m_value;
+                return true;
+            } else if (group.m_value < nTargetValue + MIN_CHANGE) {
+                applicable_groups.push_back(group);
+                nTotalLower += group.m_value;
+            } else if (group.m_value < initialLimit) {
+                lowest_larger = group;
+                initialLimit = group.m_value;
+            }
+        }
+
+        if (nTotalLower == nTargetValue) {
+            for (const auto& group : applicable_groups) {
+                util::insert(setCoinsRet, group.m_outputs);
+                nValueRet += group.m_value;
+            }
             return true;
-        } else if (group.m_value < nTargetValue + MIN_CHANGE) {
-            applicable_groups.push_back(group);
-            nTotalLower += group.m_value;
-        } else if (!lowest_larger || group.m_value < lowest_larger->m_value) {
-            lowest_larger = group;
         }
-    }
 
-    if (nTotalLower == nTargetValue) {
-        for (const auto& group : applicable_groups) {
-            util::insert(setCoinsRet, group.m_outputs);
-            nValueRet += group.m_value;
+        if (nTotalLower < nTargetValue) {
+            if (!lowest_larger)
+            {
+                if (tryDenom == 0)
+                    // we didn't look at denom yet, let's do it
+                    continue;
+                else
+                    // we looked at everything possible and didn't find anything, no luck
+                    return false;
+            }
+            util::insert(setCoinsRet, lowest_larger->m_outputs);
+            nValueRet += lowest_larger->m_value;
+            return true;
         }
-        return true;
-    }
-
-    if (nTotalLower < nTargetValue) {
-        if (!lowest_larger) return false;
-        util::insert(setCoinsRet, lowest_larger->m_outputs);
-        nValueRet += lowest_larger->m_value;
-        return true;
+        break;
     }
 
     // Solve subset sum by stochastic approximation
@@ -255,9 +291,9 @@ bool KnapsackSolver(const CAmount& nTargetValue, std::vector<OutputGroup>& group
     std::vector<char> vfBest;
     CAmount nBest;
 
-    ApproximateBestSubset(applicable_groups, nTotalLower, nTargetValue, vfBest, nBest);
+    ApproximateBestSubset(applicable_groups, nTotalLower, nTargetValue, vfBest, nBest, fUseInstantSend);
     if (nBest != nTargetValue && nTotalLower >= nTargetValue + MIN_CHANGE) {
-        ApproximateBestSubset(applicable_groups, nTotalLower, nTargetValue + MIN_CHANGE, vfBest, nBest);
+        ApproximateBestSubset(applicable_groups, nTotalLower, nTargetValue + MIN_CHANGE, vfBest, nBest, fUseInstantSend);
     }
 
     // If we have a bigger coin and (either the stochastic approximation didn't find a good solution,

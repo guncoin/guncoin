@@ -226,6 +226,10 @@ public:
     using NotifyHeaderTipFn =
         std::function<void(bool initial_download, int height, int64_t block_time, double verification_progress)>;
     virtual std::unique_ptr<Handler> handleNotifyHeaderTip(NotifyHeaderTipFn fn) = 0;
+
+    //! Register handler for additional progress messages.
+    using NotifyAdditionalDataSyncProgressChangedFn = std::function<void(double nSyncProgress)>;
+    virtual std::unique_ptr<Handler> handleNotifyAdditionalDataSyncProgressChanged(NotifyAdditionalDataSyncProgressChangedFn fn) = 0;
 };
 
 //! Return implementation of Node interface.

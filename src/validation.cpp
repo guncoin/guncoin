@@ -43,6 +43,10 @@
 #include <validationinterface.h>
 #include <warnings.h>
 
+#include <instantx.h>
+#include <masternodeman.h>
+#include <masternode-payments.h>
+
 #include <future>
 #include <sstream>
 
@@ -346,6 +350,31 @@ bool CheckFinalTx(const CTransaction &tx, int flags)
     return IsFinalTx(tx, nBlockHeight, nBlockTime);
 }
 
+bool GetUTXOCoin(const COutPoint& outpoint, Coin& coin)
+{
+    LOCK(cs_main);
+    if (!pcoinsTip->GetCoin(outpoint, coin))
+        return false;
+    if (coin.IsSpent())
+        return false;
+    return true;
+}
+
+int GetUTXOHeight(const COutPoint& outpoint)
+{
+    // -1 means UTXO is yet unknown or already spent
+    Coin coin;
+    return GetUTXOCoin(outpoint, coin) ? coin.nHeight : -1;
+}
+
+int GetUTXOConfirmations(const COutPoint& outpoint)
+{
+    // -1 means UTXO is yet unknown or already spent
+    LOCK(cs_main);
+    int nPrevoutHeight = GetUTXOHeight(outpoint);
+    return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
+}
+
 bool TestLockPointValidity(const LockPoints* lp)
 {
     AssertLockHeld(cs_main);
@@ -601,6 +630,21 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         return state.Invalid(false, REJECT_DUPLICATE, "txn-already-in-mempool");
     }
 
+    // If this is a Transaction Lock Request check to see if it's valid
+    if(instantsend.HasTxLockRequest(hash) && !CTxLockRequest(tx).IsValid())
+        return state.DoS(10, error("AcceptToMemoryPool : CTxLockRequest %s is invalid", hash.ToString()),
+                            REJECT_INVALID, "bad-txlockrequest");
+
+    // Check for conflicts with a completed Transaction Lock
+    for(const CTxIn &txin : tx.vin)
+    {
+        uint256 hashLocked;
+        if(instantsend.GetLockedOutPointTxHash(txin.prevout, hashLocked) && hash != hashLocked)
+            return state.DoS(10, error("AcceptToMemoryPool : Transaction %s conflicts with completed Transaction Lock %s",
+                                    hash.ToString(), hashLocked.ToString()),
+                            REJECT_INVALID, "tx-txlock-conflict");
+    }
+
     // Check for conflicts with in-memory transactions
     std::set<uint256> setConflicts;
     for (const CTxIn &txin : tx.vin)
@@ -611,6 +655,18 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
             const CTransaction *ptxConflicting = itConflicting->second;
             if (!setConflicts.count(ptxConflicting->GetHash()))
             {
+                // InstantSend txes are not replacable
+                if(instantsend.HasTxLockRequest(ptxConflicting->GetHash())) {
+                    // this tx conflicts with a Transaction Lock Request candidate
+                    return state.DoS(0, error("AcceptToMemoryPool : Transaction %s conflicts with Transaction Lock Request %s",
+                                            hash.ToString(), ptxConflicting->GetHash().ToString()),
+                                    REJECT_INVALID, "tx-txlockreq-mempool-conflict");
+                } else if (instantsend.HasTxLockRequest(hash)) {
+                    // this tx is a tx lock request and it conflicts with a normal tx
+                    return state.DoS(0, error("AcceptToMemoryPool : Transaction Lock Request %s conflicts with transaction %s",
+                                            hash.ToString(), ptxConflicting->GetHash().ToString()),
+                                    REJECT_INVALID, "txlockreq-tx-mempool-conflict");
+                }
                 // Allow opt-out of transaction replacement by setting
                 // nSequence > MAX_BIP125_RBF_SEQUENCE (SEQUENCE_FINAL-2) on all inputs.
                 //
@@ -1106,17 +1162,14 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
 
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams)
 {
-    CDiskBlockPos blockPos;
-    {
-        LOCK(cs_main);
-        blockPos = pindex->GetBlockPos();
-    }
-
-    if (!ReadBlockFromDisk(block, blockPos, consensusParams))
+    if (!ReadBlockFromDisk(block, pindex->GetBlockPos(), consensusParams))
         return false;
-    if (block.GetHash() != pindex->GetBlockHash())
+
+    if (block.GetHash() != pindex->GetBlockHash()) {
         return error("ReadBlockFromDisk(CBlock&, CBlockIndex*): GetHash() doesn't match index for %s at %s",
                 pindex->ToString(), pindex->GetBlockPos().ToString());
+    }
+
     return true;
 }
 
@@ -1200,6 +1253,16 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
     nSubsidy >>= halvings;
 
     return nSubsidy;
+}
+
+CAmount GetMasternodePayment(CAmount blockValue)
+{
+    return blockValue / 2;
+}
+
+CAmount GetDeveloperPayment(CAmount blockValue)
+{
+    return (blockValue * 5) / 100;
 }
 
 CAmount GetSubsidy(int nHeight) {
@@ -1725,6 +1788,16 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
     return nVersion;
 }
 
+bool GetBlockHash(uint256& hashRet, int nBlockHeight)
+{
+    LOCK(cs_main);
+    if(chainActive.Tip() == NULL) return false;
+    if(nBlockHeight < -1 || nBlockHeight > chainActive.Height()) return false;
+    if(nBlockHeight == -1) nBlockHeight = chainActive.Height();
+    hashRet = chainActive[nBlockHeight]->GetBlockHash();
+    return true;
+}
+
 /**
  * Threshold condition checker that triggers when unknown versionbits are seen on the network.
  */
@@ -1990,11 +2063,47 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
     if (pindex->nHeight == chainparams.GetConsensus().nReplacementFunds)
         blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus()) + GetSubsidy(pindex->nHeight);
+
     if (block.vtx[0]->GetValueOut() > blockReward)
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
                                block.vtx[0]->GetValueOut(), blockReward),
                                REJECT_INVALID, "bad-cb-amount");
+
+    // Coinbase transaction must include developer reward
+    if (pindex->nHeight >= chainparams.GetConsensus().nMasternodeEnforcePayment) {
+        bool found = false;
+
+        for (const CTxOut& output : block.vtx[0]->vout) {
+            if (output.scriptPubKey == Params().GetRewardScript() && output.nValue == GetDeveloperPayment(blockReward)) {
+                found = true;
+            }
+        }
+
+        if (!found)
+            return state.DoS(100, error("%s: additional reward missing", __func__), REJECT_INVALID, "bad-dev-payment");
+    }
+
+    // Coinbase transaction must include additional one off reward
+    if (pindex->nHeight == chainparams.GetConsensus().nReplacementFunds) {
+        bool found = false;
+
+        for (const CTxOut& output : block.vtx[0]->vout) {
+            if (output.scriptPubKey == Params().GetRewardScript() && output.nValue == GetSubsidy(pindex->nHeight)) {
+                found = true;
+            }
+        }
+
+        if (!found)
+            return state.DoS(100, error("%s: additional reward missing", __func__), REJECT_INVALID, "additional-reward-missing");
+    }
+
+    if (pindex->nHeight >= chainparams.GetConsensus().nMasternodeEnforcePayment) {
+        if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight)) {
+            return state.DoS(0, error("ConnectBlock(): couldn't find masternode payments"),
+                                    REJECT_INVALID, "bad-cb-payee");
+        }
+    }
 
     if (!control.Wait())
         return state.DoS(100, error("%s: CheckQueue failed", __func__), REJECT_INVALID, "block-validation-failed");
@@ -3071,6 +3180,25 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
         if (block.vtx[i]->IsCoinBase())
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-multiple", false, "more than one coinbase");
 
+    // We should never accept block which conflicts with completed transaction lock,
+    // that's why this is in CheckBlock unlike coinbase payee/amount.
+    // Require other nodes to comply, send them some data in case they are missing it.
+    for(const auto& tx : block.vtx) {
+        // skip coinbase, it has no inputs
+        if (tx->IsCoinBase()) continue;
+        // LOOK FOR TRANSACTION LOCK IN OUR MAP OF OUTPOINTS
+        for (const auto& txin : tx->vin) {
+            uint256 hashLocked;
+            if(instantsend.GetLockedOutPointTxHash(txin.prevout, hashLocked) && hashLocked != tx->GetHash()) {
+                // The node which relayed this will have to switch later,
+                // relaying instantsend data won't help it.
+                LOCK(cs_main);
+                return state.DoS(100, false, REJECT_INVALID, "conflict-tx-lock", false,
+                                 strprintf("transaction %s conflicts with transaction lock %s", tx->GetHash().ToString(), hashLocked.ToString()));
+            }
+        }
+    }
+
     // Check transactions
     for (const auto& tx : block.vtx)
         if (!CheckTransaction(*tx, state, true))
@@ -3287,22 +3415,6 @@ static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, c
                 return state.DoS(100, false, REJECT_INVALID, "unexpected-witness", true, strprintf("%s : unexpected witness data found", __func__));
             }
         }
-    }
-
-    // Coinbase transaction must include additional one off reward
-    if (nHeight == consensusParams.nReplacementFunds) {
-        bool found = false;
-
-        for (const CTxOut& output : block.vtx[0]->vout) {
-            if (output.scriptPubKey == Params().GetRewardScriptAtHeight(nHeight)) {
-                if (output.nValue == GetSubsidy(nHeight)) {
-                    found = true;
-                }
-            }
-        }
-
-        if (!found)
-            return state.DoS(100, error("%s: additional reward missing", __func__), REJECT_INVALID, "additional-reward-missing");
     }
 
     // After the coinbase witness reserved value and commitment are verified,
@@ -3539,6 +3651,14 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
     // If responsible for sync-checkpoint send it
     if (!CSyncCheckpoint::strMasterPrivKey.empty())
         SendSyncCheckpoint(AutoSelectSyncCheckpoint());
+
+    if (chainActive.Height() == chainparams.GetConsensus().nMasternodeDisconnectOldClients){
+        bool bip61 = gArgs.GetBoolArg("-enablebip61", DEFAULT_ENABLE_BIP61);
+        g_connman->ForEachNode([&](CNode* pnode) {
+            if (pnode->nVersion < PROTOCOL_VERSION)
+                DisconnectOldVersion(pnode, *g_connman, "version", pnode->nVersion, bip61);
+        });
+    }
 
     return true;
 }

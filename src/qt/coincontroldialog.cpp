@@ -22,6 +22,9 @@
 #include <wallet/fees.h>
 #include <wallet/wallet.h>
 
+#include <instantx.h>
+#include <privatesend-client.h>
+
 #include <QApplication>
 #include <QCheckBox>
 #include <QCursor>
@@ -36,7 +39,7 @@ bool CoinControlDialog::fSubtractFeeFromAmount = false;
 
 bool CCoinControlWidgetItem::operator<(const QTreeWidgetItem &other) const {
     int column = treeWidget()->sortColumn();
-    if (column == CoinControlDialog::COLUMN_AMOUNT || column == CoinControlDialog::COLUMN_DATE || column == CoinControlDialog::COLUMN_CONFIRMATIONS)
+    if (column == CoinControlDialog::COLUMN_AMOUNT || column == CoinControlDialog::COLUMN_DATE || column == CoinControlDialog::COLUMN_CONFIRMATIONS || column == CoinControlDialog::COLUMN_PRIVATESEND_ROUNDS)
         return data(column, Qt::UserRole).toLongLong() < other.data(column, Qt::UserRole).toLongLong();
     return QTreeWidgetItem::operator<(other);
 }
@@ -120,10 +123,11 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle, QWidge
 
     ui->treeWidget->setColumnWidth(COLUMN_CHECKBOX, 84);
     ui->treeWidget->setColumnWidth(COLUMN_AMOUNT, 110);
-    ui->treeWidget->setColumnWidth(COLUMN_LABEL, 190);
-    ui->treeWidget->setColumnWidth(COLUMN_ADDRESS, 320);
-    ui->treeWidget->setColumnWidth(COLUMN_DATE, 130);
-    ui->treeWidget->setColumnWidth(COLUMN_CONFIRMATIONS, 110);
+    ui->treeWidget->setColumnWidth(COLUMN_LABEL, 170);
+    ui->treeWidget->setColumnWidth(COLUMN_ADDRESS, 190);
+    ui->treeWidget->setColumnWidth(COLUMN_PRIVATESEND_ROUNDS, 88);
+    ui->treeWidget->setColumnWidth(COLUMN_DATE, 80);
+    ui->treeWidget->setColumnWidth(COLUMN_CONFIRMATIONS, 100);
     ui->treeWidget->setColumnHidden(COLUMN_TXHASH, true);         // store transaction hash in this column, but don't show it
     ui->treeWidget->setColumnHidden(COLUMN_VOUT_INDEX, true);     // store vout index in this column, but don't show it
 
@@ -374,8 +378,16 @@ void CoinControlDialog::viewItemChanged(QTreeWidgetItem* item, int column)
             coinControl()->UnSelect(outpt);
         else if (item->isDisabled()) // locked (this happens if "check all" through parent node)
             item->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
-        else
+        else {
             coinControl()->Select(outpt);
+            int nRounds = model->wallet().getOutpointPrivateSendRounds(outpt);
+            if (coinControl()->fUsePrivateSend && nRounds < privateSendClient.nPrivateSendRounds) {
+                QMessageBox::warning(this, windowTitle(),
+                    tr("Non-anonymized input selected. <b>PrivateSend will be disabled.</b><br><br>If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again."),
+                    QMessageBox::Ok, QMessageBox::Ok);
+                coinControl()->fUsePrivateSend = false;
+            }
+        }
 
         // selection changed -> update labels
         if (ui->treeWidget->isEnabled()) // do not update on every click for (un)select all
@@ -477,6 +489,10 @@ void CoinControlDialog::updateLabels(WalletModel *model, QDialog* dialog)
                 nBytesInputs += 148; // in all error cases, simply assume 148 here
         }
         else nBytesInputs += 148;
+
+        // Add inputs to calculate InstantSend Fee later
+        if(coinControl()->fUseInstantSend)
+            txDummy.vin.push_back(CTxIn());
     }
 
     // calculation
@@ -501,12 +517,21 @@ void CoinControlDialog::updateLabels(WalletModel *model, QDialog* dialog)
         // Fee
         nPayFee = model->wallet().getMinimumFee(nBytes, *coinControl(), nullptr /* returned_target */, nullptr /* reason */);
 
+        // InstantSend Fee
+        if (coinControl()->fUseInstantSend) nPayFee = std::max(nPayFee, CTxLockRequest(txDummy).GetMinFee());
+
         if (nPayAmount > 0)
         {
             nChange = nAmount - nPayAmount;
             if (!CoinControlDialog::fSubtractFeeFromAmount)
                 nChange -= nPayFee;
 
+            // PrivateSend Fee = overpay
+            if(coinControl()->fUsePrivateSend && nChange > 0)
+            {
+                nPayFee += nChange;
+                nChange = 0;
+            }
             // Never create dust outputs; if we would, just add the dust to the fee.
             if (nChange > 0 && nChange < MIN_CHANGE)
             {
@@ -682,6 +707,11 @@ void CoinControlDialog::updateView()
             // date
             itemOutput->setText(COLUMN_DATE, GUIUtil::dateTimeStr(out.time));
             itemOutput->setData(COLUMN_DATE, Qt::UserRole, QVariant((qlonglong)out.time));
+
+            // PrivateSend rounds
+            if (out.rounds >= 0) itemOutput->setText(COLUMN_PRIVATESEND_ROUNDS, QString::number(out.rounds));
+            else itemOutput->setText(COLUMN_PRIVATESEND_ROUNDS, tr("n/a"));
+            itemOutput->setData(COLUMN_PRIVATESEND_ROUNDS, Qt::UserRole, QVariant((qlonglong)out.rounds));
 
             // confirmations
             itemOutput->setText(COLUMN_CONFIRMATIONS, QString::number(out.depth_in_main_chain));

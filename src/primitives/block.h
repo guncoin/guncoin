@@ -78,6 +78,8 @@ public:
     std::vector<CTransactionRef> vtx;
 
     // memory only
+    mutable CTxOut txoutMasternode; // masternode payment
+    mutable CTxOut txoutDeveloper; // developer payment
     mutable bool fChecked;
 
     CBlock()
@@ -103,6 +105,8 @@ public:
     {
         CBlockHeader::SetNull();
         vtx.clear();
+        txoutMasternode = CTxOut();
+        txoutDeveloper = CTxOut();
         fChecked = false;
     }
 

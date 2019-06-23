@@ -9,6 +9,7 @@
 #include <QString>
 
 class TransactionRecord;
+class uint256;
 
 namespace interfaces {
 class Node;
@@ -29,7 +30,7 @@ public:
 private:
     TransactionDesc() {}
 
-    static QString FormatTxStatus(const interfaces::WalletTx& wtx, const interfaces::WalletTxStatus& status, bool inMempool, int numBlocks, int64_t adjustedTime);
+    static QString FormatTxStatus(const interfaces::WalletTx& wtx, const interfaces::WalletTxStatus& status, bool inMempool, int numBlocks, int64_t adjustedTime, uint256 &hash);
 };
 
 #endif // BITCOIN_QT_TRANSACTIONDESC_H

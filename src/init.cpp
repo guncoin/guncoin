@@ -22,6 +22,7 @@
 #include <httprpc.h>
 #include <index/txindex.h>
 #include <key.h>
+#include <key_io.h>
 #include <validation.h>
 #include <miner.h>
 #include <netbase.h>
@@ -45,6 +46,25 @@
 #include <util.h>
 #include <utilmoneystr.h>
 #include <validationinterface.h>
+#ifdef ENABLE_WALLET
+#include <wallet/wallet.h>
+#endif
+
+#include <activemasternode.h>
+#include <dsnotificationinterface.h>
+#include <flat-database.h>
+#include <instantx.h>
+#include <masternode-payments.h>
+#include <masternode-sync.h>
+#include <masternodeman.h>
+#include <masternodeconfig.h>
+#include <messagesigner.h>
+#include <netfulfilledman.h>
+#ifdef ENABLE_WALLET
+#include <privatesend-client.h>
+#endif // ENABLE_WALLET
+#include <privatesend-server.h>
+
 #include <warnings.h>
 #include <walletinitinterface.h>
 #include <stdint.h>
@@ -74,6 +94,8 @@ static const bool DEFAULT_STOPAFTERBLOCKIMPORT = false;
 
 std::unique_ptr<CConnman> g_connman;
 std::unique_ptr<PeerLogicValidation> peerLogic;
+
+static CDSNotificationInterface* pdsNotificationInterface = nullptr;
 
 #if !(ENABLE_WALLET)
 class DummyWalletInit : public WalletInitInterface {
@@ -225,6 +247,16 @@ void Shutdown()
     g_connman.reset();
     g_txindex.reset();
 
+    // STORE DATA CACHES INTO SERIALIZED DAT FILES
+    if (!fLiteMode) {
+        CFlatDB<CMasternodeMan> flatdb1("mncache.dat", "magicMasternodeCache");
+        flatdb1.Dump(mnodeman);
+        CFlatDB<CMasternodePayments> flatdb2("mnpayments.dat", "magicMasternodePaymentsCache");
+        flatdb2.Dump(mnpayments);
+        CFlatDB<CNetFulfilledRequestManager> flatdb4("netfulfilled.dat", "magicFulfilledCache");
+        flatdb4.Dump(netfulfilledman);
+    }
+
     if (g_is_mempool_loaded && gArgs.GetArg("-persistmempool", DEFAULT_PERSIST_MEMPOOL)) {
         DumpMempool();
     }
@@ -275,6 +307,12 @@ void Shutdown()
         g_zmq_notification_interface = nullptr;
     }
 #endif
+
+    if (pdsNotificationInterface) {
+        UnregisterValidationInterface(pdsNotificationInterface);
+        delete pdsNotificationInterface;
+        pdsNotificationInterface = nullptr;
+    }
 
 #ifndef WIN32
     try {
@@ -441,13 +479,17 @@ void SetupServerArgs()
 #if ENABLE_ZMQ
     gArgs.AddArg("-zmqpubhashblock=<address>", "Enable publish hash block in <address>", false, OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubhashtx=<address>", "Enable publish hash transaction in <address>", false, OptionsCategory::ZMQ);
+    gArgs.AddArg("-zmqpubhashtxlock=<address>", "Enable publish hash transaction (locked via InstantSend) in <address>", false, OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubrawblock=<address>", "Enable publish raw block in <address>", false, OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubrawtx=<address>", "Enable publish raw transaction in <address>", false, OptionsCategory::ZMQ);
+    gArgs.AddArg("-zmqpubrawtxlock=<address>", "Enable publish raw transaction (locked via InstantSend) in <address>", false, OptionsCategory::ZMQ);
 #else
     hidden_args.emplace_back("-zmqpubhashblock=<address>");
     hidden_args.emplace_back("-zmqpubhashtx=<address>");
+    hidden_args.emplace_back("-zmqpubhashtxlock=<address>");
     hidden_args.emplace_back("-zmqpubrawblock=<address>");
     hidden_args.emplace_back("-zmqpubrawtx=<address>");
+    hidden_args.emplace_back("-zmqpubrawtxlock=<address>");
 #endif
 
     gArgs.AddArg("-checkblocks=<n>", strprintf("How many blocks to check at startup (default: %u, 0 = all)", DEFAULT_CHECKBLOCKS), true, OptionsCategory::DEBUG_TEST);
@@ -482,7 +524,26 @@ void SetupServerArgs()
     gArgs.AddArg("-shrinkdebugfile", "Shrink debug.log file on client startup (default: 1 when no -debug)", false, OptionsCategory::DEBUG_TEST);
     gArgs.AddArg("-uacomment=<cmt>", "Append comment to the user agent string", false, OptionsCategory::DEBUG_TEST);
 
+    gArgs.AddArg("-litemode=<n>", strprintf(_("Disable all Masternode specific functionality (default: %d)"), DEFAULT_LITEMODE), false, OptionsCategory::OPTIONS);
+
     SetupChainParamsBaseOptions();
+
+    gArgs.AddArg("-masternode=<n>", strprintf(_("Enable the client to act as a masternode (0-1, default: %u)"), 0), false, OptionsCategory::MASTERNODE);
+    gArgs.AddArg("-mnconf=<file>", strprintf(_("Specify masternode configuration file (default: %s)"), "masternode.conf"), false, OptionsCategory::MASTERNODE);
+    gArgs.AddArg("-mnconflock=<n>", strprintf(_("Lock masternodes from masternode configuration file (default: %u)"), 1), false, OptionsCategory::MASTERNODE);
+    gArgs.AddArg("-masternodeprivkey=<n>", _("Set the masternode private key"), false, OptionsCategory::MASTERNODE);
+
+#ifdef ENABLE_WALLET
+    gArgs.AddArg("-enableprivatesend=<n>", strprintf(_("Enable use of automated PrivateSend for funds stored in this wallet (0-1, default: %u)"), 0), false, OptionsCategory::PRIVATESEND);
+    gArgs.AddArg("-privatesendrounds=<n>", strprintf(_("Use N separate masternodes for each denominated input to mix funds (%u-%u, default: %u)"), MIN_PRIVATESEND_ROUNDS, MAX_PRIVATESEND_ROUNDS, DEFAULT_PRIVATESEND_ROUNDS), false, OptionsCategory::PRIVATESEND);
+    gArgs.AddArg("-privatesendamount=<n>", strprintf(_("Keep N GUN anonymized (%u-%u, default: %u)"), MIN_PRIVATESEND_AMOUNT, MAX_PRIVATESEND_AMOUNT, DEFAULT_PRIVATESEND_AMOUNT), false, OptionsCategory::PRIVATESEND);
+    gArgs.AddArg("-liquidityprovider=<n>", strprintf(_("Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (%u-%u, default: %u, 1=very frequent, high fees, %u=very infrequent, low fees)"),
+        MIN_PRIVATESEND_LIQUIDITY, MAX_PRIVATESEND_LIQUIDITY, DEFAULT_PRIVATESEND_LIQUIDITY, MAX_PRIVATESEND_LIQUIDITY), false, OptionsCategory::PRIVATESEND);
+#endif // ENABLE_WALLET
+
+    gArgs.AddArg("-enableinstantsend=<n>", strprintf(_("Enable InstantSend, show confirmations for locked transactions (0-1, default: %u)"), 1), false, OptionsCategory::INSTANTSEND);
+    gArgs.AddArg("-instantsenddepth=<n>", strprintf(_("Show N confirmations for a successfully locked transaction (%u-%u, default: %u)"), MIN_INSTANTSEND_DEPTH, MAX_INSTANTSEND_DEPTH, DEFAULT_INSTANTSEND_DEPTH), false, OptionsCategory::INSTANTSEND);
+    gArgs.AddArg("-instantsendnotify=<cmd>", _("Execute command when a wallet InstantSend transaction is successfully locked (%s in cmd is replaced by TxID)"), false, OptionsCategory::INSTANTSEND);
 
     gArgs.AddArg("-acceptnonstdtxn", strprintf("Relay and mine \"non-standard\" transactions (%sdefault: %u)", "testnet/regtest only; ", !testnetChainParams->RequireStandard()), true, OptionsCategory::NODE_RELAY);
     gArgs.AddArg("-incrementalrelayfee=<amt>", strprintf("Fee rate (in %s/kB) used to define cost of relay, used for mempool limiting and BIP 125 replacement. (default: %s)", CURRENCY_UNIT, FormatMoney(DEFAULT_INCREMENTAL_RELAY_FEE)), true, OptionsCategory::NODE_RELAY);
@@ -804,6 +865,23 @@ void InitParameterInteraction()
         if (gArgs.SoftSetBoolArg("-whitelistrelay", true))
             LogPrintf("%s: parameter interaction: -whitelistforcerelay=1 -> setting -whitelistrelay=1\n", __func__);
     }
+
+    if(!gArgs.GetBoolArg("-enableinstantsend", fEnableInstantSend)){
+        if (gArgs.SoftSetArg("-instantsenddepth", "0"))
+            LogPrintf("%s: parameter interaction: -enableinstantsend=false -> setting -nInstantSendDepth=0\n", __func__);
+    }
+
+#ifdef ENABLE_WALLET
+    int nLiqProvTmp = gArgs.GetArg("-liquidityprovider", DEFAULT_PRIVATESEND_LIQUIDITY);
+    if (nLiqProvTmp > 0) {
+        gArgs.ForceSetArg("-enableprivatesend", "1");
+        LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -enableprivatesend=1\n", __func__, nLiqProvTmp);
+        gArgs.ForceSetArg("-privatesendrounds", itostr(std::numeric_limits<int>::max()));
+        LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendrounds=%d\n", __func__, nLiqProvTmp, itostr(std::numeric_limits<int>::max()));
+        gArgs.ForceSetArg("-privatesendamount", itostr(MAX_PRIVATESEND_AMOUNT));
+        LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendamount=%d\n", __func__, nLiqProvTmp, MAX_PRIVATESEND_AMOUNT);
+    }
+#endif // ENABLE_WALLET
 
     // Warn if network-specific options (-addnode, -connect, etc) are
     // specified in default section of config file, but not overridden
@@ -1414,6 +1492,10 @@ bool AppInitMain()
         RegisterValidationInterface(g_zmq_notification_interface);
     }
 #endif
+
+    pdsNotificationInterface = new CDSNotificationInterface(connman);
+    RegisterValidationInterface(pdsNotificationInterface);
+
     uint64_t nMaxOutboundLimit = 0; //unlimited unless -maxuploadtarget is set
     uint64_t nMaxOutboundTimeframe = MAX_UPLOAD_TIMEFRAME;
 
@@ -1694,7 +1776,138 @@ bool AppInitMain()
         return false;
     }
 
-    // ********************************************************* Step 12: start node
+    // ********************************************************* Step 12a: setup PrivateSend
+    fMasternodeMode = gArgs.GetBoolArg("-masternode", DEFAULT_MASTERNODE);
+
+    // Lite mode disables all Dash-specific functionality
+    fLiteMode = gArgs.GetBoolArg("-litemode", DEFAULT_LITEMODE);
+
+    if (fLiteMode)
+        InitWarning(_("Starting in lite mode. Masternode specific functionality disabled."));
+
+    if ((!fLiteMode && gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX) == false) && chainparams.NetworkIDString() != CBaseChainParams::REGTEST)
+        return InitError(_("Transaction index cannot be disabled in full mode. Start with litemode or txindex."));
+
+    if (fLiteMode && fMasternodeMode)
+        return InitError(_("You can not start a masternode in lite mode."));
+
+    if(fMasternodeMode) {
+        LogPrintf("MASTERNODE:\n");
+
+        std::string strMasterNodePrivKey = gArgs.GetArg("-masternodeprivkey", "");
+        if(!strMasterNodePrivKey.empty()) {
+            if(!CMessageSigner::GetKeysFromSecret(strMasterNodePrivKey, activeMasternode.keyMasternode, activeMasternode.pubKeyMasternode))
+                return InitError(_("Invalid masternodeprivkey. Please see documenation."));
+
+            LogPrintf("  pubKeyMasternode: %s\n", EncodeDestination(activeMasternode.pubKeyMasternode.GetID()));
+        } else {
+            return InitError(_("You must specify a masternodeprivkey in the configuration. Please see documentation for help."));
+        }
+    }
+
+#ifdef ENABLE_WALLET
+    LogPrintf("Using masternode config file %s\n", GetMasternodeConfigFile().string());
+    std::vector<std::shared_ptr<CWallet>> wallets = GetWallets();
+    if(gArgs.GetBoolArg("-mnconflock", true) && HasWallets() && (masternodeConfig.getCount() > 0)) {
+        for (auto& wallet : wallets) {
+            LOCK(wallet->cs_wallet);
+            LogPrintf("Locking Masternodes:\n");
+            uint256 mnTxHash;
+            uint32_t outputIndex;
+            for (const auto& mne : masternodeConfig.getEntries()) {
+                mnTxHash.SetHex(mne.getTxHash());
+                outputIndex = (uint32_t)atoi(mne.getOutputIndex());
+                COutPoint outpoint = COutPoint(mnTxHash, outputIndex);
+                // don't lock non-spendable outpoint (i.e. it's already spent or it's not from this wallet at all)
+                if(wallet->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE) {
+                    LogPrintf("  %s %s - IS NOT SPENDABLE, was not locked\n", mne.getTxHash(), mne.getOutputIndex());
+                    continue;
+                }
+                wallet->LockCoin(outpoint);
+                LogPrintf("  %s %s - locked successfully\n", mne.getTxHash(), mne.getOutputIndex());
+            }
+        }
+    }
+
+    privateSendClient.nLiquidityProvider = std::min(std::max((int)gArgs.GetArg("-liquidityprovider", DEFAULT_PRIVATESEND_LIQUIDITY), MIN_PRIVATESEND_LIQUIDITY), MAX_PRIVATESEND_LIQUIDITY);
+    int nMaxRounds = MAX_PRIVATESEND_ROUNDS;
+    if(privateSendClient.nLiquidityProvider) {
+        // special case for liquidity providers only, normal clients should use default value
+        privateSendClient.SetMinBlocksToWait(privateSendClient.nLiquidityProvider * 15);
+        nMaxRounds = std::numeric_limits<int>::max();
+    }
+
+    privateSendClient.fEnablePrivateSend = gArgs.GetBoolArg("-enableprivatesend", false);
+    privateSendClient.nPrivateSendRounds = std::min(std::max((int)gArgs.GetArg("-privatesendrounds", DEFAULT_PRIVATESEND_ROUNDS), MIN_PRIVATESEND_ROUNDS), nMaxRounds);
+    privateSendClient.nPrivateSendAmount = std::min(std::max((int)gArgs.GetArg("-privatesendamount", DEFAULT_PRIVATESEND_AMOUNT), MIN_PRIVATESEND_AMOUNT), MAX_PRIVATESEND_AMOUNT);
+#endif // ENABLE_WALLET
+
+    fEnableInstantSend = gArgs.GetBoolArg("-enableinstantsend", 1);
+    nInstantSendDepth = gArgs.GetArg("-instantsenddepth", DEFAULT_INSTANTSEND_DEPTH);
+    nInstantSendDepth = std::min(std::max(nInstantSendDepth, MIN_INSTANTSEND_DEPTH), MAX_INSTANTSEND_DEPTH);
+
+    LogPrintf("fLiteMode %d\n", fLiteMode);
+    LogPrintf("nInstantSendDepth %d\n", nInstantSendDepth);
+
+#ifdef ENABLE_WALLET
+    LogPrintf("PrivateSend liquidityprovider: %d\n", privateSendClient.nLiquidityProvider);
+    LogPrintf("PrivateSend rounds: %d\n", privateSendClient.nPrivateSendRounds);
+    LogPrintf("PrivateSend amount: %d\n", privateSendClient.nPrivateSendAmount);
+#endif // ENABLE_WALLET
+
+    CPrivateSend::InitStandardDenominations();
+
+    // ********************************************************* Step 12b: Load cache data
+
+    // LOAD SERIALIZED DAT FILES INTO DATA CACHES FOR INTERNAL USE
+
+    if (!fLiteMode) {
+        boost::filesystem::path pathDB = GetDataDir();
+        std::string strDBName;
+
+        strDBName = "mncache.dat";
+        uiInterface.InitMessage(_("Loading masternode cache..."));
+        CFlatDB<CMasternodeMan> flatdb1(strDBName, "magicMasternodeCache");
+        if(!flatdb1.Load(mnodeman)) {
+            return InitError(_("Failed to load masternode cache from") + "\n" + (pathDB / strDBName).string());
+        }
+
+        if(mnodeman.size()) {
+            strDBName = "mnpayments.dat";
+            uiInterface.InitMessage(_("Loading masternode payment cache..."));
+            CFlatDB<CMasternodePayments> flatdb2(strDBName, "magicMasternodePaymentsCache");
+            if(!flatdb2.Load(mnpayments)) {
+                return InitError(_("Failed to load masternode payments cache from") + "\n" + (pathDB / strDBName).string());
+            }
+        } else {
+            uiInterface.InitMessage(_("Masternode cache is empty, skipping payments..."));
+        }
+
+        strDBName = "netfulfilled.dat";
+        uiInterface.InitMessage(_("Loading fulfilled requests cache..."));
+        CFlatDB<CNetFulfilledRequestManager> flatdb4(strDBName, "magicFulfilledCache");
+        if(!flatdb4.Load(netfulfilledman)) {
+            return InitError(_("Failed to load fulfilled requests cache from") + "\n" + (pathDB / strDBName).string());
+        }
+    }
+
+    // ********************************************************* Step 12c: update block tip in Guncoin modules
+
+    // force UpdatedBlockTip to initialize nCachedBlockHeight for DS, MN payments
+    // but don't call it directly to prevent triggering of other listeners like zmq etc.
+    pdsNotificationInterface->InitializeCurrentBlockTip();
+
+    // ********************************************************* Step 12d: start bitcoin-ps-<smth> threads
+
+    threadGroup.create_thread(boost::bind(&ThreadCheckPrivateSend, boost::ref(*g_connman)));
+    if (fMasternodeMode)
+        threadGroup.create_thread(boost::bind(&ThreadCheckPrivateSendServer, boost::ref(*g_connman)));
+#ifdef ENABLE_WALLET
+    else
+        threadGroup.create_thread(boost::bind(&ThreadCheckPrivateSendClient, boost::ref(*g_connman)));
+#endif // ENABLE_WALLET
+
+    // ********************************************************* Step 13: start node
 
     int chain_active_height;
 
@@ -1772,7 +1985,7 @@ bool AppInitMain()
         return false;
     }
 
-    // ********************************************************* Step 13: finished
+    // ********************************************************* Step 14: finished
 
     SetRPCWarmupFinished();
     uiInterface.InitMessage(_("Done loading"));

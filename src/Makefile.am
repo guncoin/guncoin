@@ -90,6 +90,7 @@ endif
 .PHONY: FORCE check-symbols check-security
 # bitcoin core #
 BITCOIN_CORE_H = \
+  activemasternode.h \
   addrdb.h \
   addrman.h \
   alert.h \
@@ -116,7 +117,9 @@ BITCOIN_CORE_H = \
   core_io.h \
   core_memusage.h \
   cuckoocache.h \
+  dsnotificationinterface.h \
   fs.h \
+  flat-database.h \
   httprpc.h \
   httpserver.h \
   index/base.h \
@@ -126,19 +129,27 @@ BITCOIN_CORE_H = \
   interfaces/handler.h \
   interfaces/node.h \
   interfaces/wallet.h \
+  instantx.h \
   key.h \
   key_io.h \
   keystore.h \
   dbwrapper.h \
   limitedmap.h \
   logging.h \
+  masternode.h \
+  masternode-payments.h \
+  masternode-sync.h \
+  masternodeman.h \
+  masternodeconfig.h \
   memusage.h \
   merkleblock.h \
+  messagesigner.h \
   miner.h \
   net.h \
   net_processing.h \
   netaddress.h \
   netbase.h \
+  netfulfilledman.h \
   netmessagemaker.h \
   noui.h \
   outputtype.h \
@@ -147,6 +158,10 @@ BITCOIN_CORE_H = \
   policy/policy.h \
   policy/rbf.h \
   pow.h \
+  privatesend.h \
+  privatesend-client.h \
+  privatesend-server.h \
+  privatesend-util.h \
   protocol.h \
   random.h \
   reverse_iterator.h \
@@ -217,6 +232,7 @@ libbitcoin_util_a-clientversion.$(OBJEXT): obj/build.h
 libbitcoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libbitcoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_server_a_SOURCES = \
+  activemasternode.cpp \
   addrdb.cpp \
   addrman.cpp \
   alert.cpp \
@@ -226,24 +242,36 @@ libbitcoin_server_a_SOURCES = \
   checkpoints.cpp \
   checkpointsync.cpp \
   consensus/tx_verify.cpp \
+  dsnotificationinterface.cpp \
   httprpc.cpp \
   httpserver.cpp \
   index/base.cpp \
   index/txindex.cpp \
   init.cpp \
+  instantx.cpp \
   dbwrapper.cpp \
+  masternode.cpp \
+  masternode-payments.cpp \
+  masternode-sync.cpp \
+  masternodeconfig.cpp \
+  masternodeman.cpp \
   merkleblock.cpp \
+  messagesigner.cpp \
   miner.cpp \
   net.cpp \
   net_processing.cpp \
+  netfulfilledman.cpp \
   noui.cpp \
   outputtype.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   policy/rbf.cpp \
   pow.cpp \
+  privatesend.cpp \
+  privatesend-server.cpp \
   rest.cpp \
   rpc/blockchain.cpp \
+  rpc/masternode.cpp \
   rpc/mining.cpp \
   rpc/misc.cpp \
   rpc/net.cpp \
@@ -251,6 +279,7 @@ libbitcoin_server_a_SOURCES = \
   rpc/server.cpp \
   rpc/util.cpp \
   script/sigcache.cpp \
+  script/ismine.cpp \
   shutdown.cpp \
   timedata.cpp \
   torcontrol.cpp \
@@ -285,6 +314,8 @@ libbitcoin_wallet_a_SOURCES = \
   wallet/feebumper.cpp \
   wallet/fees.cpp \
   wallet/init.cpp \
+  privatesend-client.cpp \
+  privatesend-util.cpp \
   wallet/rpcdump.cpp \
   wallet/rpcwallet.cpp \
   wallet/wallet.cpp \

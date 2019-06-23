@@ -574,6 +574,9 @@ void RPCConsole::setClientModel(ClientModel *model)
         updateNetworkState();
         connect(model, SIGNAL(networkActiveChanged(bool)), this, SLOT(setNetworkActive(bool)));
 
+        setMasternodeCount(model->getMasternodeCountString());
+        connect(model, SIGNAL(strMasternodesChanged(QString)), this, SLOT(setMasternodeCount(QString)));
+
         updateTrafficStats(node.getTotalBytesRecv(), node.getTotalBytesSent());
         connect(model, SIGNAL(bytesChanged(quint64,quint64)), this, SLOT(updateTrafficStats(quint64, quint64)));
 
@@ -874,6 +877,11 @@ void RPCConsole::setNumBlocks(int count, const QDateTime& blockDate, double nVer
         ui->numberOfBlocks->setText(QString::number(count));
         ui->lastBlockTime->setText(blockDate.toString());
     }
+}
+
+void RPCConsole::setMasternodeCount(const QString &strMasternodes)
+{
+    ui->masternodeCount->setText(strMasternodes);
 }
 
 void RPCConsole::setMempoolSize(long numberOfTxs, size_t dynUsage)

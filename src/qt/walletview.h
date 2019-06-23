@@ -19,6 +19,7 @@ class SendCoinsRecipient;
 class TransactionView;
 class WalletModel;
 class AddressBookPage;
+class MasternodeList;
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
@@ -65,6 +66,7 @@ private:
     SendCoinsDialog *sendCoinsPage;
     AddressBookPage *usedSendingAddressesPage;
     AddressBookPage *usedReceivingAddressesPage;
+    MasternodeList *masternodeListPage;
 
     TransactionView *transactionView;
 
@@ -76,6 +78,8 @@ public Q_SLOTS:
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
+    /** Switch to masternode page */
+    void gotoMasternodePage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
@@ -98,7 +102,9 @@ public Q_SLOTS:
     /** Change encrypted wallet passphrase */
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
-    void unlockWallet();
+    void unlockWallet(bool fAnonymizeOnly=false);
+    /** Lock wallet */
+    void lockWallet();
 
     /** Show used sending addresses */
     void usedSendingAddresses();
