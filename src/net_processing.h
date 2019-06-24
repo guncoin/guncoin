@@ -8,6 +8,7 @@
 
 #include <net.h>
 #include <validationinterface.h>
+#include <validation.h>
 #include <consensus/params.h>
 
 /** Default for -maxorphantx, maximum number of orphan transactions kept in memory */

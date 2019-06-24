@@ -13,7 +13,6 @@
 #include <checkpointsync.h>
 #include <consensus/validation.h>
 #include <hash.h>
-#include <validation.h>
 #include <merkleblock.h>
 #include <netmessagemaker.h>
 #include <netbase.h>
